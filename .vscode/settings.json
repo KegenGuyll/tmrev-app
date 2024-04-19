@@ -1,0 +1,5 @@
+{
+  "eslint.codeActionsOnSave.rules": null,
+  "eslint.format.enable": true,
+  "files.eol": "\n"
+}
