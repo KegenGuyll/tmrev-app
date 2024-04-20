@@ -1,10 +1,12 @@
 import { View } from 'react-native';
 import { Text } from 'react-native-paper';
 
-export default function TabTwoScreen() {
+const AddReviewPage = () => {
 	return (
 		<View>
 			<Text>Add Review</Text>
 		</View>
 	);
-}
+};
+
+export default AddReviewPage;
