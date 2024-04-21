@@ -9,6 +9,7 @@ const TabLayout = () => {
 		<Tabs
 			screenOptions={{
 				tabBarActiveTintColor: 'white',
+				tabBarHideOnKeyboard: true,
 			}}
 		>
 			<Tabs.Screen
@@ -24,6 +25,7 @@ const TabLayout = () => {
 				options={{
 					title: 'Search',
 					tabBarIcon: ({ color }) => <Icon name="search" color={color} size={iconSize} />,
+					headerShown: false,
 				}}
 			/>
 			<Tabs.Screen
