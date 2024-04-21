@@ -72,7 +72,7 @@ const MovieDetails = () => {
 					<Image
 						style={styles.backgroundImage}
 						source={{
-							uri: imageUrl(movieData.backdrop_path),
+							uri: imageUrl(movieData.backdrop_path as string),
 						}}
 					/>
 					<LinearGradient
@@ -168,7 +168,7 @@ const MovieDetails = () => {
 					</Surface>
 					<View style={{ marginBottom: 8 }}>
 						<Button style={{ marginBottom: 8 }} mode="contained">
-							<Text style={{ color: 'black' }}>REVIEW MOVIE</Text>
+							<Text>REVIEW MOVIE</Text>
 						</Button>
 						<Button mode="outlined">
 							<Text>ADD TO LIST</Text>

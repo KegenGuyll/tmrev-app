@@ -21,7 +21,7 @@ const TabLayout = () => {
 				}}
 			/>
 			<Tabs.Screen
-				name="search"
+				name="(search)"
 				options={{
 					title: 'Search',
 					tabBarIcon: ({ color }) => <Icon name="search" color={color} size={iconSize} />,
@@ -36,7 +36,7 @@ const TabLayout = () => {
 				}}
 			/>
 			<Tabs.Screen
-				name="movies"
+				name="(movies)"
 				options={{
 					title: 'Movies',
 					headerShown: false,
@@ -49,6 +49,12 @@ const TabLayout = () => {
 					headerShown: false,
 					title: 'Profile',
 					tabBarIcon: ({ color }) => <Icon name="person" color={color} size={iconSize} />,
+				}}
+			/>
+			<Tabs.Screen
+				name="search"
+				options={{
+					href: null,
 				}}
 			/>
 		</Tabs>
