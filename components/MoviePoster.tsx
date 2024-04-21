@@ -9,6 +9,7 @@ type MoviePosterProps = {
 	movie: MovieGeneral;
 	height?: number;
 	width?: number;
+	location: 'movies' | 'search';
 };
 
 type MoviePosterStyleProps = {
@@ -16,13 +17,18 @@ type MoviePosterStyleProps = {
 	width?: number;
 };
 
-const MoviePoster: React.FC<MoviePosterProps> = ({ movie, height, width }: MoviePosterProps) => {
+const MoviePoster: React.FC<MoviePosterProps> = ({
+	movie,
+	height,
+	width,
+	location,
+}: MoviePosterProps) => {
 	const router = useRouter();
 
 	return (
 		<TouchableHighlight
 			onPress={() => {
-				router.push(`/(tabs)/movies/${movie.id}`);
+				router.push(`/(tabs)/(${location})/${movie.id}`);
 			}}
 		>
 			<View>
