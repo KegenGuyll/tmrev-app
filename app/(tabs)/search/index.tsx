@@ -1,3 +1,4 @@
+import { Stack } from 'expo-router';
 import React from 'react';
 import { NativeSyntheticEvent, TextInputChangeEventData } from 'react-native';
 import { Searchbar } from 'react-native-paper';
@@ -10,9 +11,12 @@ const Search = () => {
 		setSearchQuery(e.nativeEvent.text);
 
 	return (
-		<SafeAreaView>
-			<Searchbar placeholder="Search" value={searchQuery} onChange={onChangeSearch} />
-		</SafeAreaView>
+		<>
+			<Stack.Screen options={{ headerShown: false }} />
+			<SafeAreaView>
+				<Searchbar placeholder="Search" value={searchQuery} onChange={onChangeSearch} />
+			</SafeAreaView>
+		</>
 	);
 };
 
