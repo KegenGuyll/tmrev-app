@@ -12,6 +12,7 @@ import imageUrl from '@/utils/imageUrl';
 import formatDateYear from '@/utils/formatDateYear';
 import { formatRuntime, numberShortHand } from '@/utils/common';
 import ISO3166_1 from '@/models/tmdb/ISO3166-1';
+import ActorPlaceholderImage from '@/components/ActorPlacholderImage';
 
 type MovieDetailsParams = {
 	movieId: string;
@@ -182,11 +183,11 @@ const MovieDetails = () => {
 								gap: 10,
 							}}
 							horizontal
-							showsHorizontalScrollIndicator
+							showsHorizontalScrollIndicator={false}
 						>
-							{movieCredits?.cast.map((cast) => (
+							{movieCredits?.cast.map((cast, index) => (
 								<View
-									key={cast.id}
+									key={`${cast.id}-${index + 1}`}
 									style={{
 										height: 300,
 										width: 135,
@@ -194,19 +195,14 @@ const MovieDetails = () => {
 										borderRadius: 4,
 									}}
 								>
-									<Image
-										style={{
-											width: '100%',
-											height: 275,
-											borderRadius: 4,
-											maxHeight: 150,
-										}}
-										source={{
-											uri: imageUrl(cast.profile_path, 300),
-										}}
+									<ActorPlaceholderImage
+										profile_url={cast.profile_path}
+										department={cast.known_for_department}
+										height={150}
+										width="100%"
 									/>
 									<Text variant="labelLarge">{cast.name}</Text>
-									<Text>{`(${cast.character})`}</Text>
+									<Text>{`${cast.character || cast.known_for_department}`}</Text>
 								</View>
 							))}
 						</ScrollView>
