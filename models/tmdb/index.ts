@@ -61,4 +61,6 @@ type Titles = {
 	type: string;
 };
 
-export type { KnownForGeneric, KnownForMovie, KnownForTV, MediaType, Titles, TVGeneric };
+export type { KnownForGeneric, KnownForMovie, KnownForTV, Titles, TVGeneric };
+
+export { MediaType };

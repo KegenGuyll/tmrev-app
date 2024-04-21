@@ -80,7 +80,8 @@ type PeopleGeneral = {
 	profile_path: string;
 	adult: boolean;
 	id: number;
-	known_for: KnownForMovie | KnownForTV;
+	known_for: KnownForMovie[] | KnownForTV[];
+	known_for_department: string;
 	name: string;
 	popularity: number;
 };
