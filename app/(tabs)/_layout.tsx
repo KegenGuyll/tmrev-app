@@ -51,12 +51,6 @@ const TabLayout = () => {
 					tabBarIcon: ({ color }) => <Icon name="person" color={color} size={iconSize} />,
 				}}
 			/>
-			<Tabs.Screen
-				name="search"
-				options={{
-					href: null,
-				}}
-			/>
 		</Tabs>
 	);
 };
