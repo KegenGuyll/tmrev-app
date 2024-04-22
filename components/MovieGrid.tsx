@@ -28,7 +28,9 @@ const MovieGrid: React.FC<MovieGridProps> = ({
 					style={styles.list}
 					data={movies}
 					spacing={8}
-					renderItem={({ item }) => <MoviePoster movie={item} location={posterPath} />}
+					renderItem={({ item }) => (
+						<MoviePoster movieId={item.id} moviePoster={item.poster_path} location={posterPath} />
+					)}
 					keyExtractor={(item) => item.id.toString()}
 					onEndReached={onEndReached}
 					onEndReachedThreshold={onEndReachedThreshold}

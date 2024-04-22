@@ -1,15 +1,16 @@
 import { View, Image, StyleSheet, TouchableHighlight } from 'react-native';
 import React from 'react';
 import { useRouter } from 'expo-router';
-import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 
 import imageUrl from '@/utils/imageUrl';
+import { PosterPath } from '@/models';
 
 type MoviePosterProps = {
-	movie: MovieGeneral;
+	movieId: number;
+	moviePoster: string | null | undefined;
 	height?: number;
 	width?: number;
-	location: 'movies' | 'search';
+	location: PosterPath;
 };
 
 type MoviePosterStyleProps = {
@@ -18,25 +19,39 @@ type MoviePosterStyleProps = {
 };
 
 const MoviePoster: React.FC<MoviePosterProps> = ({
-	movie,
+	movieId,
+	moviePoster,
 	height,
 	width,
 	location,
 }: MoviePosterProps) => {
 	const router = useRouter();
 
+	const moviePosterUrl = () => {
+		if (moviePoster) {
+			return (
+				<Image
+					style={styles({ height, width }).moviePoster}
+					source={{ uri: imageUrl(moviePoster, 200) }}
+				/>
+			);
+		}
+
+		return (
+			<Image
+				style={styles({ height, width }).moviePoster}
+				source={require('@/assets/images/movie-poster-placeholder.jpg')}
+			/>
+		);
+	};
+
 	return (
 		<TouchableHighlight
 			onPress={() => {
-				router.push(`/(tabs)/(${location})/${movie.id}`);
+				router.push(`/(tabs)/(${location})/${movieId}?from=${location}`);
 			}}
 		>
-			<View>
-				<Image
-					style={styles({ height, width }).moviePoster}
-					source={{ uri: imageUrl(movie.poster_path as string, 200) }}
-				/>
-			</View>
+			<View>{moviePosterUrl()}</View>
 		</TouchableHighlight>
 	);
 };

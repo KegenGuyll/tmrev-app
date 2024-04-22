@@ -14,7 +14,7 @@ import {
 	PopularPeople,
 } from '@/models/tmdb/person';
 
-export const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+import { tmdbAPIKey } from '@/constants/tmrev';
 
 export const peopleApi = createApi({
 	baseQuery: fetchBaseQuery({
@@ -25,7 +25,7 @@ export const peopleApi = createApi({
 		getLatestPeople: builder.query({
 			query: () => ({
 				params: {
-					api_key: apiKey,
+					api_key: tmdbAPIKey,
 				},
 				url: `/person/latest`,
 			}),
@@ -33,7 +33,7 @@ export const peopleApi = createApi({
 		getPerson: builder.query<PersonDetail, PersonQuery>({
 			query: ({ personId, ...params }) => ({
 				params: {
-					api_key: apiKey,
+					api_key: tmdbAPIKey,
 					...params,
 				},
 				url: `/person/${personId}`,
@@ -42,7 +42,7 @@ export const peopleApi = createApi({
 		getPersonCredits: builder.query<PersonCombineCredit, PersonQuery>({
 			query: ({ personId, ...params }) => ({
 				params: {
-					api_key: apiKey,
+					api_key: tmdbAPIKey,
 					...params,
 				},
 				url: `/person/${personId}/combined_credits`,
@@ -51,7 +51,7 @@ export const peopleApi = createApi({
 		getPersonExternalIds: builder.query<PersonExternalIds, PersonQuery>({
 			query: ({ personId, ...params }) => ({
 				params: {
-					api_key: apiKey,
+					api_key: tmdbAPIKey,
 					...params,
 				},
 				url: `/person/${personId}/external_ids`,
@@ -60,7 +60,7 @@ export const peopleApi = createApi({
 		getPersonImages: builder.query<PersonImages, PersonQuery>({
 			query: ({ personId, ...params }) => ({
 				params: {
-					api_key: apiKey,
+					api_key: tmdbAPIKey,
 					...params,
 				},
 				url: `/person/${personId}/images`,
@@ -69,7 +69,7 @@ export const peopleApi = createApi({
 		getPersonMostPopularMovies: builder.query({
 			query: ({ personId, ...params }) => ({
 				params: {
-					api_key: apiKey,
+					api_key: tmdbAPIKey,
 					...params,
 				},
 				url: `/person/${personId}/movie_credits`,
@@ -80,7 +80,7 @@ export const peopleApi = createApi({
 		getPersonMovieCredits: builder.query<PersonMovieCredit, PersonQuery>({
 			query: ({ personId, ...params }) => ({
 				params: {
-					api_key: apiKey,
+					api_key: tmdbAPIKey,
 					...params,
 				},
 				url: `/person/${personId}/movie_credits`,
@@ -89,7 +89,7 @@ export const peopleApi = createApi({
 		getPersonTVCredits: builder.query<PersonTVCredit, PersonQuery>({
 			query: ({ personId, ...params }) => ({
 				params: {
-					api_key: apiKey,
+					api_key: tmdbAPIKey,
 					...params,
 				},
 				url: `/person/${personId}/tv_credits`,
@@ -98,7 +98,7 @@ export const peopleApi = createApi({
 		getPersonTaggedImages: builder.query<PersonTaggedImages, PersonQuery>({
 			query: ({ personId, ...params }) => ({
 				params: {
-					api_key: apiKey,
+					api_key: tmdbAPIKey,
 					...params,
 				},
 				url: `/person/${personId}/tagged_images`,
@@ -107,7 +107,7 @@ export const peopleApi = createApi({
 		getPersonTranslations: builder.query<PersonTranslations, PersonQuery>({
 			query: ({ personId, ...params }) => ({
 				params: {
-					api_key: apiKey,
+					api_key: tmdbAPIKey,
 					...params,
 				},
 				url: `/person/${personId}/translations`,
@@ -116,7 +116,7 @@ export const peopleApi = createApi({
 		getPopularPeople: builder.query<PopularPeople, PeopleQuery>({
 			query: ({ ...params }) => ({
 				params: {
-					api_key: apiKey,
+					api_key: tmdbAPIKey,
 					...params,
 				},
 				url: `/person/popular`,
