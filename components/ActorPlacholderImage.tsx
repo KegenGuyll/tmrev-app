@@ -2,7 +2,7 @@ import { DimensionValue, Image } from 'react-native';
 import imageUrl from '@/utils/imageUrl';
 
 type ActorPlaceholderImageProps = {
-	profile_url: string | null;
+	profile_url: string | undefined;
 	department:
 		| 'Acting'
 		| 'Directing'
