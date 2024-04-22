@@ -54,6 +54,7 @@
         "endOfLine": "auto"
       }
     ],
-    "@typescript-eslint/naming-convention": "warn"
+    "@typescript-eslint/naming-convention": "warn",
+    "@typescript-eslint/no-explicit-any": "warn"
   }
 }
