@@ -4,6 +4,8 @@ import { useRouter } from 'expo-router';
 
 import imageUrl from '@/utils/imageUrl';
 import { PosterPath } from '@/models';
+import { useAppDispatch } from '@/hooks/reduxHooks';
+import { setMoviePosterQuickActionData, setVisibility } from '@/redux/slice/bottomSheet';
 
 type MoviePosterProps = {
 	movieId: number;
@@ -26,6 +28,7 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 	location,
 }: MoviePosterProps) => {
 	const router = useRouter();
+	const dispatch = useAppDispatch();
 
 	const moviePosterUrl = () => {
 		if (moviePoster) {
@@ -45,8 +48,14 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 		);
 	};
 
+	const handleLongPress = () => {
+		dispatch(setVisibility(true));
+		dispatch(setMoviePosterQuickActionData({ movieId, moviePoster }));
+	};
+
 	return (
 		<TouchableHighlight
+			onLongPress={handleLongPress}
 			onPress={() => {
 				router.push(`/(tabs)/(${location})/${movieId}?from=${location}`);
 			}}
@@ -66,9 +75,14 @@ const styles = ({ height = 175, width = 100 }: MoviePosterStyleProps) =>
 			borderRadius: 4,
 			aspectRatio: 2 / 3,
 		},
-		previewModal: {
+		container: {
+			flex: 1,
+			padding: 24,
+			backgroundColor: 'grey',
+		},
+		contentContainer: {
+			flex: 1,
+			alignItems: 'center',
 			backgroundColor: '#121212',
-			height: '85%',
-			borderRadius: 4,
 		},
 	});

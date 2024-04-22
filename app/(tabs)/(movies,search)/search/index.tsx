@@ -14,6 +14,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFindMoviesQuery, useFindPeopleQuery } from '@/redux/api/tmdb/searchApi';
 import MovieGrid from '@/components/MovieGrid';
 import ActorPlaceholderImage from '@/components/ActorPlacholderImage';
+import MovieQuickActions from '@/components/MovieQuickActions';
+import { useAppSelector } from '@/hooks/reduxHooks';
 
 type SearchSelection = 'movies' | 'crew';
 
@@ -38,6 +40,7 @@ const SearchSelectionChip: React.FC<SearchSelectionChipProps> = ({
 const Search: React.FC = () => {
 	const [searchQuery, setSearchQuery] = React.useState('');
 	const [searchSelection, setSearchSelection] = React.useState<SearchSelection>('movies');
+	const { moviePosterQuickActionData } = useAppSelector((state) => state.bottomSheet);
 
 	const onChangeSearch = (e: NativeSyntheticEvent<TextInputChangeEventData>) =>
 		setSearchQuery(e.nativeEvent.text);
@@ -47,10 +50,17 @@ const Search: React.FC = () => {
 		{ skip: searchSelection !== 'movies' }
 	);
 
-	const { data: peopleData, isFetching: peopleIsFetching } = useFindPeopleQuery(
+	const { data: peopleData } = useFindPeopleQuery(
 		{ query: searchQuery },
 		{ skip: searchSelection !== 'crew' }
 	);
+
+	const handleFindMovie = () => {
+		const movie = movieData?.results.find((m) => m.id === moviePosterQuickActionData?.movieId);
+
+		return movie;
+	};
+
 	useEffect(() => {
 		LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
 	}, []);
@@ -113,6 +123,7 @@ const Search: React.FC = () => {
 					)}
 				</ScrollView>
 			</SafeAreaView>
+			<MovieQuickActions movie={handleFindMovie()} />
 		</>
 	);
 };

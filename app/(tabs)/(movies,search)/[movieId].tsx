@@ -3,6 +3,8 @@ import { Button, Chip, IconButton, Surface, Text } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Image, StyleSheet, Share, ScrollView, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useBottomSheetModal } from '@gorhom/bottom-sheet';
+import { useEffect } from 'react';
 import {
 	useGetMovieCreditsQuery,
 	useGetMovieDetailsQuery,
@@ -22,6 +24,11 @@ type MovieDetailsParams = {
 
 const MovieDetails = () => {
 	const slug: MovieDetailsParams = useLocalSearchParams();
+	const { dismissAll } = useBottomSheetModal();
+
+	useEffect(() => {
+		dismissAll();
+	}, []);
 
 	const {
 		data: movieData,
