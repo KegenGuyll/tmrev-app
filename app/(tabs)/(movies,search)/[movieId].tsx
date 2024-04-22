@@ -1,7 +1,7 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Link, Stack, useLocalSearchParams } from 'expo-router';
 import { Button, Chip, IconButton, Surface, Text } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { View, Image, StyleSheet, Share, ScrollView } from 'react-native';
+import { View, Image, StyleSheet, Share, ScrollView, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
 	useGetMovieCreditsQuery,
@@ -13,9 +13,11 @@ import formatDateYear from '@/utils/formatDateYear';
 import { formatRuntime, numberShortHand } from '@/utils/common';
 import ISO3166_1 from '@/models/tmdb/ISO3166-1';
 import ActorPlaceholderImage from '@/components/ActorPlacholderImage';
+import { PosterPath } from '@/models';
 
 type MovieDetailsParams = {
 	movieId: string;
+	from?: PosterPath;
 };
 
 const MovieDetails = () => {
@@ -176,36 +178,37 @@ const MovieDetails = () => {
 						</Button>
 					</View>
 					<View style={{ flexDirection: 'row', marginBottom: 8 }}>
-						<ScrollView
-							style={{
-								display: 'flex',
-								flexDirection: 'row',
-								gap: 10,
-							}}
-							horizontal
-							showsHorizontalScrollIndicator={false}
-						>
-							{movieCredits?.cast.map((cast, index) => (
-								<View
-									key={`${cast.id}-${index + 1}`}
-									style={{
-										height: 300,
-										width: 135,
-										marginRight: 8,
-										borderRadius: 4,
-									}}
-								>
-									<ActorPlaceholderImage
-										profile_url={cast.profile_path}
-										department={cast.known_for_department}
-										height={150}
-										width="100%"
-									/>
-									<Text variant="labelLarge">{cast.name}</Text>
-									<Text>{`${cast.character || cast.known_for_department}`}</Text>
-								</View>
-							))}
-						</ScrollView>
+						{movieCredits?.cast && (
+							<FlatList
+								horizontal
+								showsHorizontalScrollIndicator={false}
+								data={movieCredits?.cast}
+								keyExtractor={(item) => item.id.toString()}
+								renderItem={({ item }) => (
+									<Link
+										style={{ marginRight: 8 }}
+										href={`/(tabs)/(${slug.from ?? 'movies'})/person/${item.id}?from=${slug.from}`}
+									>
+										<View
+											style={{
+												marginRight: 8,
+												borderRadius: 4,
+												gap: 8,
+											}}
+										>
+											<ActorPlaceholderImage
+												profile_url={item.profile_path}
+												department={item.known_for_department}
+												height={175}
+												width={150}
+											/>
+											<Text variant="labelLarge">{item.name}</Text>
+											<Text>{`${item.character || item.known_for_department}`}</Text>
+										</View>
+									</Link>
+								)}
+							/>
+						)}
 					</View>
 				</SafeAreaView>
 			</ScrollView>
