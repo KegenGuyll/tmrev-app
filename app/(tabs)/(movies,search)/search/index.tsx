@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router';
+import { Link, Stack } from 'expo-router';
 import React, { useEffect } from 'react';
 import {
 	NativeSyntheticEvent,
@@ -91,18 +91,20 @@ const Search: React.FC = () => {
 							data={peopleData.results}
 							renderItem={({ item }) => (
 								<>
-									<List.Item
-										title={item.name}
-										left={() => (
-											<ActorPlaceholderImage
-												profile_url={item.profile_path}
-												department={item.known_for_department}
-												height={50}
-												width={50}
-											/>
-										)}
-										description={item.known_for_department}
-									/>
+									<Link href={`/(tabs)/(search)/person/${item.id}?from=search`}>
+										<List.Item
+											title={item.name}
+											left={() => (
+												<ActorPlaceholderImage
+													profile_url={item.profile_path}
+													department={item.known_for_department}
+													height={50}
+													width={50}
+												/>
+											)}
+											description={item.known_for_department}
+										/>
+									</Link>
 									<Divider />
 								</>
 							)}
