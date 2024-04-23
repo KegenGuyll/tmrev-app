@@ -9,7 +9,7 @@ import { MD3DarkTheme, PaperProvider } from 'react-native-paper';
 import { Provider } from 'react-redux';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { View } from 'react-native';
-import { BottomSheetModal, BottomSheetModalProvider, BottomSheetView } from '@gorhom/bottom-sheet';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { store } from '@/redux/store';
 
 export {
@@ -65,6 +65,7 @@ const RootLayoutNav = () => {
 							<Stack>
 								<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 								<Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+								<Stack.Screen name="login" />
 							</Stack>
 						</View>
 					</ThemeProvider>
