@@ -68,7 +68,7 @@ const Search: React.FC = () => {
 	return (
 		<>
 			<Stack.Screen options={{ headerShown: false }} />
-			<SafeAreaView>
+			<SafeAreaView style={{ marginTop: 16 }}>
 				<Searchbar placeholder="Search" value={searchQuery} onChange={onChangeSearch} />
 				{/* <ScrollView horizontal> */}
 				<View style={styles.chipContainer}>
