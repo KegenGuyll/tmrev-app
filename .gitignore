@@ -43,3 +43,7 @@ expo-env.d.ts
 
 %ProgramData%
 
+# google auth
+google-services.json
+GoogleService-Info.plist
+
