@@ -5,6 +5,7 @@ import { movieApi } from '../api/tmdb/movieApi';
 import { peopleApi } from '../api/tmdb/peopleApi';
 import { searchApi } from '../api/tmdb/searchApi';
 import { tvApi } from '../api/tmdb/tvApi';
+import { tmrevApi } from '../api/tmrev';
 
 export const store = configureStore({
 	reducer: rootReducer,
@@ -16,7 +17,8 @@ export const store = configureStore({
 			.concat(movieApi.middleware)
 			.concat(tvApi.middleware)
 			.concat(peopleApi.middleware)
-			.concat(searchApi.middleware),
+			.concat(searchApi.middleware)
+			.concat(tmrevApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

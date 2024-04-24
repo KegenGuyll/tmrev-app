@@ -6,6 +6,7 @@ import { movieApi } from '../api/tmdb/movieApi';
 import { peopleApi } from '../api/tmdb/peopleApi';
 import { searchApi } from '../api/tmdb/searchApi';
 import { tvApi } from '../api/tmdb/tvApi';
+import { tmrevApi } from '../api/tmrev';
 
 const rootReducer = combineReducers({
 	counter: counterReducer,
@@ -15,6 +16,7 @@ const rootReducer = combineReducers({
 	[peopleApi.reducerPath]: peopleApi.reducer,
 	[searchApi.reducerPath]: searchApi.reducer,
 	[tvApi.reducerPath]: tvApi.reducer,
+	[tmrevApi.reducerPath]: tmrevApi.reducer,
 });
 
 export default rootReducer;
