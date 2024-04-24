@@ -19,7 +19,7 @@ const TabLayout = () => {
 	const handleSignOut = async () => {
 		try {
 			await auth().signOut();
-			router.replace('/(tabs)/');
+			router.replace('/(tabs)/(home)/home');
 		} catch (error) {
 			console.error(error);
 		}
@@ -27,16 +27,18 @@ const TabLayout = () => {
 
 	return (
 		<Tabs
+			initialRouteName="(home)"
 			screenOptions={{
 				tabBarActiveTintColor: 'white',
 				tabBarHideOnKeyboard: true,
 			}}
 		>
 			<Tabs.Screen
-				name="index"
+				name="(home)"
 				options={{
+					headerShown: false,
 					title: 'Home',
-					headerTitle: '',
+					headerTitle: 'Home',
 					tabBarIcon: ({ color }) => <Icon name="home" color={color} size={iconSize} />,
 				}}
 			/>
@@ -49,7 +51,7 @@ const TabLayout = () => {
 				}}
 			/>
 			<Tabs.Screen
-				name="add-review"
+				name="(add-review)"
 				options={{
 					title: 'Add Review',
 					tabBarIcon: ({ color }) => <Icon name="add" color={color} size={iconSize} />,
@@ -64,7 +66,7 @@ const TabLayout = () => {
 				}}
 			/>
 			<Tabs.Screen
-				name="profile"
+				name="(profile)"
 				options={{
 					headerShown: true,
 					title: 'Profile',
