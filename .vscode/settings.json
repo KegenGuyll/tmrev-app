@@ -2,5 +2,6 @@
   "eslint.codeActionsOnSave.rules": null,
   "eslint.format.enable": true,
   "files.eol": "\n",
-  "java.configuration.updateBuildConfiguration": "automatic"
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.compile.nullAnalysis.mode": "disabled"
 }
