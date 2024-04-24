@@ -1,7 +1,7 @@
 import { View } from 'react-native';
-import { Text, Button } from 'react-native-paper';
+import { Text, Button, TextInput, Divider } from 'react-native-paper';
 import auth from '@react-native-firebase/auth';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { GoogleSignin, GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import { GOOGLE_WEB_CLIENT_ID } from '@env';
 import { useRouter } from 'expo-router';
 
@@ -23,18 +23,30 @@ const Login: React.FC = () => {
 
 			// Sign-in the user with the credential
 			await auth().signInWithCredential(googleCredential);
-			router.replace('/(tabs)/');
+			router.replace('/(tabs)/(home)/home');
 		} catch (error) {
 			console.error(error);
 		}
 	};
 
 	return (
-		<View>
-			<Text>Login</Text>
-			<Button onPress={onGoogleButtonPress}>
-				<Text>Google Login</Text>
-			</Button>
+		<View style={{ gap: 16, padding: 16 }}>
+			<View style={{ gap: 8 }}>
+				<TextInput mode="outlined" label="Email" />
+				<TextInput mode="outlined" label="Password" />
+				<Text style={{ textAlign: 'right' }}>Forgot Password?</Text>
+				<Button mode="contained" onPress={onGoogleButtonPress}>
+					<Text>Login</Text>
+				</Button>
+			</View>
+			<Divider />
+			<View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+				<GoogleSigninButton
+					size={GoogleSigninButton.Size.Wide}
+					color={GoogleSigninButton.Color.Light}
+					onPress={onGoogleButtonPress}
+				/>
+			</View>
 		</View>
 	);
 };
