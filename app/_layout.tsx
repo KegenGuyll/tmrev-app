@@ -62,7 +62,7 @@ const RootLayoutNav = () => {
 				<BottomSheetModalProvider>
 					<ThemeProvider value={DarkTheme}>
 						<View style={{ height: '100%', width: '100%' }}>
-							<Stack>
+							<Stack initialRouteName="/(tabs)/(home)">
 								<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 								<Stack.Screen name="modal" options={{ presentation: 'modal' }} />
 								<Stack.Screen name="login" />
