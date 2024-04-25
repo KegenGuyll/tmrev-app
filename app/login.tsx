@@ -69,7 +69,7 @@ const Login: React.FC = () => {
 			if (currentUser) {
 				const dbUser = await findUserByUid(currentUser?.uid);
 
-				if (!dbUser.isUser) {
+				if (!dbUser) {
 					await createTMREVUser(currentUser);
 				}
 			}
