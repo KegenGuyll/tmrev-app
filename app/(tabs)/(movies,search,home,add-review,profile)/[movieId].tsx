@@ -1,4 +1,4 @@
-import { Link, Stack, useLocalSearchParams } from 'expo-router';
+import { Link, Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Button, Chip, IconButton, Surface, Text } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Image, StyleSheet, Share, ScrollView, FlatList } from 'react-native';
@@ -12,10 +12,11 @@ import {
 } from '@/redux/api/tmdb/movieApi';
 import imageUrl from '@/utils/imageUrl';
 import formatDateYear from '@/utils/formatDateYear';
-import { formatRuntime, numberShortHand } from '@/utils/common';
+import { formatRuntime, numberShortHand, roundWithMaxPrecision } from '@/utils/common';
 import ISO3166_1 from '@/models/tmdb/ISO3166-1';
 import ActorPlaceholderImage from '@/components/ActorPlacholderImage';
 import { PosterPath } from '@/models';
+import { useGetAllReviewsQuery } from '@/redux/api/tmrev';
 
 type MovieDetailsParams = {
 	movieId: string;
@@ -24,7 +25,9 @@ type MovieDetailsParams = {
 
 const MovieDetails = () => {
 	const slug: MovieDetailsParams = useLocalSearchParams();
+	const router = useRouter();
 	const { dismissAll } = useBottomSheetModal();
+	const { data: movieReviews } = useGetAllReviewsQuery({ movie_id: Number(slug.movieId) });
 
 	useEffect(() => {
 		dismissAll();
@@ -124,11 +127,11 @@ const MovieDetails = () => {
 					<View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
 						<View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 8 }}>
 							<IconButton icon="thumb-up-outline" />
-							<Text>0</Text>
+							<Text>{movieReviews?.body.likes}</Text>
 						</View>
 						<View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 8 }}>
 							<IconButton icon="thumb-down-outline" />
-							<Text>0</Text>
+							<Text>{movieReviews?.body.dislikes}</Text>
 						</View>
 					</View>
 					<Surface
@@ -142,6 +145,11 @@ const MovieDetails = () => {
 							gap: 8,
 						}}
 					>
+						{movieReviews?.body.avgScore && (
+							<Chip icon="star">
+								<Text>{roundWithMaxPrecision(movieReviews?.body.avgScore?.totalScore, 1)}</Text>
+							</Chip>
+						)}
 						{movieData.budget ? (
 							<Chip icon="cash">
 								<Text>{numberShortHand(movieData.budget)}</Text>
@@ -184,6 +192,16 @@ const MovieDetails = () => {
 							<Text>ADD TO LIST</Text>
 						</Button>
 					</View>
+					<Button
+						onPress={() =>
+							router.push(
+								`/(tabs)/(${slug.from})/reviews/${slug.movieId}?from=${slug.from}&title=${movieData.title}` as any
+							)
+						}
+						mode="outlined"
+					>
+						<Text>View All Reviews</Text>
+					</Button>
 					<View style={{ flexDirection: 'row', marginBottom: 8 }}>
 						{movieCredits?.cast && (
 							<FlatList
@@ -194,7 +212,9 @@ const MovieDetails = () => {
 								renderItem={({ item }) => (
 									<Link
 										style={{ marginRight: 8 }}
-										href={`/(tabs)/(${slug.from ?? 'movies'})/person/${item.id}?from=${slug.from}`}
+										href={
+											`/(tabs)/(${slug.from ?? 'movies'})/person/${item.id}?from=${slug.from}` as any
+										}
 									>
 										<View
 											style={{
