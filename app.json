@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "tabs-example",
-    "slug": "tabs-example",
+    "name": "tmrev",
+    "slug": "tmrev",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

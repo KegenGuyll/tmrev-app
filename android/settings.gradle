@@ -1,4 +1,4 @@
-rootProject.name = 'tabs-example'
+rootProject.name = 'tmrev'
 
 dependencyResolutionManagement {
   versionCatalogs {
