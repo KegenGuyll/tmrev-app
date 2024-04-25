@@ -17,6 +17,7 @@ import ISO3166_1 from '@/models/tmdb/ISO3166-1';
 import ActorPlaceholderImage from '@/components/ActorPlacholderImage';
 import { PosterPath } from '@/models';
 import { useGetAllReviewsQuery } from '@/redux/api/tmrev';
+import MovieRadarChart from '@/components/MovieRadarChart';
 
 type MovieDetailsParams = {
 	movieId: string;
@@ -202,6 +203,7 @@ const MovieDetails = () => {
 					>
 						<Text>View All Reviews</Text>
 					</Button>
+					<MovieRadarChart reviews={movieReviews?.body.reviews} />
 					<View style={{ flexDirection: 'row', marginBottom: 8 }}>
 						{movieCredits?.cast && (
 							<FlatList
