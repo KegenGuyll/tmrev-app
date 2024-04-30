@@ -74,7 +74,7 @@ const Login: React.FC = () => {
 				}
 			}
 
-			router.replace('/(tabs)/(home)/home');
+			router.replace('/(tabs)/(profile)/profile');
 		} catch (error) {
 			console.error(error, 'error');
 		}
@@ -87,7 +87,7 @@ const Login: React.FC = () => {
 				<TextInput mode="outlined" label="Password" />
 				<Text style={{ textAlign: 'right' }}>Forgot Password?</Text>
 				<Button mode="contained" onPress={onGoogleButtonPress}>
-					<Text>Login</Text>
+					Login
 				</Button>
 			</View>
 			<Divider />
