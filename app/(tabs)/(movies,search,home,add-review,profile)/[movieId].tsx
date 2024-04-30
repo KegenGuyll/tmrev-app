@@ -187,11 +187,9 @@ const MovieDetails = () => {
 					</Surface>
 					<View style={{ marginBottom: 8 }}>
 						<Button style={{ marginBottom: 8 }} mode="contained">
-							<Text>REVIEW MOVIE</Text>
+							REVIEW MOVIE
 						</Button>
-						<Button mode="outlined">
-							<Text>ADD TO LIST</Text>
-						</Button>
+						<Button mode="outlined">ADD TO LIST</Button>
 					</View>
 					<Button
 						onPress={() =>
@@ -201,7 +199,7 @@ const MovieDetails = () => {
 						}
 						mode="outlined"
 					>
-						<Text>View All Reviews</Text>
+						View All Reviews
 					</Button>
 					<MovieRadarChart reviews={movieReviews?.body.reviews} />
 					<View style={{ flexDirection: 'row', marginBottom: 8 }}>

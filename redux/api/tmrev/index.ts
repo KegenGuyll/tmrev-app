@@ -35,6 +35,7 @@ import { SearchResponse } from '@/models/tmrev/search';
 import { WatchedDeletePayload, WatchedPayload, WatchedResponse } from '@/models/tmrev/watched';
 import { AddMovieToWatchList, GetListPayload, UpdateWatchList } from '@/models/tmrev/watchList';
 import { IMovieQueryGeneral } from '@/models/tmdb/movie/tmdbMovie';
+import { UpdateUserQuery } from '@/models/tmrev/user';
 
 export const tmrevApi = createApi({
 	baseQuery: fetchBaseQuery({
@@ -346,6 +347,22 @@ export const tmrevApi = createApi({
 				url: `/movie/watched/${body._id}`,
 			}),
 		}),
+		updateUser: builder.mutation<User, UpdateUserQuery>({
+			invalidatesTags: ['USER'],
+			query: (data) => ({
+				headers: {
+					authorization: data.authToken,
+				},
+				body: {
+					bio: data.bio,
+					firstName: data.firstName,
+					lastName: data.lastName,
+					location: data.location,
+				},
+				method: 'PUT',
+				url: `/user`,
+			}),
+		}),
 		voteTmrevReview: builder.mutation<void, { vote: boolean; token: string; reviewId: string }>({
 			invalidatesTags: ['COMMENT', 'REVIEW', 'MOVIE'],
 			query: (data) => ({
@@ -406,6 +423,7 @@ export const {
 	useRetrieveFollowerQuery,
 	useRetrieveFollowingQuery,
 	useRetrieveFollowerFeedQuery,
+	useUpdateUserMutation,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;
 

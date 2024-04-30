@@ -1,29 +1,13 @@
 import React from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { Tabs, useRouter } from 'expo-router';
+import { Tabs } from 'expo-router';
 import auth from '@react-native-firebase/auth';
 import { Image } from 'react-native';
-import { Menu, Divider, IconButton } from 'react-native-paper';
 
 const iconSize = 25;
 
 const TabLayout = () => {
 	const { currentUser } = auth();
-	const [visible, setVisible] = React.useState(false);
-	const router = useRouter();
-
-	const openMenu = () => setVisible(true);
-
-	const closeMenu = () => setVisible(false);
-
-	const handleSignOut = async () => {
-		try {
-			await auth().signOut();
-			router.replace('/(tabs)/(home)/home');
-		} catch (error) {
-			console.error(error);
-		}
-	};
 
 	return (
 		<Tabs
@@ -68,25 +52,8 @@ const TabLayout = () => {
 			<Tabs.Screen
 				name="(profile)"
 				options={{
-					headerShown: true,
+					headerShown: false,
 					title: 'Profile',
-					headerRight: () => (
-						<Menu
-							visible={visible}
-							onDismiss={closeMenu}
-							anchor={<IconButton onPress={openMenu} icon="dots-vertical" />}
-						>
-							<Menu.Item onPress={() => {}} title="Item 1" />
-							<Menu.Item onPress={() => {}} title="Item 2" />
-
-							{currentUser && (
-								<>
-									<Divider />
-									<Menu.Item onPress={handleSignOut} title="Sign Out" />
-								</>
-							)}
-						</Menu>
-					),
 					tabBarIcon: ({ color }) => {
 						if (currentUser?.photoURL) {
 							return (

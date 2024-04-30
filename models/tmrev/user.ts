@@ -35,7 +35,7 @@ interface User {
 	bio: string;
 	location: string;
 	public: boolean;
-	followers: number;
+	followers: string[];
 }
 
 interface UserQuery {
@@ -43,4 +43,12 @@ interface UserQuery {
 	authToken?: string;
 }
 
-export type { Link, TmrevUser, User, UserQuery };
+type UpdateUserQuery = {
+	authToken?: string;
+	firstName?: string;
+	lastName?: string;
+	bio?: string;
+	location?: string;
+};
+
+export type { Link, TmrevUser, User, UserQuery, UpdateUserQuery };

@@ -1,26 +1,53 @@
 import { View } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import { Button, Divider, Text } from 'react-native-paper';
+import { Button, Divider, IconButton, Menu, Text } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
+import { useMemo, useState } from 'react';
+import ProfileHeader from '@/components/Profile/ProfileHeader';
+import { useGetUserQuery } from '@/redux/api/tmrev';
 
 const Profile = () => {
 	const { currentUser } = auth();
 	const router = useRouter();
+	const { data, isLoading } = useGetUserQuery(
+		{ uid: currentUser?.uid as string },
+		{ skip: !currentUser || !currentUser.uid }
+	);
+	const [visible, setVisible] = useState(false);
 
-	if (!currentUser) {
+	const openMenu = () => setVisible(true);
+	const closeMenu = () => setVisible(false);
+
+	const name = useMemo(() => `${data?.firstName} ${data?.lastName}`, [data]);
+
+	const handleSignOut = async () => {
+		try {
+			closeMenu();
+			await auth().signOut();
+			router.replace('/(tabs)/(home)/home');
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
+	if (isLoading || (!data && currentUser)) {
+		return <Text>Loading...</Text>;
+	}
+
+	if (!currentUser || !data) {
 		return (
 			<>
-				<Stack.Screen options={{ headerShown: false }} />
+				<Stack.Screen options={{ title: 'Profile', headerRight: () => null }} />
 				<SafeAreaView style={{ gap: 8 }}>
 					<Text variant="headlineMedium">You&apos;re not currently logged in.</Text>
 					<View style={{ gap: 8 }}>
 						<Button onPress={() => router.push('/login')} mode="contained">
-							<Text>Login</Text>
+							Login
 						</Button>
 						<Divider />
 						<Button onPress={() => router.push('/signup')} mode="outlined">
-							<Text>Sign Up</Text>
+							Sign Up
 						</Button>
 					</View>
 				</SafeAreaView>
@@ -30,9 +57,22 @@ const Profile = () => {
 
 	return (
 		<>
-			<Stack.Screen options={{ headerShown: false }} />
+			<Stack.Screen
+				options={{
+					title: name,
+					headerRight: () => (
+						<Menu
+							visible={visible}
+							onDismiss={closeMenu}
+							anchor={<IconButton onPress={openMenu} icon="dots-vertical" />}
+						>
+							<Menu.Item onPress={handleSignOut} title="Logout" />
+						</Menu>
+					),
+				}}
+			/>
 			<View>
-				<Text>Profile</Text>
+				<ProfileHeader editVisible user={data} />
 			</View>
 		</>
 	);

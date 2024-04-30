@@ -1,5 +1,6 @@
 import { Chip, Divider, Text } from 'react-native-paper';
 import { Image, View } from 'react-native';
+import { Link } from 'expo-router';
 import { TmrevReview } from '@/models/tmrev';
 
 type MovieReviewProps = {
@@ -13,17 +14,31 @@ const MovieReview: React.FC<MovieReviewProps> = ({ review }: MovieReviewProps) =
 		<>
 			<View style={{ padding: 8 }}>
 				<View
-					style={{ display: 'flex', alignItems: 'center', flexDirection: 'row', marginBottom: 8 }}
+					style={{
+						display: 'flex',
+						alignItems: 'center',
+						flexDirection: 'row',
+						marginBottom: 8,
+					}}
 				>
-					{review.profile.photoUrl && (
-						<Image
-							source={{ uri: review.profile.photoUrl }}
-							style={{ width: 40, height: 40, borderRadius: 20, marginRight: 8 }}
-						/>
-					)}
-					<Text variant="labelLarge" style={{ flexGrow: 1 }}>
-						{name}
-					</Text>
+					<Link style={{ flexGrow: 1 }} href={`/(tabs)/(home)/profile/${review.profile.uuid}`}>
+						<View
+							style={{
+								display: 'flex',
+								flexDirection: 'row',
+								alignItems: 'center',
+								gap: 8,
+							}}
+						>
+							{review.profile.photoUrl && (
+								<Image
+									source={{ uri: review.profile.photoUrl }}
+									style={{ width: 40, height: 40, borderRadius: 50 }}
+								/>
+							)}
+							<Text variant="labelLarge">{name}</Text>
+						</View>
+					</Link>
 					<Chip icon="star">
 						<Text>{review.averagedAdvancedScore}</Text>
 					</Chip>
