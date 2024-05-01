@@ -4,20 +4,8 @@ type Link = {
 	title: string;
 	link: string;
 };
-interface TmrevUser {
-	_id: string;
-	email: string;
-	uuid: string;
-	following: string[];
-	firstName: string;
-	lastName: string;
-	public: boolean;
-	bio: string;
-	location: string;
-	link?: Link;
-}
 
-interface User {
+interface TmrevUser {
 	displayName?: string;
 	photoUrl?: string;
 	email: string;
@@ -28,10 +16,7 @@ interface User {
 	watchLists: WatchList[];
 	firstName: string;
 	lastName: string;
-	link: {
-		title: string;
-		url: string;
-	};
+	link?: Link;
 	bio: string;
 	location: string;
 	public: boolean;
@@ -51,4 +36,4 @@ type UpdateUserQuery = {
 	location?: string;
 };
 
-export type { Link, TmrevUser, User, UserQuery, UpdateUserQuery };
+export type { Link, TmrevUser, TmrevUser as User, UserQuery, UpdateUserQuery };
