@@ -22,7 +22,7 @@ const MovieReviewsPage = () => {
 				<ScrollView>
 					<List.Section>
 						{movieReviews?.body.reviews.map((review) => (
-							<MovieReview key={review._id} review={review} />
+							<MovieReview from={slug.from} key={review._id} review={review} />
 						))}
 					</List.Section>
 				</ScrollView>
