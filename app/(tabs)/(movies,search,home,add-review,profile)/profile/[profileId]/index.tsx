@@ -8,6 +8,7 @@ import { useGetUserQuery } from '@/redux/api/tmrev';
 import ClickableSurface from '@/components/ClickableSurface';
 import { useAppDispatch } from '@/hooks/reduxHooks';
 import { setUserProfile } from '@/redux/slice/userProfileSlice';
+import RatingDistributionList from '@/components/Profile/RatingDistributionList';
 
 export type ProfileSearchParams = {
 	profileId: string;
@@ -81,6 +82,7 @@ const Profile = () => {
 					title="View All Reviews"
 					icon="chevron-right"
 				/>
+				<RatingDistributionList uid={profileId} />
 			</View>
 		</>
 	);

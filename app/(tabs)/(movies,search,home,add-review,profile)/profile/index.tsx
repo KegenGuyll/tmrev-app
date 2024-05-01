@@ -9,6 +9,7 @@ import { useGetUserQuery } from '@/redux/api/tmrev';
 import ClickableSurface from '@/components/ClickableSurface';
 import { useAppDispatch } from '@/hooks/reduxHooks';
 import { setUserProfile } from '@/redux/slice/userProfileSlice';
+import RatingDistributionList from '@/components/Profile/RatingDistributionList';
 
 const Profile = () => {
 	const { currentUser } = auth();
@@ -81,13 +82,14 @@ const Profile = () => {
 					),
 				}}
 			/>
-			<View style={{ gap: 16 }}>
+			<View>
 				<ProfileHeader editVisible user={data} />
 				<ClickableSurface
 					onPress={() => router.push(`/(tabs)/(profile)/profile/${currentUser.uid}/allReviews`)}
 					title="View All Reviews"
 					icon="chevron-right"
 				/>
+				<RatingDistributionList uid={currentUser.uid} />
 			</View>
 		</>
 	);
