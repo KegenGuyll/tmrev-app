@@ -12,6 +12,7 @@ type MoviePosterProps = {
 	moviePoster: string | null | undefined;
 	height?: number;
 	width?: number;
+	clickable?: boolean;
 	location: PosterPath;
 };
 
@@ -26,6 +27,7 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 	height,
 	width,
 	location,
+	clickable = true,
 }: MoviePosterProps) => {
 	const router = useRouter();
 	const dispatch = useAppDispatch();
@@ -53,6 +55,10 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 		dispatch(setMoviePosterQuickActionData({ movieId, moviePoster }));
 	};
 
+	if (!clickable) {
+		return <View>{moviePosterUrl()}</View>;
+	}
+
 	return (
 		<TouchableHighlight
 			onLongPress={handleLongPress}
@@ -74,6 +80,8 @@ const styles = ({ height = 175, width = 100 }: MoviePosterStyleProps) =>
 			height: height ?? 250,
 			borderRadius: 4,
 			aspectRatio: 2 / 3,
+			borderWidth: 1,
+			borderColor: 'grey',
 		},
 		container: {
 			flex: 1,
