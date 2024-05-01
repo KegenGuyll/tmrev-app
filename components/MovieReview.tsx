@@ -5,9 +5,10 @@ import { TmrevReview } from '@/models/tmrev';
 
 type MovieReviewProps = {
 	review: TmrevReview;
+	from: string;
 };
 
-const MovieReview: React.FC<MovieReviewProps> = ({ review }: MovieReviewProps) => {
+const MovieReview: React.FC<MovieReviewProps> = ({ review, from }: MovieReviewProps) => {
 	const name = `${review.profile.firstName} ${review.profile.lastName}`;
 
 	return (
@@ -21,7 +22,10 @@ const MovieReview: React.FC<MovieReviewProps> = ({ review }: MovieReviewProps) =
 						marginBottom: 8,
 					}}
 				>
-					<Link style={{ flexGrow: 1 }} href={`/(tabs)/(home)/profile/${review.profile.uuid}`}>
+					<Link
+						style={{ flexGrow: 1 }}
+						href={`/(tabs)/(${from})/profile/${review.profile.uuid}?from=${from}`}
+					>
 						<View
 							style={{
 								display: 'flex',
