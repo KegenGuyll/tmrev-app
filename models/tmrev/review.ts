@@ -1,3 +1,4 @@
+import { GetMovieReviewSortBy } from '.';
 import { Comment, Vote } from './comments';
 import { Profile } from './movie';
 
@@ -30,6 +31,21 @@ interface AllReviewsResponse {
 		total: number;
 	};
 }
+
+type GetUserMovieReviewsResponse = {
+	success: boolean;
+	body: {
+		numberOfReviews: number;
+		reviews: TmrevReview[];
+	};
+};
+
+type GetUserMovieReviewsPayload = {
+	userId: string;
+	query?: {
+		sort_by: GetMovieReviewSortBy;
+	};
+};
 
 interface CreateTmrevReviewQuery {
 	title: string;
@@ -112,4 +128,6 @@ export type {
 	SingleReview,
 	TmrevReview,
 	UpdatedAt,
+	GetUserMovieReviewsResponse,
+	GetUserMovieReviewsPayload,
 };

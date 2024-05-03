@@ -43,7 +43,6 @@ const RatingDistribution: React.FC<RatingDistributionProps> = ({
 				hideRules
 				height={200}
 				maxValue={10}
-				isAnimated
 			/>
 		</View>
 	);

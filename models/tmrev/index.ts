@@ -18,7 +18,7 @@ type Timestamp = {
 	nanoseconds: number;
 };
 
-type GetMovieReviewSortBy =
+export type GetMovieReviewSortBy =
 	| 'averagedAdvancedScore.asc'
 	| 'averagedAdvancedScore.desc'
 	| 'acting.asc.advancedScore'

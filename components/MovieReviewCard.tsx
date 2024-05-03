@@ -12,9 +12,15 @@ const MovieReviewCard: React.FC<MovieReviewCardProps> = ({ review }: MovieReview
 	return (
 		<TouchableHighlight>
 			<Surface style={styles.container}>
-				<Text variant="titleMedium">{review.title}</Text>
-				<View style={{ display: 'flex', flexDirection: 'row' }}>
-					<Chip icon="star">{review.averagedAdvancedScore}</Chip>
+				<View
+					style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}
+				>
+					<Text style={{ flexGrow: 1 }} variant="titleMedium">
+						{review.title}
+					</Text>
+					<View style={{ display: 'flex', flexDirection: 'row' }}>
+						<Chip icon="star">{review.averagedAdvancedScore}</Chip>
+					</View>
 				</View>
 
 				<View style={{ display: 'flex', flexDirection: 'row', gap: 8, alignItems: 'flex-start' }}>

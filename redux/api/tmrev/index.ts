@@ -30,7 +30,12 @@ import {
 	ReviewResponse,
 	TopReviewed,
 } from '@/models/tmrev/movie';
-import { AllReviewsResponse, DeleteReviewQuery } from '@/models/tmrev/review';
+import {
+	AllReviewsResponse,
+	DeleteReviewQuery,
+	GetUserMovieReviewsPayload,
+	GetUserMovieReviewsResponse,
+} from '@/models/tmrev/review';
 import { SearchResponse } from '@/models/tmrev/search';
 import { WatchedDeletePayload, WatchedPayload, WatchedResponse } from '@/models/tmrev/watched';
 import { AddMovieToWatchList, GetListPayload, UpdateWatchList } from '@/models/tmrev/watchList';
@@ -40,7 +45,6 @@ import { UpdateUserQuery } from '@/models/tmrev/user';
 export const tmrevApi = createApi({
 	baseQuery: fetchBaseQuery({
 		baseUrl: TMREV_API_URL,
-		prepareHeaders: (headers) => headers,
 	}),
 	endpoints: (builder) => ({
 		addComment: builder.mutation<void, { id: string; comment: string; token: string }>({
@@ -99,6 +103,14 @@ export const tmrevApi = createApi({
 				},
 				method: 'POST',
 				url: '/movie/batch',
+			}),
+		}),
+		getUserMovieReviews: builder.query<GetUserMovieReviewsResponse, GetUserMovieReviewsPayload>({
+			query: ({ query, userId }) => ({
+				params: {
+					...query,
+				},
+				url: `movie/user/review/${userId}`,
 			}),
 		}),
 		categoryRatings: builder.query<CategoryDataResponse, string>({
@@ -424,6 +436,7 @@ export const {
 	useRetrieveFollowingQuery,
 	useRetrieveFollowerFeedQuery,
 	useUpdateUserMutation,
+	useGetUserMovieReviewsQuery,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;
 
