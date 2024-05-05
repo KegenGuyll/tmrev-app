@@ -121,3 +121,8 @@ export function genreIdToName(genreId: number) {
 			return null;
 	}
 }
+
+// convert camelcase to space separated
+export function camelCaseToWords(str: string) {
+	return str.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase());
+}
