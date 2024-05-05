@@ -1,17 +1,39 @@
+import { useRouter } from 'expo-router';
 import { View } from 'react-native';
 import { BarChart } from 'react-native-gifted-charts';
 import { useTheme, Text } from 'react-native-paper';
+import { FromLocation } from '@/models';
+
+type Data = {
+	label: string;
+	value: number;
+};
 
 type RatingDistributionProps = {
 	title: string;
-	data: { label: string; value: number }[];
+	id: string;
+	data: Data[];
+	profileId: string;
+	from?: FromLocation;
 };
 
 const RatingDistribution: React.FC<RatingDistributionProps> = ({
 	data,
 	title,
+	id,
+	profileId,
+	from,
 }: RatingDistributionProps) => {
 	const theme = useTheme();
+	const router = useRouter();
+
+	const handleRoute = (item: Data) => {
+		const formattedQuery = `${id}.${item.label}`;
+
+		router.push(
+			`/(tabs)/(${from || 'home'})/profile/${profileId}/allReviews?advancedScore=${formattedQuery}`
+		);
+	};
 
 	return (
 		<View
@@ -43,6 +65,7 @@ const RatingDistribution: React.FC<RatingDistributionProps> = ({
 				hideRules
 				height={200}
 				maxValue={10}
+				onPress={handleRoute}
 			/>
 		</View>
 	);

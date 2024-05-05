@@ -4,13 +4,16 @@ import { Text } from 'react-native-paper';
 import { Categories } from '@/models/tmrev/categories';
 import { useCategoryRatingsQuery } from '@/redux/api/tmrev';
 import RatingDistribution from './RatingDistribution';
+import { FromLocation } from '@/models';
 
 type RatingDistributionListProps = {
 	uid: string;
+	from?: FromLocation;
 };
 
 const RatingDistributionList: React.FC<RatingDistributionListProps> = ({
 	uid,
+	from,
 }: RatingDistributionListProps) => {
 	const { data: categoryRatings, isLoading } = useCategoryRatingsQuery(uid);
 
@@ -115,16 +118,76 @@ const RatingDistributionList: React.FC<RatingDistributionListProps> = ({
 	return (
 		<View style={{ padding: 8 }}>
 			<ScrollView style={{ gap: 8, display: 'flex', flexDirection: 'row' }} horizontal>
-				<RatingDistribution title="Personal Score" data={personalScoreRatings} />
-				<RatingDistribution title="Acting" data={actingScoreRatings} />
-				<RatingDistribution title="Characters" data={charactersScoreRatings} />
-				<RatingDistribution title="Cinematography" data={cinematographyScoreRatings} />
-				<RatingDistribution title="Climax" data={climaxScoreRatings} />
-				<RatingDistribution title="Ending" data={endingScoreRatings} />
-				<RatingDistribution title="Music" data={musicScoreRatings} />
-				<RatingDistribution title="Plot" data={plotScoreRatings} />
-				<RatingDistribution title="Theme" data={themeScoreRatings} />
-				<RatingDistribution title="Visuals" data={visualsScoreRatings} />
+				<RatingDistribution
+					profileId={uid}
+					id="personalScore"
+					title="Personal Score"
+					data={personalScoreRatings}
+					from={from}
+				/>
+				<RatingDistribution
+					profileId={uid}
+					id="acting"
+					title="Acting"
+					data={actingScoreRatings}
+					from={from}
+				/>
+				<RatingDistribution
+					profileId={uid}
+					id="characters"
+					title="Characters"
+					data={charactersScoreRatings}
+					from={from}
+				/>
+				<RatingDistribution
+					profileId={uid}
+					id="cinematography"
+					title="Cinematography"
+					data={cinematographyScoreRatings}
+					from={from}
+				/>
+				<RatingDistribution
+					profileId={uid}
+					id="climax"
+					title="Climax"
+					data={climaxScoreRatings}
+					from={from}
+				/>
+				<RatingDistribution
+					profileId={uid}
+					id="ending"
+					title="Ending"
+					data={endingScoreRatings}
+					from={from}
+				/>
+				<RatingDistribution
+					profileId={uid}
+					id="music"
+					title="Music"
+					data={musicScoreRatings}
+					from={from}
+				/>
+				<RatingDistribution
+					profileId={uid}
+					id="plot"
+					title="Plot"
+					data={plotScoreRatings}
+					from={from}
+				/>
+				<RatingDistribution
+					profileId={uid}
+					id="theme"
+					title="Theme"
+					data={themeScoreRatings}
+					from={from}
+				/>
+				<RatingDistribution
+					profileId={uid}
+					id="visuals"
+					title="Visuals"
+					data={visualsScoreRatings}
+					from={from}
+				/>
 			</ScrollView>
 		</View>
 	);
