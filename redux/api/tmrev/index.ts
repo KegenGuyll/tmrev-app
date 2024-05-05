@@ -128,7 +128,7 @@ export const tmrevApi = createApi({
 				params: {
 					...query,
 				},
-				url: `movie/user/review/${userId}`,
+				url: `movie/v2/user/review/${userId}`,
 			}),
 		}),
 		categoryRatings: builder.query<CategoryDataResponse, string>({
