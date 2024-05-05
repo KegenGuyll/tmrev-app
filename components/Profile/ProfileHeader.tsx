@@ -4,38 +4,58 @@ import { useMemo, useState } from 'react';
 import auth from '@react-native-firebase/auth';
 import { useRouter } from 'expo-router';
 import { numberShortHand } from '@/utils/common';
-import { User } from '@/models/tmrev';
-import { useFollowUserMutation } from '@/redux/api/tmrev';
+import { useFollowUserV2Mutation, useUnfollowUserV2Mutation } from '@/redux/api/tmrev';
+import { UserV2 } from '@/models/tmrev/user';
 
 type ProfileHeaderProps = {
-	user: User;
+	user: UserV2;
 	followVisible?: boolean;
 	editVisible?: boolean;
-	isCurrentlyFollowing?: boolean;
 };
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 	user,
 	followVisible,
 	editVisible,
-	isCurrentlyFollowing,
 }: ProfileHeaderProps) => {
 	const theme = useTheme();
 	const styles = makeStyles(theme);
-	const [isFollowing, setIsFollowing] = useState(isCurrentlyFollowing);
+	const [isFollowing, setIsFollowing] = useState(user.isFollowing);
+	const [followerCount, setFollowerCount] = useState(user.followerCount);
 	const { currentUser } = auth();
-	const [followUser] = useFollowUserMutation();
+	const [followUser] = useFollowUserV2Mutation();
+	const [unfollowUser] = useUnfollowUserV2Mutation();
 	const router = useRouter();
 
 	const handleFollowUser = async () => {
 		if (!currentUser) return;
 
 		try {
-			const token = await currentUser.getIdToken();
-			await followUser({ uid: user._id, authToken: token });
+			await followUser({ userUid: user.uuid });
 			setIsFollowing(true);
+			setFollowerCount(followerCount + 1);
 		} catch (error) {
 			console.error(error);
+		}
+	};
+
+	const handleUnFollowUser = async () => {
+		if (!currentUser) return;
+
+		try {
+			await unfollowUser({ userUid: user.uuid });
+			setIsFollowing(false);
+			setFollowerCount(followerCount - 1);
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
+	const handleFollowButton = async () => {
+		if (isFollowing) {
+			await handleUnFollowUser();
+		} else {
+			await handleFollowUser();
 		}
 	};
 
@@ -48,20 +68,20 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 			<View style={styles.statsContainer}>
 				<Image source={{ uri: user?.photoUrl }} style={styles.image} />
 				<View style={styles.statDisplay}>
-					<Text> {numberShortHand(user.reviews.length)}</Text>
+					<Text> {numberShortHand(user.reviewCount)}</Text>
 					<Text variant="labelLarge">reviews</Text>
 				</View>
 				<View style={styles.statDisplay}>
-					<Text>{numberShortHand(user.followers.length)}</Text>
+					<Text>{numberShortHand(followerCount)}</Text>
 					<Text variant="labelLarge">followers</Text>
 				</View>
 				<View style={styles.statDisplay}>
-					<Text>{numberShortHand(user.following.length)}</Text>
+					<Text>{numberShortHand(user.followingCount)}</Text>
 					<Text variant="labelLarge">following</Text>
 				</View>
-				{user.watchLists.length > 0 ? (
+				{user.listCount > 0 ? (
 					<View style={styles.statDisplay}>
-						<Text>{numberShortHand(user.watchLists.length)}</Text>
+						<Text>{numberShortHand(user.listCount)}</Text>
 						<Text variant="labelLarge">lists</Text>
 					</View>
 				) : null}
@@ -80,7 +100,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 				<>
 					<Divider style={{ margin: 16 }} />
 					<View style={{ display: 'flex', flexDirection: 'row', width: '100%', gap: 8 }}>
-						<Button onPress={handleFollowUser} style={{ width: '50%' }} mode="contained">
+						<Button onPress={handleFollowButton} style={{ width: '50%' }} mode="contained">
 							{isFollowing ? 'Unfollow' : 'Follow'}
 						</Button>
 						<Button disabled style={{ width: '50%' }} mode="outlined">
