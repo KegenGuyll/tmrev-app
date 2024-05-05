@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 import { TMREV_API_URL } from '@env';
+import auth from '@react-native-firebase/auth';
 import { CategoryDataResponse } from '@/models/tmrev/categories';
 import {
 	RetrieveFollowerFeedResponse,
@@ -40,11 +41,28 @@ import { SearchResponse } from '@/models/tmrev/search';
 import { WatchedDeletePayload, WatchedPayload, WatchedResponse } from '@/models/tmrev/watched';
 import { AddMovieToWatchList, GetListPayload, UpdateWatchList } from '@/models/tmrev/watchList';
 import { IMovieQueryGeneral } from '@/models/tmdb/movie/tmdbMovie';
-import { UpdateUserQuery } from '@/models/tmrev/user';
+import {
+	FollowUserV2Payload,
+	FollowUserV2Response,
+	GetUserV2Payload,
+	GetUserV2Response,
+	UpdateUserQuery,
+} from '@/models/tmrev/user';
 
 export const tmrevApi = createApi({
 	baseQuery: fetchBaseQuery({
 		baseUrl: TMREV_API_URL,
+		prepareHeaders: async (headers) => {
+			const { currentUser } = auth();
+
+			if (currentUser) {
+				const token = await currentUser.getIdToken();
+
+				headers.set('Authorization', token);
+			}
+
+			return headers;
+		},
 	}),
 	endpoints: (builder) => ({
 		addComment: builder.mutation<void, { id: string; comment: string; token: string }>({
@@ -182,14 +200,18 @@ export const tmrevApi = createApi({
 				url: `/movie/watched/${body.watchedId}`,
 			}),
 		}),
-		followUser: builder.mutation<string, UserQuery>({
+		followUserV2: builder.mutation<FollowUserV2Response, FollowUserV2Payload>({
 			invalidatesTags: ['USER'],
 			query: (data) => ({
-				headers: {
-					authorization: data.authToken,
-				},
 				method: 'POST',
-				url: `/user/follow/${data.uid}`,
+				url: `/user/v2/follow/${data.userUid}`,
+			}),
+		}),
+		unfollowUserV2: builder.mutation<FollowUserV2Response, FollowUserV2Payload>({
+			invalidatesTags: ['USER'],
+			query: (data) => ({
+				method: 'POST',
+				url: `/user/v2/unfollow/${data.userUid}`,
 			}),
 		}),
 		getAllReviews: builder.query<AllReviewsResponse, MovieReviewPayload>({
@@ -240,6 +262,12 @@ export const tmrevApi = createApi({
 				url: `/user/full/${data.uid}`,
 			}),
 			transformResponse: (response: User) => response,
+		}),
+		getV2User: builder.query<GetUserV2Response, GetUserV2Payload>({
+			providesTags: ['USER'],
+			query: (data) => ({
+				url: `/user/v2/${data.uid}`,
+			}),
 		}),
 		getUserWatchLists: builder.query<WatchList[], string>({
 			providesTags: ['WATCH_LIST'],
@@ -423,7 +451,6 @@ export const {
 	useGetJustReviewedQuery,
 	useBatchLookUpQuery,
 	useCreateWatchListMutation,
-	useFollowUserMutation,
 	useGetAllReviewsQuery,
 	useGetListQuery,
 	useDeleteWatchListMutation,
@@ -437,6 +464,9 @@ export const {
 	useRetrieveFollowerFeedQuery,
 	useUpdateUserMutation,
 	useGetUserMovieReviewsQuery,
+	useGetV2UserQuery,
+	useFollowUserV2Mutation,
+	useUnfollowUserV2Mutation,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;
 
