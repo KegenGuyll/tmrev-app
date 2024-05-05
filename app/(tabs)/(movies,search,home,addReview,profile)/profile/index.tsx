@@ -3,34 +3,26 @@ import auth from '@react-native-firebase/auth';
 import { Button, Divider, IconButton, Menu, Text } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import ProfileHeader from '@/components/Profile/ProfileHeader';
-import { useGetUserQuery } from '@/redux/api/tmrev';
+import { useGetV2UserQuery } from '@/redux/api/tmrev';
 import ClickableSurface from '@/components/ClickableSurface';
-import { useAppDispatch } from '@/hooks/reduxHooks';
-import { setUserProfile } from '@/redux/slice/userProfileSlice';
 import RatingDistributionList from '@/components/Profile/RatingDistributionList';
 
 const Profile = () => {
 	const { currentUser } = auth();
 	const router = useRouter();
-	const { data, isLoading } = useGetUserQuery(
+
+	const { data, isLoading } = useGetV2UserQuery(
 		{ uid: currentUser?.uid as string },
 		{ skip: !currentUser || !currentUser.uid }
 	);
 	const [visible, setVisible] = useState(false);
-	const dispatch = useAppDispatch();
 
 	const openMenu = () => setVisible(true);
 	const closeMenu = () => setVisible(false);
 
-	useEffect(() => {
-		if (data) {
-			dispatch(setUserProfile(data));
-		}
-	}, [data]);
-
-	const name = useMemo(() => `${data?.firstName} ${data?.lastName}`, [data]);
+	const name = useMemo(() => `${data?.body.firstName} ${data?.body.lastName}`, [data]);
 
 	const handleSignOut = async () => {
 		try {
@@ -83,13 +75,13 @@ const Profile = () => {
 				}}
 			/>
 			<View>
-				<ProfileHeader editVisible user={data} />
+				<ProfileHeader editVisible user={data.body} />
 				<ClickableSurface
 					onPress={() => router.push(`/(tabs)/(profile)/profile/${currentUser.uid}/allReviews`)}
 					title="View All Reviews"
 					icon="chevron-right"
 				/>
-				<RatingDistributionList uid={currentUser.uid} />
+				<RatingDistributionList from="(profile)" uid={currentUser.uid} />
 			</View>
 		</>
 	);
