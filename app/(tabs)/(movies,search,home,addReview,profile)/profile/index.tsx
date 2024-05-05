@@ -75,13 +75,13 @@ const Profile = () => {
 				}}
 			/>
 			<View>
-				<ProfileHeader editVisible user={data.body} />
+				<ProfileHeader from="profile" editVisible user={data.body} />
 				<ClickableSurface
 					onPress={() => router.push(`/(tabs)/(profile)/profile/${currentUser.uid}/allReviews`)}
 					title="View All Reviews"
 					icon="chevron-right"
 				/>
-				<RatingDistributionList from="(profile)" uid={currentUser.uid} />
+				<RatingDistributionList from="profile" uid={currentUser.uid} />
 			</View>
 		</>
 	);

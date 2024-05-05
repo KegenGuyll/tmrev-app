@@ -55,7 +55,7 @@ const Profile = () => {
 				}}
 			/>
 			<View>
-				<ProfileHeader followVisible user={profileData.body} />
+				<ProfileHeader followVisible user={profileData.body} from={from} />
 				<ClickableSurface
 					onPress={() => router.push(`/(tabs)/(${from || 'home'})/profile/${profileId}/allReviews`)}
 					title="View All Reviews"

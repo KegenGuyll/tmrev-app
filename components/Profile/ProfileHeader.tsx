@@ -2,21 +2,24 @@ import { View, Image, StyleSheet } from 'react-native';
 import { Icon, Text, useTheme, MD3Theme, Button, Divider } from 'react-native-paper';
 import { useMemo, useState } from 'react';
 import auth from '@react-native-firebase/auth';
-import { useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { numberShortHand } from '@/utils/common';
 import { useFollowUserV2Mutation, useUnfollowUserV2Mutation } from '@/redux/api/tmrev';
 import { UserV2 } from '@/models/tmrev/user';
+import { FromLocation } from '@/models';
 
 type ProfileHeaderProps = {
 	user: UserV2;
 	followVisible?: boolean;
 	editVisible?: boolean;
+	from?: FromLocation;
 };
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 	user,
 	followVisible,
 	editVisible,
+	from,
 }: ProfileHeaderProps) => {
 	const theme = useTheme();
 	const styles = makeStyles(theme);
@@ -67,10 +70,13 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 		<View style={styles.container}>
 			<View style={styles.statsContainer}>
 				<Image source={{ uri: user?.photoUrl }} style={styles.image} />
-				<View style={styles.statDisplay}>
-					<Text> {numberShortHand(user.reviewCount)}</Text>
-					<Text variant="labelLarge">reviews</Text>
-				</View>
+				<Link href={`/(tabs)/(${from || 'home'})/profile/${user.uuid}/allReviews`}>
+					<View style={styles.statDisplay}>
+						<Text> {numberShortHand(user.reviewCount)}</Text>
+						<Text variant="labelLarge">reviews</Text>
+					</View>
+				</Link>
+
 				<View style={styles.statDisplay}>
 					<Text>{numberShortHand(followerCount)}</Text>
 					<Text variant="labelLarge">followers</Text>
