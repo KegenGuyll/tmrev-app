@@ -36,4 +36,48 @@ type UpdateUserQuery = {
 	location?: string;
 };
 
-export type { Link, TmrevUser, TmrevUser as User, UserQuery, UpdateUserQuery };
+type UserV2 = {
+	_id: string;
+	uuid: string;
+	firstName: string;
+	lastName: string;
+	bio: string;
+	location: string;
+	photoUrl: string;
+	reviewCount: number;
+	listCount: number;
+	followerCount: number;
+	followingCount: number;
+	isFollowing: boolean;
+};
+
+type GetUserV2Response = {
+	success: boolean;
+	body: UserV2;
+};
+
+type GetUserV2Payload = {
+	uid: string;
+	authToken?: string;
+};
+
+type FollowUserV2Payload = {
+	userUid: string;
+};
+
+type FollowUserV2Response = {
+	success: boolean;
+};
+
+export type {
+	Link,
+	TmrevUser,
+	TmrevUser as User,
+	UserQuery,
+	UpdateUserQuery,
+	UserV2,
+	GetUserV2Response,
+	GetUserV2Payload,
+	FollowUserV2Payload,
+	FollowUserV2Response,
+};
