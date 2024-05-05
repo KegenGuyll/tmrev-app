@@ -1,4 +1,5 @@
 import { GetMovieReviewSortBy } from '.';
+// eslint-disable-next-line import/no-cycle
 import { Comment, Vote } from './comments';
 import { Profile } from './movie';
 
@@ -35,7 +36,10 @@ interface AllReviewsResponse {
 type GetUserMovieReviewsResponse = {
 	success: boolean;
 	body: {
-		numberOfReviews: number;
+		pageNumber: number;
+		pageSize: number;
+		totalNumberOfPages: number;
+		totalCount: number;
 		reviews: TmrevReview[];
 	};
 };
@@ -44,6 +48,9 @@ type GetUserMovieReviewsPayload = {
 	userId: string;
 	query?: {
 		sort_by: GetMovieReviewSortBy;
+		pageNumber: number;
+		pageSize: number;
+		advancedScore?: string;
 	};
 };
 
