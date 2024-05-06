@@ -5,7 +5,6 @@ import {
 	TextInputChangeEventData,
 	StyleSheet,
 	View,
-	ScrollView,
 	FlatList,
 	LogBox,
 } from 'react-native';
@@ -83,45 +82,40 @@ const Search: React.FC = () => {
 						isSelected={searchSelection === 'crew'}
 					/>
 				</View>
-				{/* </ScrollView> */}
-				<ScrollView>
-					{movieData && searchSelection === 'movies' && (
-						<MovieGrid
-							movies={movieData.results}
-							isLoading={movieIsFetching}
-							onEndReached={() => {}}
-							onEndReachedThreshold={1}
-							posterPath="search"
-						/>
-					)}
-				</ScrollView>
-				<ScrollView>
-					{peopleData && searchSelection === 'crew' && (
-						<FlatList
-							data={peopleData.results}
-							renderItem={({ item }) => (
-								<>
-									<Link href={`/(tabs)/(search)/person/${item.id}?from=search`}>
-										<List.Item
-											title={item.name}
-											left={() => (
-												<ActorPlaceholderImage
-													profile_url={item.profile_path}
-													department={item.known_for_department}
-													height={50}
-													width={50}
-												/>
-											)}
-											description={item.known_for_department}
-										/>
-									</Link>
-									<Divider />
-								</>
-							)}
-							keyExtractor={(item) => item.id.toString()}
-						/>
-					)}
-				</ScrollView>
+				{movieData && searchSelection === 'movies' && (
+					<MovieGrid
+						movies={movieData.results}
+						isLoading={movieIsFetching}
+						onEndReached={() => {}}
+						onEndReachedThreshold={1}
+						posterPath="search"
+					/>
+				)}
+				{peopleData && searchSelection === 'crew' && (
+					<FlatList
+						data={peopleData.results}
+						renderItem={({ item }) => (
+							<>
+								<Link href={`/(tabs)/(search)/person/${item.id}?from=search`}>
+									<List.Item
+										title={item.name}
+										left={() => (
+											<ActorPlaceholderImage
+												profile_url={item.profile_path}
+												department={item.known_for_department}
+												height={50}
+												width={50}
+											/>
+										)}
+										description={item.known_for_department}
+									/>
+								</Link>
+								<Divider />
+							</>
+						)}
+						keyExtractor={(item) => item.id.toString()}
+					/>
+				)}
 			</SafeAreaView>
 			<MovieQuickActions movie={handleFindMovie()} />
 		</>
