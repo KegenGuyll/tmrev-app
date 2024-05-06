@@ -51,6 +51,35 @@ type UserV2 = {
 	isFollowing: boolean;
 };
 
+type BasicUserV2 = {
+	_id: string;
+	uuid: string;
+	firstName: string;
+	lastName: string;
+	bio: string;
+	location: string;
+	photoUrl: string;
+	createdAt: string;
+	email: string;
+	followers: string[];
+	following: string[];
+	link: Link | null;
+	public: boolean;
+	updatedAt: string;
+};
+
+type GetFollowResponse = {
+	success: boolean;
+	body: BasicUserV2[];
+};
+
+type GetFollowPayload = {
+	uid: string;
+	query?: {
+		search?: string;
+	};
+};
+
 type GetUserV2Response = {
 	success: boolean;
 	body: UserV2;
@@ -80,4 +109,7 @@ export type {
 	GetUserV2Payload,
 	FollowUserV2Payload,
 	FollowUserV2Response,
+	BasicUserV2,
+	GetFollowResponse,
+	GetFollowPayload,
 };

@@ -44,6 +44,8 @@ import { IMovieQueryGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import {
 	FollowUserV2Payload,
 	FollowUserV2Response,
+	GetFollowPayload,
+	GetFollowResponse,
 	GetUserV2Payload,
 	GetUserV2Response,
 	UpdateUserQuery,
@@ -129,6 +131,22 @@ export const tmrevApi = createApi({
 					...query,
 				},
 				url: `movie/v2/user/review/${userId}`,
+			}),
+		}),
+		getFollowingV2: builder.query<GetFollowResponse, GetFollowPayload>({
+			query: (data) => ({
+				url: `/user/v2/following/${data.uid}`,
+				params: {
+					...data.query,
+				},
+			}),
+		}),
+		getFollowersV2: builder.query<GetFollowResponse, GetFollowPayload>({
+			query: (data) => ({
+				url: `/user/v2/followers/${data.uid}`,
+				params: {
+					...data.query,
+				},
 			}),
 		}),
 		categoryRatings: builder.query<CategoryDataResponse, string>({
@@ -467,6 +485,8 @@ export const {
 	useGetV2UserQuery,
 	useFollowUserV2Mutation,
 	useUnfollowUserV2Mutation,
+	useGetFollowersV2Query,
+	useGetFollowingV2Query,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;
 
