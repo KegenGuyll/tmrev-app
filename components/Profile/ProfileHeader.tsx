@@ -1,5 +1,5 @@
 import { View, Image, StyleSheet } from 'react-native';
-import { Icon, Text, useTheme, MD3Theme, Button, Divider } from 'react-native-paper';
+import { Icon, Text, useTheme, MD3Theme, Button, Divider, Snackbar } from 'react-native-paper';
 import { useMemo, useState } from 'react';
 import auth from '@react-native-firebase/auth';
 import { Link, useRouter } from 'expo-router';
@@ -25,6 +25,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 	const styles = makeStyles(theme);
 	const [isFollowing, setIsFollowing] = useState(user.isFollowing);
 	const [followerCount, setFollowerCount] = useState(user.followerCount);
+	const [snackbarVisible, setSnackbarVisible] = useState(false);
 	const { currentUser } = auth();
 	const [followUser] = useFollowUserV2Mutation();
 	const [unfollowUser] = useUnfollowUserV2Mutation();
@@ -60,6 +61,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 		} else {
 			await handleFollowUser();
 		}
+		setSnackbarVisible(true);
 	};
 
 	const name = useMemo(() => {
@@ -67,73 +69,87 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 	}, [user]);
 
 	return (
-		<View style={styles.container}>
-			<View style={styles.statsContainer}>
-				<Image source={{ uri: user?.photoUrl }} style={styles.image} />
-				<Link href={`/(tabs)/(${from || 'home'})/profile/${user.uuid}/allReviews`}>
-					<View style={styles.statDisplay}>
-						<Text> {numberShortHand(user.reviewCount)}</Text>
-						<Text variant="labelLarge">reviews</Text>
-					</View>
-				</Link>
-				<Link
-					href={`/(tabs)/(${from || 'home'})/profile/followers?userId=${user.uuid}&from=${from}`}
-				>
-					<View style={styles.statDisplay}>
-						<Text>{numberShortHand(followerCount)}</Text>
-						<Text variant="labelLarge">followers</Text>
-					</View>
-				</Link>
-				<Link
-					href={`/(tabs)/(${from || 'home'})/profile/following?userId=${user.uuid}&from=${from}`}
-				>
-					<View style={styles.statDisplay}>
-						<Text>{numberShortHand(user.followingCount)}</Text>
-						<Text variant="labelLarge">following</Text>
-					</View>
-				</Link>
-				{user.listCount > 0 ? (
-					<View style={styles.statDisplay}>
-						<Text>{numberShortHand(user.listCount)}</Text>
-						<Text variant="labelLarge">lists</Text>
-					</View>
-				) : null}
-			</View>
-			<View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-				<Text variant="labelLarge">{name}</Text>
-			</View>
-			{user.bio && <Text>{user.bio}</Text>}
-			{user.location && (
-				<View style={{ display: 'flex', gap: 8, flexDirection: 'row', alignItems: 'center' }}>
-					<Icon size={24} source="map-marker" />
-					<Text>{user.location}</Text>
-				</View>
-			)}
-			{followVisible && (
-				<>
-					<Divider style={{ margin: 16 }} />
-					<View style={{ display: 'flex', flexDirection: 'row', width: '100%', gap: 8 }}>
-						<Button onPress={handleFollowButton} style={{ width: '50%' }} mode="contained">
-							{isFollowing ? 'Unfollow' : 'Follow'}
-						</Button>
-						<Button disabled style={{ width: '50%' }} mode="outlined">
-							Message
-						</Button>
-					</View>
-				</>
-			)}
-			{editVisible && (
-				<>
-					<Divider style={{ margin: 16 }} />
-					<Button
-						onPress={() => router.push('/(tabs)/(profile)/profile/editProfile')}
-						mode="outlined"
+		<>
+			<View style={styles.container}>
+				<View style={styles.statsContainer}>
+					<Image source={{ uri: user?.photoUrl }} style={styles.image} />
+					<Link href={`/(tabs)/(${from || 'home'})/profile/${user.uuid}/allReviews`}>
+						<View style={styles.statDisplay}>
+							<Text> {numberShortHand(user.reviewCount)}</Text>
+							<Text variant="labelLarge">reviews</Text>
+						</View>
+					</Link>
+					<Link
+						href={`/(tabs)/(${from || 'home'})/profile/followers?userId=${user.uuid}&from=${from}`}
 					>
-						Edit Profile
-					</Button>
-				</>
-			)}
-		</View>
+						<View style={styles.statDisplay}>
+							<Text>{numberShortHand(followerCount)}</Text>
+							<Text variant="labelLarge">followers</Text>
+						</View>
+					</Link>
+					<Link
+						href={`/(tabs)/(${from || 'home'})/profile/following?userId=${user.uuid}&from=${from}`}
+					>
+						<View style={styles.statDisplay}>
+							<Text>{numberShortHand(user.followingCount)}</Text>
+							<Text variant="labelLarge">following</Text>
+						</View>
+					</Link>
+					{user.listCount > 0 ? (
+						<View style={styles.statDisplay}>
+							<Text>{numberShortHand(user.listCount)}</Text>
+							<Text variant="labelLarge">lists</Text>
+						</View>
+					) : null}
+				</View>
+				<View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+					<Text variant="labelLarge">{name}</Text>
+				</View>
+				{user.bio && <Text>{user.bio}</Text>}
+				{user.location && (
+					<View style={{ display: 'flex', gap: 8, flexDirection: 'row', alignItems: 'center' }}>
+						<Icon size={24} source="map-marker" />
+						<Text>{user.location}</Text>
+					</View>
+				)}
+				{followVisible && (
+					<>
+						<Divider style={{ margin: 16 }} />
+						<View style={{ display: 'flex', flexDirection: 'row', width: '100%', gap: 8 }}>
+							<Button onPress={handleFollowButton} style={{ width: '50%' }} mode="contained">
+								{isFollowing ? 'Unfollow' : 'Follow'}
+							</Button>
+							<Button disabled style={{ width: '50%' }} mode="outlined">
+								Message
+							</Button>
+						</View>
+					</>
+				)}
+				{editVisible && (
+					<>
+						<Divider style={{ margin: 16 }} />
+						<Button
+							onPress={() => router.push('/(tabs)/(profile)/profile/editProfile')}
+							mode="outlined"
+						>
+							Edit Profile
+						</Button>
+					</>
+				)}
+			</View>
+			<Snackbar
+				style={{
+					zIndex: 999,
+				}}
+				visible={snackbarVisible}
+				onDismiss={() => setSnackbarVisible(false)}
+				action={{
+					label: 'Dismiss',
+				}}
+			>
+				{`${isFollowing ? 'Unfollowed' : 'Followed'} ${name}`}
+			</Snackbar>
+		</>
 	);
 };
 
