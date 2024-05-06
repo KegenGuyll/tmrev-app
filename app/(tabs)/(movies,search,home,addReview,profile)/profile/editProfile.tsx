@@ -95,7 +95,9 @@ const EditProfile = () => {
 					>
 						Save
 					</Button>
-					<Button mode="outlined">Cancel</Button>
+					<Button onPress={() => router.back()} mode="outlined">
+						Cancel
+					</Button>
 				</View>
 			</View>
 		</>
