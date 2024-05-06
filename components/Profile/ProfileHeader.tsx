@@ -76,13 +76,17 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 						<Text variant="labelLarge">reviews</Text>
 					</View>
 				</Link>
-				<Link href={`/(tabs)/(${from || 'home'})/profile/followers`}>
+				<Link
+					href={`/(tabs)/(${from || 'home'})/profile/followers?userId=${user.uuid}&from=${from}`}
+				>
 					<View style={styles.statDisplay}>
 						<Text>{numberShortHand(followerCount)}</Text>
 						<Text variant="labelLarge">followers</Text>
 					</View>
 				</Link>
-				<Link href={`/(tabs)/(${from || 'home'})/profile/following`}>
+				<Link
+					href={`/(tabs)/(${from || 'home'})/profile/following?userId=${user.uuid}&from=${from}`}
+				>
 					<View style={styles.statDisplay}>
 						<Text>{numberShortHand(user.followingCount)}</Text>
 						<Text variant="labelLarge">following</Text>
