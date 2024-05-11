@@ -1,12 +1,11 @@
 import { Link, Stack } from 'expo-router';
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
 	NativeSyntheticEvent,
 	TextInputChangeEventData,
 	StyleSheet,
 	View,
 	FlatList,
-	LogBox,
 } from 'react-native';
 import { Chip, Divider, List, Searchbar, Text } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -59,10 +58,6 @@ const Search: React.FC = () => {
 
 		return movie;
 	};
-
-	useEffect(() => {
-		LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
-	}, []);
 
 	return (
 		<>
