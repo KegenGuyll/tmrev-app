@@ -56,13 +56,24 @@ type GetUserMovieReviewsPayload = {
 
 interface CreateTmrevReviewQuery {
 	title: string;
-	advancedScore: AdvancedScore;
+	advancedScore: {
+		acting: number;
+		characters: number;
+		cinematography: number;
+		climax: number;
+		ending: number;
+		music: number;
+		personalScore: number;
+		plot: number;
+		theme: number;
+		visuals: number;
+	};
 	tmdbID: number;
 	reviewedDate: string;
 	notes: string;
 	public: boolean;
 	release_date: string;
-	token?: string;
+	moviePoster: string;
 }
 interface CreateTmrevReviewResponse {
 	acknowledged: boolean;

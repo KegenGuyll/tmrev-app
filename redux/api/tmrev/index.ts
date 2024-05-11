@@ -94,14 +94,8 @@ export const tmrevApi = createApi({
 		addTmrevReview: builder.mutation<CreateTmrevReviewResponse, CreateTmrevReviewQuery>({
 			invalidatesTags: ['TMREV_SCORE', 'REVIEW', 'MOVIE'],
 			query: (body) => {
-				const newBody = structuredClone(body);
-				delete newBody.token;
-
 				return {
-					body: newBody,
-					headers: {
-						authorization: body.token,
-					},
+					body,
 					method: 'POST',
 					url: '/movie/review/',
 				};
@@ -358,16 +352,10 @@ export const tmrevApi = createApi({
 		updateTmrevReview: builder.mutation<CreateTmrevReviewResponse, CreateTmrevReviewQuery>({
 			invalidatesTags: ['MOVIE', 'COMMENT'],
 			query: (body) => {
-				const newBody = structuredClone(body);
-				delete newBody.token;
-
 				return {
-					body: newBody,
-					headers: {
-						authorization: body.token,
-					},
+					body,
 					method: 'PUT',
-					url: `/movie/review/${newBody.tmdbID}`,
+					url: `/movie/review/${body.tmdbID}`,
 				};
 			},
 		}),
