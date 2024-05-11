@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Image, StyleSheet, Share, ScrollView, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useBottomSheetModal } from '@gorhom/bottom-sheet';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
 	useGetMovieCreditsQuery,
 	useGetMovieDetailsQuery,
@@ -18,6 +18,8 @@ import ActorPlaceholderImage from '@/components/ActorPlacholderImage';
 import { PosterPath } from '@/models';
 import { useGetAllReviewsQuery } from '@/redux/api/tmrev';
 import MovieRadarChart from '@/components/MovieRadarChart';
+import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
+import CreateMovieReviewModal from '@/components/CreateMovieReviewModal';
 
 type MovieDetailsParams = {
 	movieId: string;
@@ -29,6 +31,7 @@ const MovieDetails = () => {
 	const router = useRouter();
 	const { dismissAll } = useBottomSheetModal();
 	const { data: movieReviews } = useGetAllReviewsQuery({ movie_id: Number(slug.movieId) });
+	const [selectedMovie, setSelectedMovie] = useState<MovieGeneral | null>(null);
 
 	useEffect(() => {
 		dismissAll();
@@ -186,7 +189,11 @@ const MovieDetails = () => {
 						<Text variant="bodyMedium">{movieData.overview}</Text>
 					</Surface>
 					<View style={{ marginBottom: 8 }}>
-						<Button style={{ marginBottom: 8 }} mode="contained">
+						<Button
+							onPress={() => setSelectedMovie(movieData)}
+							style={{ marginBottom: 8 }}
+							mode="contained"
+						>
 							REVIEW MOVIE
 						</Button>
 						<Button mode="outlined">ADD TO LIST</Button>
@@ -239,6 +246,7 @@ const MovieDetails = () => {
 					</View>
 				</SafeAreaView>
 			</ScrollView>
+			<CreateMovieReviewModal selectedMovie={selectedMovie} setSelectedMovie={setSelectedMovie} />
 		</>
 	);
 };
