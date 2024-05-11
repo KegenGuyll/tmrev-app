@@ -21,6 +21,36 @@ type MoviePosterStyleProps = {
 	width?: number;
 };
 
+type MoviePosterImageProps = {
+	moviePoster: string | null | undefined;
+	height?: number;
+	width?: number;
+	style?: any;
+};
+
+export const MoviePosterImage: React.FC<MoviePosterImageProps> = ({
+	moviePoster,
+	height,
+	width,
+	style,
+}: MoviePosterImageProps) => {
+	if (moviePoster) {
+		return (
+			<Image
+				style={styles({ height, width }).moviePoster}
+				source={{ uri: imageUrl(moviePoster, 200) }}
+			/>
+		);
+	}
+
+	return (
+		<Image
+			style={{ ...styles({ height, width }).moviePoster, ...style }}
+			source={require('@/assets/images/movie-poster-placeholder.jpg')}
+		/>
+	);
+};
+
 const MoviePoster: React.FC<MoviePosterProps> = ({
 	movieId,
 	moviePoster,
@@ -32,31 +62,17 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 	const router = useRouter();
 	const dispatch = useAppDispatch();
 
-	const moviePosterUrl = () => {
-		if (moviePoster) {
-			return (
-				<Image
-					style={styles({ height, width }).moviePoster}
-					source={{ uri: imageUrl(moviePoster, 200) }}
-				/>
-			);
-		}
-
-		return (
-			<Image
-				style={styles({ height, width }).moviePoster}
-				source={require('@/assets/images/movie-poster-placeholder.jpg')}
-			/>
-		);
-	};
-
 	const handleLongPress = () => {
 		dispatch(setVisibility(true));
 		dispatch(setMoviePosterQuickActionData({ movieId, moviePoster }));
 	};
 
 	if (!clickable) {
-		return <View>{moviePosterUrl()}</View>;
+		return (
+			<View>
+				<MoviePosterImage moviePoster={moviePoster} height={height} width={width} />
+			</View>
+		);
 	}
 
 	return (
@@ -66,7 +82,9 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 				router.push(`/(tabs)/(${location})/${movieId}?from=${location}`);
 			}}
 		>
-			<View>{moviePosterUrl()}</View>
+			<View>
+				<MoviePosterImage moviePoster={moviePoster} height={height} width={width} />
+			</View>
 		</TouchableHighlight>
 	);
 };
@@ -82,6 +100,7 @@ const styles = ({ height = 175, width = 100 }: MoviePosterStyleProps) =>
 			aspectRatio: 2 / 3,
 			borderWidth: 1,
 			borderColor: 'grey',
+			flexShrink: 0,
 		},
 		container: {
 			flex: 1,
