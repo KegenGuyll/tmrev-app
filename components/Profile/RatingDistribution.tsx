@@ -53,14 +53,14 @@ const RatingDistribution: React.FC<RatingDistributionProps> = ({
 				topLabelTextStyle={{ color: theme.colors.secondary }}
 				xAxisLabelTextStyle={{ color: theme.colors.secondary }}
 				initialSpacing={0}
-				endSpacing={2}
+				endSpacing={4}
 				yAxisThickness={0}
 				xAxisThickness={0}
 				barBorderRadius={4}
 				frontColor={theme.colors.secondary}
 				hideYAxisText
 				barWidth={22}
-				spacing={8}
+				spacing={4}
 				data={data}
 				hideRules
 				height={200}
