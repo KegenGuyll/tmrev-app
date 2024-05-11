@@ -37,6 +37,7 @@ const TabLayout = () => {
 			<Tabs.Screen
 				name="(addReview)"
 				options={{
+					headerShown: false,
 					title: 'Add Review',
 					tabBarIcon: ({ color }) => <Icon name="add" color={color} size={iconSize} />,
 				}}
