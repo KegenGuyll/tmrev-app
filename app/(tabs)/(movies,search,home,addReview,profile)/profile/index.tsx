@@ -4,10 +4,13 @@ import { Button, Divider, IconButton, Menu, Text } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
+import { ScrollView } from 'react-native-gesture-handler';
 import ProfileHeader from '@/components/Profile/ProfileHeader';
 import { useGetV2UserQuery } from '@/redux/api/tmrev';
 import ClickableSurface from '@/components/ClickableSurface';
-import RatingDistributionList from '@/components/Profile/RatingDistributionList';
+// import RatingDistributionList from '@/components/Profile/RatingDistributionList';
+import SwipeableTabs, { SwipeableData } from '@/components/SwipeableTabs';
+import HighlightedReviews from '@/components/HighlightedReviews';
 
 const Profile = () => {
 	const { currentUser } = auth();
@@ -23,6 +26,34 @@ const Profile = () => {
 	const closeMenu = () => setVisible(false);
 
 	const name = useMemo(() => `${data?.body.firstName} ${data?.body.lastName}`, [data]);
+
+	const tabData: SwipeableData[] = useMemo(
+		() => [
+			{
+				tab: {
+					label: 'Highlighted Reviews',
+					icon: 'movie-open-star',
+					hideLabel: false,
+				},
+				view: <HighlightedReviews userId={currentUser?.uid} from="profile" />,
+			},
+			{
+				tab: {
+					label: 'Watched Movies',
+					icon: 'movie-play',
+				},
+				view: <Text>Lists</Text>,
+			},
+			// {
+			// 	tab: {
+			// 		label: 'Lists',
+			// 		icon: 'format-list-numbered',
+			// 	},
+			// 	view: <Text>Lists</Text>,
+			// },
+		],
+		[currentUser]
+	);
 
 	const handleSignOut = async () => {
 		try {
@@ -74,15 +105,16 @@ const Profile = () => {
 					),
 				}}
 			/>
-			<View>
+			<ScrollView showsVerticalScrollIndicator={false} style={{ marginBottom: 32 }}>
 				<ProfileHeader from="profile" editVisible user={data.body} />
 				<ClickableSurface
 					onPress={() => router.push(`/(tabs)/(profile)/profile/${currentUser.uid}/allReviews`)}
 					title="View All Reviews"
 					icon="chevron-right"
 				/>
-				<RatingDistributionList from="profile" uid={currentUser.uid} />
-			</View>
+				{/* <RatingDistributionList from="profile" uid={currentUser.uid} /> */}
+				<SwipeableTabs data={tabData} />
+			</ScrollView>
 		</>
 	);
 };
