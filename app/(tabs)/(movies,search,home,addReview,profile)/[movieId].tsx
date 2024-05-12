@@ -208,7 +208,7 @@ const MovieDetails = () => {
 					>
 						View All Reviews
 					</Button>
-					<MovieRadarChart reviews={movieReviews?.body.reviews} />
+					<MovieRadarChart reviews={movieReviews?.body.reviews || []} />
 					<View style={{ flexDirection: 'row', marginBottom: 8 }}>
 						{movieCredits?.cast && (
 							<FlatList
