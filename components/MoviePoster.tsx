@@ -3,7 +3,7 @@ import React from 'react';
 import { useRouter } from 'expo-router';
 
 import imageUrl from '@/utils/imageUrl';
-import { PosterPath } from '@/models';
+import { FromLocation } from '@/models';
 import { useAppDispatch } from '@/hooks/reduxHooks';
 import { setMoviePosterQuickActionData, setVisibility } from '@/redux/slice/bottomSheet';
 
@@ -13,7 +13,7 @@ type MoviePosterProps = {
 	height?: number;
 	width?: number;
 	clickable?: boolean;
-	location: PosterPath;
+	location: FromLocation;
 };
 
 type MoviePosterStyleProps = {
