@@ -34,6 +34,7 @@ import {
 import {
 	AllReviewsResponse,
 	DeleteReviewQuery,
+	GetUserHighlightedReviewsResponse,
 	GetUserMovieReviewsPayload,
 	GetUserMovieReviewsResponse,
 } from '@/models/tmrev/review';
@@ -125,6 +126,12 @@ export const tmrevApi = createApi({
 					...query,
 				},
 				url: `movie/v2/user/review/${userId}`,
+			}),
+		}),
+		getUserHighlightedReviews: builder.query<GetUserHighlightedReviewsResponse, string>({
+			providesTags: ['REVIEW', 'MOVIE'],
+			query: (userId) => ({
+				url: `/user/${userId}/ratedMovies`,
 			}),
 		}),
 		getFollowingV2: builder.query<GetFollowResponse, GetFollowPayload>({
@@ -475,6 +482,7 @@ export const {
 	useUnfollowUserV2Mutation,
 	useGetFollowersV2Query,
 	useGetFollowingV2Query,
+	useGetUserHighlightedReviewsQuery,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;
 

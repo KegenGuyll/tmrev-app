@@ -135,6 +135,14 @@ interface DeleteReviewQuery {
 	reviewId: string;
 }
 
+type GetUserHighlightedReviewsResponse = {
+	success: boolean;
+	body: {
+		highest: TmrevReview[];
+		lowest: TmrevReview[];
+	};
+};
+
 export type {
 	AdvancedScore,
 	AllReviewsResponse,
@@ -148,4 +156,5 @@ export type {
 	UpdatedAt,
 	GetUserMovieReviewsResponse,
 	GetUserMovieReviewsPayload,
+	GetUserHighlightedReviewsResponse,
 };
