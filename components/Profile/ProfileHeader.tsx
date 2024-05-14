@@ -161,7 +161,6 @@ const makeStyles = ({ colors }: MD3Theme) =>
 			gap: 4,
 			backgroundColor: colors.background,
 			padding: 16,
-			borderRadius: 4,
 		},
 		statsContainer: {
 			flexDirection: 'row',
