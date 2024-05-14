@@ -26,10 +26,14 @@ import {
 } from '@/models/tmrev';
 import {
 	BatchMoviesResponse,
+	CreatePinnedMoviePayload,
+	GetPinnedMoviesResponse,
 	JustReviewed,
 	MovieResponse,
+	PinnedMovieResponse,
 	ReviewResponse,
 	TopReviewed,
+	UpdatePinnedMoviePayload,
 } from '@/models/tmrev/movie';
 import {
 	AllReviewsResponse,
@@ -429,6 +433,32 @@ export const tmrevApi = createApi({
 				url: `/movie/review/vote/${data.reviewId}`,
 			}),
 		}),
+		getPinnedMovies: builder.query<GetPinnedMoviesResponse, string>({
+			providesTags: ['PINNED'],
+			query: (userId) => ({
+				url: `/movie/v2/pinned/${userId}`,
+			}),
+		}),
+		createPinnedMovie: builder.mutation<PinnedMovieResponse, CreatePinnedMoviePayload>({
+			invalidatesTags: ['PINNED'],
+			query: ({ movieReviewId }) => ({
+				body: {
+					movieReviewId,
+				},
+				method: 'POST',
+				url: '/movie/v2/pinned',
+			}),
+		}),
+		updatePinnedMovie: builder.mutation<PinnedMovieResponse, UpdatePinnedMoviePayload>({
+			invalidatesTags: ['PINNED'],
+			query: ({ movieReviewIds }) => ({
+				body: {
+					movieReviewIds,
+				},
+				method: 'PUT',
+				url: '/movie/v2/pinned',
+			}),
+		}),
 	}),
 	reducerPath: 'tmrevApi',
 	tagTypes: [
@@ -441,6 +471,7 @@ export const tmrevApi = createApi({
 		'COMMENT',
 		'NOTIFICATIONS',
 		'FOLLOW',
+		'PINNED',
 	],
 });
 

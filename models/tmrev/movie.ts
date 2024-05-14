@@ -1,4 +1,5 @@
-import { Movie, WatchProviderResponse } from '../tmdb';
+/* eslint-disable import/no-cycle */
+
 import { TmrevReview } from './review';
 
 /* eslint-disable no-unused-vars */
@@ -37,7 +38,7 @@ export interface Body {
 	release_dates: ReleaseDates;
 	reviews: Reviews;
 	imdb: Imdb;
-	watchProvider: WatchProviderResponse | null;
+	// watchProvider: WatchProviderResponse | null;
 }
 
 export interface Credits {
@@ -222,11 +223,11 @@ export interface Profile {
 	photoUrl?: string;
 }
 
-export type BatchMovies = { [x: string]: Movie };
+// export type BatchMovies = { [x: string]: Movie };
 
 export interface BatchMoviesResponse {
 	success: boolean;
-	body: BatchMovies;
+	// body: BatchMovies;
 	error?: any;
 }
 
@@ -249,4 +250,21 @@ export interface JustReviewed {
 export type JustReviewedBody = {
 	movies: TmrevReview[];
 	count: number;
+};
+
+export type CreatePinnedMoviePayload = {
+	movieReviewId: string;
+};
+
+export type UpdatePinnedMoviePayload = {
+	movieReviewIds: string[];
+};
+
+export type PinnedMovieResponse = {
+	success: boolean;
+};
+
+export type GetPinnedMoviesResponse = {
+	success: boolean;
+	body: TmrevReview[];
 };
