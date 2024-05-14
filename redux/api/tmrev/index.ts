@@ -514,6 +514,9 @@ export const {
 	useGetFollowersV2Query,
 	useGetFollowingV2Query,
 	useGetUserHighlightedReviewsQuery,
+	useGetPinnedMoviesQuery,
+	useCreatePinnedMovieMutation,
+	useUpdatePinnedMovieMutation,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;
 
