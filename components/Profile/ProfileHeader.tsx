@@ -31,6 +31,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 	const [unfollowUser] = useUnfollowUserV2Mutation();
 	const router = useRouter();
 
+	const isCurrentUser = useMemo(() => currentUser?.uid === user.uuid, [currentUser, user]);
+
 	const handleFollowUser = async () => {
 		if (!currentUser) return;
 
@@ -112,7 +114,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 						<Text>{user.location}</Text>
 					</View>
 				)}
-				{followVisible && (
+				{followVisible && !currentUser && (
 					<>
 						<Divider style={{ margin: 16 }} />
 						<View style={{ display: 'flex', flexDirection: 'row', width: '100%', gap: 8 }}>
@@ -125,17 +127,18 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 						</View>
 					</>
 				)}
-				{editVisible && (
-					<>
-						<Divider style={{ margin: 16 }} />
-						<Button
-							onPress={() => router.push('/(tabs)/(profile)/profile/editProfile')}
-							mode="outlined"
-						>
-							Edit Profile
-						</Button>
-					</>
-				)}
+				{editVisible ||
+					(isCurrentUser && (
+						<>
+							<Divider style={{ margin: 16 }} />
+							<Button
+								onPress={() => router.push('/(tabs)/(profile)/profile/editProfile')}
+								mode="outlined"
+							>
+								Edit Profile
+							</Button>
+						</>
+					))}
 			</View>
 			<Snackbar
 				style={{
