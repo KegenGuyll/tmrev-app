@@ -9,6 +9,7 @@ import ProfileHeader from '@/components/Profile/ProfileHeader';
 import { useGetV2UserQuery } from '@/redux/api/tmrev';
 import ProfileNavigation from '@/components/Profile/ProfileListNavigationt';
 import ProfilePinnedMovies from '@/components/Profile/ProfilePinnedMovies';
+import { loginRoute, signupRoute } from '@/constants/routes';
 
 const Profile = () => {
 	const { currentUser } = auth();
@@ -46,11 +47,11 @@ const Profile = () => {
 				<SafeAreaView style={{ gap: 8 }}>
 					<Text variant="headlineMedium">You&apos;re not currently logged in.</Text>
 					<View style={{ gap: 8 }}>
-						<Button onPress={() => router.push('/login')} mode="contained">
+						<Button onPress={() => router.push(loginRoute())} mode="contained">
 							Login
 						</Button>
 						<Divider />
-						<Button onPress={() => router.push('/signup')} mode="outlined">
+						<Button onPress={() => router.push(signupRoute())} mode="outlined">
 							Sign Up
 						</Button>
 					</View>

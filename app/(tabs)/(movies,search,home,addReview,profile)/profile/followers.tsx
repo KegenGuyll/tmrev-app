@@ -8,6 +8,7 @@ import auth from '@react-native-firebase/auth';
 import { FromLocation } from '@/models';
 import { useGetFollowersV2Query } from '@/redux/api/tmrev';
 import { BasicUserV2 } from '@/models/tmrev/user';
+import { profileRoute } from '@/constants/routes';
 
 type FollowerSearchParams = {
 	userId: string;
@@ -27,10 +28,7 @@ const FollowerItem: React.FC<FollowerItemProps> = ({
 }: FollowerItemProps) => {
 	return (
 		<View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 8 }}>
-			<Link
-				style={{ flexGrow: 1 }}
-				href={`/(tabs)/(${from || 'home'})/profile/${item.uuid}?from=${from}`}
-			>
+			<Link style={{ flexGrow: 1 }} href={profileRoute(from || 'home', item.uuid)}>
 				<View
 					style={{
 						display: 'flex',

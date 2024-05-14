@@ -6,6 +6,7 @@ import imageUrl from '@/utils/imageUrl';
 import { FromLocation } from '@/models';
 import { useAppDispatch } from '@/hooks/reduxHooks';
 import { setMoviePosterQuickActionData, setVisibility } from '@/redux/slice/bottomSheet';
+import { movieDetailsRoute } from '@/constants/routes';
 
 type MoviePosterProps = {
 	movieId: number;
@@ -79,7 +80,7 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 		<TouchableHighlight
 			onLongPress={handleLongPress}
 			onPress={() => {
-				router.push(`/(tabs)/(${location})/${movieId}?from=${location}`);
+				router.push(movieDetailsRoute(location, movieId));
 			}}
 		>
 			<View>

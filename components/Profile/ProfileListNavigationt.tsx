@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { View } from 'react-native';
 import { Icon, List, useTheme, Text } from 'react-native-paper';
 import { FromLocation } from '@/models';
-import { allReviewsRoute } from '@/constants/routes';
+import { allReviewsRoute, watchedMoviesRoute } from '@/constants/routes';
 
 type ProfileNavigationProps = {
 	profileId: string;
@@ -70,9 +70,7 @@ const ProfileNavigation: React.FC<ProfileNavigationProps> = ({
 				)}
 			/>
 			<List.Item
-				onPress={() =>
-					router.push(`/(tabs)/(${from})/profile/${profileId}/watchedMovies?from=${from}`)
-				}
+				onPress={() => router.push(watchedMoviesRoute(from, profileId))}
 				style={{ borderBottomColor: theme.colors.background, borderBottomWidth: 1 }}
 				title="Movies Seen"
 				left={(props) => <List.Icon {...props} icon="movie-play" />}

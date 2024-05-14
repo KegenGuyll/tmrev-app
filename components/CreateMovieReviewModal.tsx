@@ -11,6 +11,7 @@ import RatingSliderList, { Ratings } from '@/components/AddReview/RatingSliderLi
 import ReviewNote from '@/components/AddReview/ReviewNote';
 import { useAddTmrevReviewMutation } from '@/redux/api/tmrev';
 import { CreateTmrevReviewQuery } from '@/models/tmrev';
+import { movieDetailsRoute } from '@/constants/routes';
 
 const defaultRatings: Ratings = {
 	plot: 5,
@@ -92,7 +93,7 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 				handleBottomSheetDismiss();
 				setNote('');
 				handleClearRatings();
-				router.push(`/(tabs)/(addReview)/${selectedMovie.id}?from=addReview`);
+				router.push(movieDetailsRoute('addReview', selectedMovie.id));
 			}
 		} catch (error) {
 			console.log(error);

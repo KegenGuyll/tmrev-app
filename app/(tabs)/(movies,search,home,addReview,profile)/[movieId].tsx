@@ -20,6 +20,7 @@ import { useGetAllReviewsQuery } from '@/redux/api/tmrev';
 import MovieRadarChart from '@/components/MovieRadarChart';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import CreateMovieReviewModal from '@/components/CreateMovieReviewModal';
+import { movieReviewsRoute, personDetailsRoute } from '@/constants/routes';
 
 type MovieDetailsParams = {
 	movieId: string;
@@ -27,10 +28,10 @@ type MovieDetailsParams = {
 };
 
 const MovieDetails = () => {
-	const slug: MovieDetailsParams = useLocalSearchParams();
+	const { movieId, from } = useLocalSearchParams<MovieDetailsParams>();
 	const router = useRouter();
 	const { dismissAll } = useBottomSheetModal();
-	const { data: movieReviews } = useGetAllReviewsQuery({ movie_id: Number(slug.movieId) });
+	const { data: movieReviews } = useGetAllReviewsQuery({ movie_id: Number(movieId) });
 	const [selectedMovie, setSelectedMovie] = useState<MovieGeneral | null>(null);
 
 	useEffect(() => {
@@ -42,18 +43,18 @@ const MovieDetails = () => {
 		isFetching: movieDataIsFetching,
 		isLoading: movieDataIsLoading,
 	} = useGetMovieDetailsQuery({
-		movie_id: Number(slug.movieId),
+		movie_id: Number(movieId),
 		params: {
 			append_to_response: 'cast',
 		},
 	});
 
 	const { data: movieReleaseDates } = useGetMovieReleaseDatesQuery({
-		movie_id: Number(slug.movieId),
+		movie_id: Number(movieId),
 	});
 
 	const { data: movieCredits } = useGetMovieCreditsQuery({
-		movie_id: Number(slug.movieId),
+		movie_id: Number(movieId),
 		params: { language: 'en-US' },
 	});
 
@@ -200,9 +201,7 @@ const MovieDetails = () => {
 					</View>
 					<Button
 						onPress={() =>
-							router.push(
-								`/(tabs)/(${slug.from})/reviews/${slug.movieId}?from=${slug.from}&title=${movieData.title}` as any
-							)
+							router.push(movieReviewsRoute(from || 'movies', String(movieId), movieData.title))
 						}
 						mode="outlined"
 					>
@@ -219,9 +218,7 @@ const MovieDetails = () => {
 								renderItem={({ item }) => (
 									<Link
 										style={{ marginRight: 8 }}
-										href={
-											`/(tabs)/(${slug.from ?? 'movies'})/person/${item.id}?from=${slug.from}` as any
-										}
+										href={personDetailsRoute(from || 'movies', item.id.toString())}
 									>
 										<View
 											style={{

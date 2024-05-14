@@ -7,7 +7,12 @@ import { numberShortHand } from '@/utils/common';
 import { useFollowUserV2Mutation, useUnfollowUserV2Mutation } from '@/redux/api/tmrev';
 import { UserV2 } from '@/models/tmrev/user';
 import { FromLocation } from '@/models';
-import { allReviewsRoute } from '@/constants/routes';
+import {
+	allReviewsRoute,
+	editProfileRoute,
+	profileFollowerRoute,
+	profileFollowingRoute,
+} from '@/constants/routes';
 
 type ProfileHeaderProps = {
 	user: UserV2;
@@ -82,17 +87,13 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 							<Text variant="labelLarge">reviews</Text>
 						</View>
 					</Link>
-					<Link
-						href={`/(tabs)/(${from || 'home'})/profile/followers?userId=${user.uuid}&from=${from}`}
-					>
+					<Link href={profileFollowerRoute(from || 'home', user.uuid)}>
 						<View style={styles.statDisplay}>
 							<Text>{numberShortHand(followerCount)}</Text>
 							<Text variant="labelLarge">followers</Text>
 						</View>
 					</Link>
-					<Link
-						href={`/(tabs)/(${from || 'home'})/profile/following?userId=${user.uuid}&from=${from}`}
-					>
+					<Link href={profileFollowingRoute(from || 'home', user.uuid)}>
 						<View style={styles.statDisplay}>
 							<Text>{numberShortHand(user.followingCount)}</Text>
 							<Text variant="labelLarge">following</Text>
@@ -133,7 +134,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 						<>
 							<Divider style={{ margin: 16 }} />
 							<Button
-								onPress={() => router.push('/(tabs)/(profile)/profile/editProfile')}
+								onPress={() => router.push(editProfileRoute(from || 'profile'))}
 								mode="outlined"
 							>
 								Edit Profile

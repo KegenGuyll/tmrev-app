@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { TmrevReview } from '@/models/tmrev';
 import MoviePoster from './MoviePoster';
 import { FromLocation } from '@/models';
+import { movieDetailsRoute } from '@/constants/routes';
 
 type MovieReviewCardProps = {
 	review: TmrevReview;
@@ -18,7 +19,7 @@ const MovieReviewCard: React.FC<MovieReviewCardProps> = ({
 	const router = useRouter();
 
 	return (
-		<TouchableHighlight onPress={() => router.push(`/(tabs)/(${from})/${review.tmdbID}`)}>
+		<TouchableHighlight onPress={() => router.push(movieDetailsRoute(from, review.tmdbID))}>
 			<Surface style={styles.container}>
 				<View
 					style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}

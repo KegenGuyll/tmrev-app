@@ -14,6 +14,7 @@ import MovieGrid from '@/components/MovieGrid';
 import ActorPlaceholderImage from '@/components/ActorPlacholderImage';
 import MovieQuickActions from '@/components/MovieQuickActions';
 import { useAppSelector } from '@/hooks/reduxHooks';
+import { personDetailsRoute } from '@/constants/routes';
 
 type SearchSelection = 'movies' | 'crew';
 
@@ -91,7 +92,7 @@ const Search: React.FC = () => {
 						data={peopleData.results}
 						renderItem={({ item }) => (
 							<>
-								<Link href={`/(tabs)/(search)/person/${item.id}?from=search`}>
+								<Link href={personDetailsRoute('search', String(item.id))}>
 									<List.Item
 										title={item.name}
 										left={() => (
