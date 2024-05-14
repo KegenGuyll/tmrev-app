@@ -45,7 +45,7 @@ const ProfilePinnedMovies: React.FC<ProfilePinnedMoviesProps> = ({
 									width: 300,
 								}}
 							>
-								<MovieReviewCard review={item} from={from || 'home'} mode="movieDetails" />
+								<MovieReviewCard review={item} from={from || 'home'} />
 							</View>
 						)}
 						keyExtractor={(item) => item._id}
@@ -57,9 +57,7 @@ const ProfilePinnedMovies: React.FC<ProfilePinnedMoviesProps> = ({
 				<TouchableRipple
 					style={styles.pinnedContainer}
 					onPress={() =>
-						router.push(
-							`/(tabs)/(${from})/profile/${profileId}/allReviews?from=${from}&mode=pinned`
-						)
+						router.push(`/(tabs)/(${from})/profile/${profileId}/allReviews?from=${from}`)
 					}
 				>
 					<Text variant="labelSmall">Click to pin your favorite reviews</Text>
