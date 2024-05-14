@@ -1,12 +1,11 @@
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { View } from 'react-native';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { IconButton, Menu, Text } from 'react-native-paper';
 import { useMemo, useState } from 'react';
+import { ScrollView } from 'react-native-gesture-handler';
 import ProfileHeader from '@/components/Profile/ProfileHeader';
 import { useGetV2UserQuery } from '@/redux/api/tmrev';
-import ClickableSurface from '@/components/ClickableSurface';
-import RatingDistributionList from '@/components/Profile/RatingDistributionList';
 import { FromLocation } from '@/models';
+import ProfileNavigation from '@/components/Profile/ProfileListNavigationt';
 
 export type ProfileSearchParams = {
 	profileId: string;
@@ -15,13 +14,15 @@ export type ProfileSearchParams = {
 
 const Profile = () => {
 	const { profileId, from } = useLocalSearchParams<ProfileSearchParams>();
+
+	if (!profileId) return null;
+
 	const { data: profileData, isLoading: isProfileLoading } = useGetV2UserQuery(
 		{ uid: profileId },
 		{ skip: !profileId }
 	);
 
 	const [visible, setVisible] = useState(false);
-	const router = useRouter();
 
 	const openMenu = () => setVisible(true);
 	const closeMenu = () => setVisible(false);
@@ -54,15 +55,16 @@ const Profile = () => {
 					),
 				}}
 			/>
-			<View>
+			<ScrollView>
 				<ProfileHeader followVisible user={profileData.body} from={from} />
-				<ClickableSurface
-					onPress={() => router.push(`/(tabs)/(${from || 'home'})/profile/${profileId}/allReviews`)}
-					title="View All Reviews"
-					icon="chevron-right"
+				<ProfileNavigation
+					from={from || 'home'}
+					profileId={profileId}
+					listCount={profileData.body.listCount}
+					reviewCount={profileData.body.reviewCount}
+					watchedCount={profileData.body.watchedCount}
 				/>
-				<RatingDistributionList from={from} uid={profileId} />
-			</View>
+			</ScrollView>
 		</>
 	);
 };
