@@ -50,7 +50,7 @@ const FollowerItem: React.FC<FollowerItemProps> = ({
 					</Text>
 				</View>
 			</Link>
-			{!isCurrentUser && (
+			{isCurrentUser && (
 				<Button mode="text" disabled>
 					Remove
 				</Button>

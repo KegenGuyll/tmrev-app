@@ -68,7 +68,7 @@ const FollowingItem: React.FC<FollowerItemProps> = ({
 					</Text>
 				</View>
 			</Link>
-			{!isCurrentUser && (
+			{isCurrentUser && (
 				<Button onPress={handleFollowButton} mode="text">
 					{isFollowing ? 'Unfollow' : 'Follow'}
 				</Button>
