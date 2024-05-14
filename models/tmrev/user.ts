@@ -46,6 +46,7 @@ type UserV2 = {
 	photoUrl: string;
 	reviewCount: number;
 	listCount: number;
+	watchedCount: number;
 	followerCount: number;
 	followingCount: number;
 	isFollowing: boolean;
