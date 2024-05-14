@@ -2,10 +2,12 @@ import { Stack, useLocalSearchParams } from 'expo-router';
 import { IconButton, Menu, Text } from 'react-native-paper';
 import { useMemo, useState } from 'react';
 import { ScrollView } from 'react-native-gesture-handler';
+import { View } from 'react-native';
 import ProfileHeader from '@/components/Profile/ProfileHeader';
 import { useGetV2UserQuery } from '@/redux/api/tmrev';
 import { FromLocation } from '@/models';
 import ProfileNavigation from '@/components/Profile/ProfileListNavigationt';
+import ProfilePinnedMovies from '@/components/Profile/ProfilePinnedMovies';
 
 export type ProfileSearchParams = {
 	profileId: string;
@@ -56,14 +58,19 @@ const Profile = () => {
 				}}
 			/>
 			<ScrollView>
-				<ProfileHeader followVisible user={profileData.body} from={from} />
-				<ProfileNavigation
-					from={from || 'home'}
-					profileId={profileId}
-					listCount={profileData.body.listCount}
-					reviewCount={profileData.body.reviewCount}
-					watchedCount={profileData.body.watchedCount}
-				/>
+				<View style={{ gap: 32 }}>
+					<View>
+						<ProfileHeader followVisible user={profileData.body} from={from} />
+						<ProfileNavigation
+							from={from || 'home'}
+							profileId={profileId}
+							listCount={profileData.body.listCount}
+							reviewCount={profileData.body.reviewCount}
+							watchedCount={profileData.body.watchedCount}
+						/>
+					</View>
+					<ProfilePinnedMovies profileId={profileId} from={from || 'home'} />
+				</View>
 			</ScrollView>
 		</>
 	);

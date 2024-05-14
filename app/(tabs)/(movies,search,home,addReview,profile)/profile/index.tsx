@@ -8,6 +8,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import ProfileHeader from '@/components/Profile/ProfileHeader';
 import { useGetV2UserQuery } from '@/redux/api/tmrev';
 import ProfileNavigation from '@/components/Profile/ProfileListNavigationt';
+import ProfilePinnedMovies from '@/components/Profile/ProfilePinnedMovies';
 
 const Profile = () => {
 	const { currentUser } = auth();
@@ -75,14 +76,19 @@ const Profile = () => {
 				}}
 			/>
 			<ScrollView>
-				<ProfileHeader from="profile" editVisible user={data.body} />
-				<ProfileNavigation
-					from="profile"
-					profileId={currentUser.uid}
-					listCount={data.body.listCount}
-					reviewCount={data.body.reviewCount}
-					watchedCount={data.body.watchedCount}
-				/>
+				<View style={{ gap: 32 }}>
+					<View>
+						<ProfileHeader from="profile" editVisible user={data.body} />
+						<ProfileNavigation
+							from="profile"
+							profileId={currentUser.uid}
+							listCount={data.body.listCount}
+							reviewCount={data.body.reviewCount}
+							watchedCount={data.body.watchedCount}
+						/>
+					</View>
+					<ProfilePinnedMovies profileId={currentUser.uid} from="profile" />
+				</View>
 			</ScrollView>
 		</>
 	);
