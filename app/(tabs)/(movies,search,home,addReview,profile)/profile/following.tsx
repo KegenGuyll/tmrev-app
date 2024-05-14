@@ -2,8 +2,9 @@
 import { Link, Stack, useLocalSearchParams } from 'expo-router';
 import { Image, View } from 'react-native';
 import { Text, Button, Searchbar, Divider } from 'react-native-paper';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { FlatList } from 'react-native-gesture-handler';
+import auth from '@react-native-firebase/auth';
 import { FromLocation } from '@/models';
 import {
 	useFollowUserV2Mutation,
@@ -19,10 +20,15 @@ type FollowerSearchParams = {
 
 type FollowerItemProps = {
 	item: BasicUserV2;
+	isCurrentUser?: boolean;
 	from?: FromLocation;
 };
 
-const FollowingItem: React.FC<FollowerItemProps> = ({ item, from }: FollowerItemProps) => {
+const FollowingItem: React.FC<FollowerItemProps> = ({
+	item,
+	from,
+	isCurrentUser,
+}: FollowerItemProps) => {
 	const [isFollowing, setIsFollowing] = useState<boolean>(true);
 	const [followUser] = useFollowUserV2Mutation();
 	const [unFollowUser] = useUnfollowUserV2Mutation();
@@ -62,9 +68,11 @@ const FollowingItem: React.FC<FollowerItemProps> = ({ item, from }: FollowerItem
 					</Text>
 				</View>
 			</Link>
-			<Button onPress={handleFollowButton} mode="text">
-				{isFollowing ? 'Unfollow' : 'Follow'}{' '}
-			</Button>
+			{!isCurrentUser && (
+				<Button onPress={handleFollowButton} mode="text">
+					{isFollowing ? 'Unfollow' : 'Follow'}
+				</Button>
+			)}
 		</View>
 	);
 };
@@ -72,8 +80,14 @@ const FollowingItem: React.FC<FollowerItemProps> = ({ item, from }: FollowerItem
 const Following: React.FC = () => {
 	const { userId, from } = useLocalSearchParams<FollowerSearchParams>();
 	const [search, setSearch] = useState<string>('');
+	const { currentUser } = auth();
 
-	const { data, isLoading } = useGetFollowingV2Query({ uid: userId, query: { search } });
+	const { data, isLoading } = useGetFollowingV2Query(
+		{ uid: userId!, query: { search } },
+		{ skip: !userId }
+	);
+
+	const isCurrentUser = useMemo(() => currentUser?.uid === userId, [currentUser, userId]);
 
 	if (isLoading) {
 		return <Text>Loading...</Text>;
@@ -93,7 +107,9 @@ const Following: React.FC = () => {
 				<Text variant="titleMedium">All Following</Text>
 				<FlatList
 					data={data?.body}
-					renderItem={({ item }) => <FollowingItem item={item} from={from} />}
+					renderItem={({ item }) => (
+						<FollowingItem item={item} from={from} isCurrentUser={isCurrentUser} />
+					)}
 					keyExtractor={(item) => item._id}
 				/>
 			</View>
