@@ -1,16 +1,24 @@
 import { TouchableHighlight } from 'react-native-gesture-handler';
 import { Chip, Surface, Text } from 'react-native-paper';
 import { StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { TmrevReview } from '@/models/tmrev';
 import MoviePoster from './MoviePoster';
+import { FromLocation } from '@/models';
 
 type MovieReviewCardProps = {
 	review: TmrevReview;
+	from: FromLocation;
 };
 
-const MovieReviewCard: React.FC<MovieReviewCardProps> = ({ review }: MovieReviewCardProps) => {
+const MovieReviewCard: React.FC<MovieReviewCardProps> = ({
+	review,
+	from,
+}: MovieReviewCardProps) => {
+	const router = useRouter();
+
 	return (
-		<TouchableHighlight>
+		<TouchableHighlight onPress={() => router.push(`/(tabs)/(${from})/${review.tmdbID}`)}>
 			<Surface style={styles.container}>
 				<View
 					style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}

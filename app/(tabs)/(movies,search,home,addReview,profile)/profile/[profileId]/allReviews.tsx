@@ -11,13 +11,14 @@ import MovieReviewCard from '@/components/MovieReviewCard';
 import { GetMovieReviewSortBy, TmrevReview } from '@/models/tmrev';
 import AllMovieReviewsFilters from '@/components/AllMovieReviewFilters';
 import { camelCaseToWords } from '@/utils/common';
+import { FromLocation } from '@/models';
 
 const pageSize = 15;
 
 type AllReviewsSearchParams = {
 	profileId: string;
 	advancedScore?: string;
-	from?: string;
+	from?: FromLocation;
 };
 
 const AllReviews = () => {
@@ -27,7 +28,7 @@ const AllReviews = () => {
 	const [page, setPage] = useState(0);
 	const [reviews, setReviews] = useState<TmrevReview[]>([]);
 
-	const { profileId, advancedScore } = useLocalSearchParams<AllReviewsSearchParams>();
+	const { profileId, advancedScore, from } = useLocalSearchParams<AllReviewsSearchParams>();
 
 	const query = useMemo(() => {
 		if (advancedScore && showAdvancedScoreFilter) {
@@ -41,7 +42,7 @@ const AllReviews = () => {
 		data: userMovieReviewResponse,
 		isLoading,
 		refetch,
-	} = useGetUserMovieReviewsQuery({ userId: profileId, query }, { skip: !profileId });
+	} = useGetUserMovieReviewsQuery({ userId: profileId!, query }, { skip: !profileId });
 	const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 	const theme = useTheme();
 	const styles = makeStyles(theme);
@@ -138,7 +139,7 @@ const AllReviews = () => {
 						style={styles.list}
 						data={reviews}
 						spacing={8}
-						renderItem={({ item }) => <MovieReviewCard review={item} />}
+						renderItem={({ item }) => <MovieReviewCard from={from || 'home'} review={item} />}
 						keyExtractor={(item) => item._id.toString()}
 						refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
 						onEndReached={incrementPage}

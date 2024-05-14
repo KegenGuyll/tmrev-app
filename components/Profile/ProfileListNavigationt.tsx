@@ -29,7 +29,9 @@ const ProfileNavigation: React.FC<ProfileNavigationProps> = ({
 					borderBottomColor: theme.colors.background,
 					borderBottomWidth: 1,
 				}}
-				onPress={() => router.push(`/(tabs)/(${from})/profile/${profileId}/allReviews`)}
+				onPress={() =>
+					router.push(`/(tabs)/(${from})/profile/${profileId}/allReviews?from=${from}`)
+				}
 				title="Reviews"
 				left={(props) => <List.Icon {...props} icon="message-draw" />}
 				right={() => (
@@ -69,7 +71,9 @@ const ProfileNavigation: React.FC<ProfileNavigationProps> = ({
 				)}
 			/>
 			<List.Item
-				onPress={() => router.push(`/(tabs)/(${from})/profile/${profileId}/watchedMovies`)}
+				onPress={() =>
+					router.push(`/(tabs)/(${from})/profile/${profileId}/watchedMovies?from=${from}`)
+				}
 				style={{ borderBottomColor: theme.colors.background, borderBottomWidth: 1 }}
 				title="Movies Seen"
 				left={(props) => <List.Icon {...props} icon="movie-play" />}

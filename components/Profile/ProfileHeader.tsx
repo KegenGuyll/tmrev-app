@@ -73,7 +73,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 			<View style={styles.container}>
 				<View style={styles.statsContainer}>
 					<Image source={{ uri: user?.photoUrl }} style={styles.image} />
-					<Link href={`/(tabs)/(${from || 'home'})/profile/${user.uuid}/allReviews`}>
+					<Link href={`/(tabs)/(${from || 'home'})/profile/${user.uuid}/allReviews?from=${from}`}>
 						<View style={styles.statDisplay}>
 							<Text> {numberShortHand(user.reviewCount)}</Text>
 							<Text variant="labelLarge">reviews</Text>
