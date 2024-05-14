@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { BarChart } from 'react-native-gifted-charts';
 import { useTheme, Text } from 'react-native-paper';
 import { FromLocation } from '@/models';
+import { allReviewsRoute } from '@/constants/routes';
 
 type Data = {
 	label: string;
@@ -30,9 +31,7 @@ const RatingDistribution: React.FC<RatingDistributionProps> = ({
 	const handleRoute = (item: Data) => {
 		const formattedQuery = `${id}.${item.label}`;
 
-		router.push(
-			`/(tabs)/(${from || 'home'})/profile/${profileId}/allReviews?advancedScore=${formattedQuery}`
-		);
+		router.push(allReviewsRoute(from || 'home', profileId, formattedQuery));
 	};
 
 	return (

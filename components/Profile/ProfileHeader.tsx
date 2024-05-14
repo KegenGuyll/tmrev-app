@@ -7,6 +7,7 @@ import { numberShortHand } from '@/utils/common';
 import { useFollowUserV2Mutation, useUnfollowUserV2Mutation } from '@/redux/api/tmrev';
 import { UserV2 } from '@/models/tmrev/user';
 import { FromLocation } from '@/models';
+import { allReviewsRoute } from '@/constants/routes';
 
 type ProfileHeaderProps = {
 	user: UserV2;
@@ -75,7 +76,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 			<View style={styles.container}>
 				<View style={styles.statsContainer}>
 					<Image source={{ uri: user?.photoUrl }} style={styles.image} />
-					<Link href={`/(tabs)/(${from || 'home'})/profile/${user.uuid}/allReviews?from=${from}`}>
+					<Link href={allReviewsRoute(from || 'home', user.uuid)}>
 						<View style={styles.statDisplay}>
 							<Text> {numberShortHand(user.reviewCount)}</Text>
 							<Text variant="labelLarge">reviews</Text>

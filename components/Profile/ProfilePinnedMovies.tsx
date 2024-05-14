@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router';
 import { FromLocation } from '@/models';
 import { useGetPinnedMoviesQuery } from '@/redux/api/tmrev';
 import MovieReviewCard from '../MovieReviewCard';
+import { allReviewsRoute } from '@/constants/routes';
 
 type ProfilePinnedMoviesProps = {
 	profileId: string;
@@ -56,9 +57,7 @@ const ProfilePinnedMovies: React.FC<ProfilePinnedMoviesProps> = ({
 			{isCurrentUser && (!pinnedData?.body || !pinnedData.body.length) && (
 				<TouchableRipple
 					style={styles.pinnedContainer}
-					onPress={() =>
-						router.push(`/(tabs)/(${from})/profile/${profileId}/allReviews?from=${from}`)
-					}
+					onPress={() => router.push(allReviewsRoute(from, profileId))}
 				>
 					<Text variant="labelSmall">Click to pin your favorite reviews</Text>
 				</TouchableRipple>
