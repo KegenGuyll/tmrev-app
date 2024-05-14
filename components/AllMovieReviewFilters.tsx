@@ -2,7 +2,7 @@
 import { View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Button, Divider, Text, Chip, useTheme, List } from 'react-native-paper';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GetMovieReviewSortBy } from '@/models/tmrev';
 
 type SortType = {
@@ -81,17 +81,33 @@ const SortByList: SortByItem[] = [
 type AllMovieReviewsFiltersProps = {
 	handleCloseBottomSheet: () => void;
 	setSortByQuery: (queryValue: GetMovieReviewSortBy) => void;
+	sortQuery: GetMovieReviewSortBy;
 };
 
 const AllMovieReviewsFilters: React.FC<AllMovieReviewsFiltersProps> = ({
 	handleCloseBottomSheet,
 	setSortByQuery,
+	sortQuery: initialSortQuery,
 }: AllMovieReviewsFiltersProps) => {
 	const [expandedSortBy, setExpandedSortBy] = useState(true);
 	const [sort, setSort] = useState<SortType>({
-		value: 'reviewedDate.desc',
+		value: initialSortQuery,
 		title: 'Most Recent',
 	});
+
+	const setInitialSort = (value: GetMovieReviewSortBy) => {
+		const initialSort = SortByList.find((item) => item.sortValue === value);
+		if (initialSort) {
+			setSort({
+				value,
+				title: initialSort.title,
+			});
+		}
+	};
+
+	useEffect(() => {
+		setInitialSort(initialSortQuery);
+	}, [initialSortQuery]);
 
 	const handleSubmit = () => {
 		setSortByQuery(sort.value);

@@ -157,6 +157,7 @@ const AllReviews = () => {
 					<AllMovieReviewsFilters
 						handleCloseBottomSheet={handleCloseBottomSheet}
 						setSortByQuery={setSort}
+						sortQuery={sort}
 					/>
 				</BottomSheetView>
 			</BottomSheetModal>
