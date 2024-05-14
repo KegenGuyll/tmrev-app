@@ -21,7 +21,10 @@ type FollowerItemProps = {
 const FollowerItem: React.FC<FollowerItemProps> = ({ item, from }: FollowerItemProps) => {
 	return (
 		<View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 8 }}>
-			<Link style={{ flexGrow: 1 }} href={`/(tabs)/(${from || 'home'})/profile/${item.uuid}`}>
+			<Link
+				style={{ flexGrow: 1 }}
+				href={`/(tabs)/(${from || 'home'})/profile/${item.uuid}?from=${from}`}
+			>
 				<View
 					style={{
 						display: 'flex',
