@@ -1,20 +1,25 @@
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { NativeSyntheticEvent, TextInputChangeEventData, View, StyleSheet } from 'react-native';
-import { Divider, Searchbar } from 'react-native-paper';
+import { Divider, Searchbar, Snackbar } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlatGrid } from 'react-native-super-grid';
 import { TouchableHighlight } from 'react-native-gesture-handler';
+import auth from '@react-native-firebase/auth';
 import { useFindMoviesQuery } from '@/redux/api/tmdb/searchApi';
 import { MoviePosterImage } from '@/components/MoviePoster';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import CreateMovieReviewModal from '@/components/CreateMovieReviewModal';
 import MovieDiscoverGrid from '@/components/MovieDiscoverGrid';
+import { loginRoute } from '@/constants/routes';
 
 const AddReviewPage = () => {
 	const [searchQuery, setSearchQuery] = useState('');
 	const [selectedMovie, setSelectedMovie] = useState<MovieGeneral | null>(null);
 	const styles = makeStyles();
+	const router = useRouter();
+
+	const { currentUser } = auth();
 
 	const onChangeSearch = (e: NativeSyntheticEvent<TextInputChangeEventData>) => {
 		setSearchQuery(e.nativeEvent.text);
@@ -55,7 +60,19 @@ const AddReviewPage = () => {
 					)}
 				</View>
 			</SafeAreaView>
-			<CreateMovieReviewModal selectedMovie={selectedMovie} setSelectedMovie={setSelectedMovie} />
+			{currentUser && (
+				<CreateMovieReviewModal selectedMovie={selectedMovie} setSelectedMovie={setSelectedMovie} />
+			)}
+			<Snackbar
+				onDismiss={() => setSelectedMovie(null)}
+				action={{
+					label: 'Login',
+					onPress: () => router.navigate(loginRoute()),
+				}}
+				visible={!currentUser && !!selectedMovie}
+			>
+				You must login to review a movie
+			</Snackbar>
 		</>
 	);
 };
