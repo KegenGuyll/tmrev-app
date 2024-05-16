@@ -96,7 +96,7 @@ const AllReviews = () => {
 					headerRight: () => <IconButton icon="filter" onPress={handleOpenBottomSheet} />,
 				}}
 			/>
-			<View style={{ marginTop: 8, marginBottom: 32 }}>
+			<View style={{ marginTop: 8 }}>
 				<View
 					style={{
 						display: 'flex',
@@ -138,6 +138,7 @@ const AllReviews = () => {
 						itemDimension={200}
 						style={styles.list}
 						data={reviews}
+						contentContainerStyle={{ paddingBottom: 100 }}
 						itemContainerStyle={{ maxHeight: 170 }}
 						spacing={8}
 						renderItem={({ item }) => (
