@@ -10,7 +10,7 @@ module.exports = {
 		splash: {
 			image: './assets/images/splash.png',
 			resizeMode: 'contain',
-			backgroundColor: '#ffffff',
+			backgroundColor: '#242424',
 		},
 		assetBundlePatterns: ['**/*'],
 		ios: {
@@ -21,8 +21,9 @@ module.exports = {
 		android: {
 			adaptiveIcon: {
 				foregroundImage: './assets/images/adaptive-icon.png',
-				backgroundColor: '#ffffff',
+				backgroundColor: '#242424',
 			},
+			primaryColor: '#ffc000',
 			googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
 			package: 'com.tmrev',
 		},
