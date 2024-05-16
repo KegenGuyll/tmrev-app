@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import { useState } from 'react';
 import { NativeSyntheticEvent, TextInputChangeEventData, View, StyleSheet } from 'react-native';
-import { Searchbar } from 'react-native-paper';
+import { Divider, Searchbar } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlatGrid } from 'react-native-super-grid';
 import { TouchableHighlight } from 'react-native-gesture-handler';
@@ -9,9 +9,10 @@ import { useFindMoviesQuery } from '@/redux/api/tmdb/searchApi';
 import { MoviePosterImage } from '@/components/MoviePoster';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import CreateMovieReviewModal from '@/components/CreateMovieReviewModal';
+import MovieDiscoverGrid from '@/components/MovieDiscoverGrid';
 
 const AddReviewPage = () => {
-	const [searchQuery, setSearchQuery] = useState('step brothers');
+	const [searchQuery, setSearchQuery] = useState('');
 	const [selectedMovie, setSelectedMovie] = useState<MovieGeneral | null>(null);
 	const styles = makeStyles();
 
@@ -27,8 +28,17 @@ const AddReviewPage = () => {
 		<>
 			<Stack.Screen />
 			<SafeAreaView style={{ marginTop: 16 }}>
-				<View>
-					<Searchbar placeholder="Search" value={searchQuery} onChange={onChangeSearch} />
+				<View style={{ gap: 8 }}>
+					<Searchbar
+						onClearIconPress={() => setSearchQuery('')}
+						placeholder="Search"
+						value={searchQuery}
+						onChange={onChangeSearch}
+					/>
+					<Divider />
+					{!searchQuery && (
+						<MovieDiscoverGrid from="addReview" onPress={(item) => setSelectedMovie(item)} />
+					)}
 					{movieData && (
 						<FlatGrid
 							itemDimension={100}
