@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Button, Divider, Switch, Text } from 'react-native-paper';
+import { Button, Divider, Snackbar, Switch, Text } from 'react-native-paper';
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { MoviePosterImage } from '@/components/MoviePoster';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
@@ -38,6 +38,8 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 	setSelectedMovie,
 }: CreateMovieReviewModalProps) => {
 	const router = useRouter();
+	const [lastReview, setLastReview] = useState<MovieGeneral | null>(null);
+	const [reviewedSuccess, setReviewedSuccess] = useState(false);
 	const [isPrivate, setIsPrivate] = useState(false);
 	const [createReview] = useAddTmrevReviewMutation();
 	const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -90,85 +92,107 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 				};
 				await createReview(review).unwrap();
 
+				setLastReview(selectedMovie);
+
 				handleBottomSheetDismiss();
 				setNote('');
 				handleClearRatings();
-				router.push(movieDetailsRoute('addReview', selectedMovie.id));
+
+				setReviewedSuccess(true);
 			}
 		} catch (error) {
 			console.log(error);
+			setReviewedSuccess(false);
 		}
 	};
 
 	return (
-		<BottomSheetModal
-			handleIndicatorStyle={styles.customHandleStyle}
-			backgroundComponent={CustomBottomSheetBackground}
-			snapPoints={snapPoints}
-			ref={bottomSheetModalRef}
-			onChange={(index) => {
-				if (index === -1) setSelectedMovie(null);
-			}}
-		>
-			<BottomSheetScrollView style={styles.bottomSheetContainer}>
-				{selectedMovie && (
-					<View style={{ gap: 16, marginBottom: 32 }}>
-						<View
-							style={{
-								display: 'flex',
-								flexDirection: 'row',
-								justifyContent: 'space-between',
-								alignItems: 'center',
-							}}
-						>
-							<Button onPress={handleBottomSheetDismiss}>Cancel</Button>
-							<Text variant="titleMedium">Add Review</Text>
-							<Button onPress={handleCreateMovieReview}>Save</Button>
-						</View>
-						<Divider />
-						<View style={{ display: 'flex', flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-							<MoviePosterImage moviePoster={selectedMovie.poster_path} height={100} width={50} />
+		<>
+			<BottomSheetModal
+				handleIndicatorStyle={styles.customHandleStyle}
+				backgroundComponent={CustomBottomSheetBackground}
+				snapPoints={snapPoints}
+				ref={bottomSheetModalRef}
+				onChange={(index) => {
+					if (index === -1) setSelectedMovie(null);
+				}}
+			>
+				<BottomSheetScrollView style={styles.bottomSheetContainer}>
+					{selectedMovie && (
+						<View style={{ gap: 16, marginBottom: 32 }}>
 							<View
 								style={{
 									display: 'flex',
 									flexDirection: 'row',
+									justifyContent: 'space-between',
 									alignItems: 'center',
-									flexWrap: 'wrap',
 								}}
 							>
-								<Text variant="titleMedium">{selectedMovie.title}</Text>
-								<Text variant="bodyMedium"> {formatDateYear(selectedMovie.release_date)}</Text>
+								<Button onPress={handleBottomSheetDismiss}>Cancel</Button>
+								<Text variant="titleMedium">Add Review</Text>
+								<Button onPress={handleCreateMovieReview}>Save</Button>
 							</View>
+							<Divider />
+							<View style={{ display: 'flex', flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+								<MoviePosterImage moviePoster={selectedMovie.poster_path} height={100} width={50} />
+								<View
+									style={{
+										display: 'flex',
+										flexDirection: 'row',
+										alignItems: 'center',
+										flexWrap: 'wrap',
+									}}
+								>
+									<Text variant="titleMedium">{selectedMovie.title}</Text>
+									<Text variant="bodyMedium"> {formatDateYear(selectedMovie.release_date)}</Text>
+								</View>
+							</View>
+							<Divider />
+							<View
+								style={{
+									display: 'flex',
+									flexDirection: 'column',
+									alignItems: 'flex-start',
+									gap: 4,
+								}}
+							>
+								<Text variant="labelLarge">{!isPrivate ? 'Public' : 'Private'} Review</Text>
+								<Switch value={isPrivate} onValueChange={() => setIsPrivate(!isPrivate)} />
+							</View>
+							<RatingSliderList
+								resetRatings={handleClearRatings}
+								ratings={ratings}
+								setRatings={handleSetRatings}
+							/>
+							<ReviewNote note={note} setNote={setNote} />
+							<Divider />
+							<Button mode="outlined" onPress={handleBottomSheetDismiss}>
+								Cancel
+							</Button>
+							<Button mode="contained" onPress={handleCreateMovieReview}>
+								Save
+							</Button>
 						</View>
-						<Divider />
-						<View
-							style={{
-								display: 'flex',
-								flexDirection: 'column',
-								alignItems: 'flex-start',
-								gap: 4,
-							}}
-						>
-							<Text variant="labelLarge">{!isPrivate ? 'Public' : 'Private'} Review</Text>
-							<Switch value={isPrivate} onValueChange={() => setIsPrivate(!isPrivate)} />
-						</View>
-						<RatingSliderList
-							resetRatings={handleClearRatings}
-							ratings={ratings}
-							setRatings={handleSetRatings}
-						/>
-						<ReviewNote note={note} setNote={setNote} />
-						<Divider />
-						<Button mode="outlined" onPress={handleBottomSheetDismiss}>
-							Cancel
-						</Button>
-						<Button mode="contained" onPress={handleCreateMovieReview}>
-							Save
-						</Button>
-					</View>
-				)}
-			</BottomSheetScrollView>
-		</BottomSheetModal>
+					)}
+				</BottomSheetScrollView>
+			</BottomSheetModal>
+			<Snackbar
+				visible={!!lastReview && reviewedSuccess}
+				onDismiss={() => {
+					setReviewedSuccess(false);
+					setLastReview(null);
+				}}
+				duration={3000}
+				action={{
+					label: 'View',
+					onPress: () => {
+						router.push(movieDetailsRoute('addReview', lastReview!.id.toString()));
+					},
+				}}
+			>
+				{`${lastReview?.title} Reviewed Successfully`}
+			</Snackbar>
+		</>
 	);
 };
 
