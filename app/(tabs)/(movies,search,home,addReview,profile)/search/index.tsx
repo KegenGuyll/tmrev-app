@@ -15,6 +15,7 @@ import ActorPlaceholderImage from '@/components/ActorPlacholderImage';
 import MovieQuickActions from '@/components/MovieQuickActions';
 import { useAppSelector } from '@/hooks/reduxHooks';
 import { personDetailsRoute } from '@/constants/routes';
+import MovieDiscoverGrid from '@/components/MovieDiscoverGrid';
 
 type SearchSelection = 'movies' | 'crew';
 
@@ -64,7 +65,12 @@ const Search: React.FC = () => {
 		<>
 			<Stack.Screen options={{ headerShown: false }} />
 			<SafeAreaView style={{ marginTop: 16 }}>
-				<Searchbar placeholder="Search" value={searchQuery} onChange={onChangeSearch} />
+				<Searchbar
+					onClearIconPress={() => setSearchQuery('')}
+					placeholder="Search"
+					value={searchQuery}
+					onChange={onChangeSearch}
+				/>
 				{/* <ScrollView horizontal> */}
 				<View style={styles.chipContainer}>
 					<SearchSelectionChip
@@ -78,6 +84,7 @@ const Search: React.FC = () => {
 						isSelected={searchSelection === 'crew'}
 					/>
 				</View>
+				{!searchQuery && searchSelection === 'movies' && <MovieDiscoverGrid from="search" />}
 				{movieData && searchSelection === 'movies' && (
 					<MovieGrid
 						movies={movieData.results}
@@ -85,6 +92,7 @@ const Search: React.FC = () => {
 						onEndReached={() => {}}
 						onEndReachedThreshold={1}
 						posterPath="search"
+						bottomPadding={100}
 					/>
 				)}
 				{peopleData && searchSelection === 'crew' && (

@@ -13,6 +13,7 @@ type MovieGridProps = {
 	onEndReachedThreshold: number;
 	posterPath: FromLocation;
 	onPress?: (item: MovieGeneral) => void;
+	bottomPadding?: number;
 };
 
 const MovieGrid: React.FC<MovieGridProps> = ({
@@ -22,6 +23,7 @@ const MovieGrid: React.FC<MovieGridProps> = ({
 	onEndReachedThreshold,
 	posterPath,
 	onPress,
+	bottomPadding,
 }: MovieGridProps) => {
 	return (
 		<>
@@ -32,6 +34,7 @@ const MovieGrid: React.FC<MovieGridProps> = ({
 					style={styles.list}
 					data={movies}
 					spacing={8}
+					contentContainerStyle={{ paddingBottom: bottomPadding }}
 					renderItem={({ item }) => {
 						if (onPress) {
 							return (
