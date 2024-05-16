@@ -16,17 +16,10 @@ import {
 
 type ProfileHeaderProps = {
 	user: UserV2;
-	followVisible?: boolean;
-	editVisible?: boolean;
 	from?: FromLocation;
 };
 
-const ProfileHeader: React.FC<ProfileHeaderProps> = ({
-	user,
-	followVisible,
-	editVisible,
-	from,
-}: ProfileHeaderProps) => {
+const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, from }: ProfileHeaderProps) => {
 	const theme = useTheme();
 	const styles = makeStyles(theme);
 	const [isFollowing, setIsFollowing] = useState(user.isFollowing);
@@ -36,8 +29,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 	const [followUser] = useFollowUserV2Mutation();
 	const [unfollowUser] = useUnfollowUserV2Mutation();
 	const router = useRouter();
-
-	const isCurrentUser = useMemo(() => currentUser?.uid === user.uuid, [currentUser, user]);
 
 	const handleFollowUser = async () => {
 		if (!currentUser) return;
@@ -116,7 +107,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 						<Text>{user.location}</Text>
 					</View>
 				)}
-				{followVisible && !currentUser && (
+				{currentUser?.uid !== user.uuid && (
 					<>
 						<Divider style={{ margin: 16 }} />
 						<View style={{ display: 'flex', flexDirection: 'row', width: '100%', gap: 8 }}>
@@ -129,18 +120,17 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 						</View>
 					</>
 				)}
-				{editVisible ||
-					(isCurrentUser && (
-						<>
-							<Divider style={{ margin: 16 }} />
-							<Button
-								onPress={() => router.push(editProfileRoute(from || 'profile'))}
-								mode="outlined"
-							>
-								Edit Profile
-							</Button>
-						</>
-					))}
+				{currentUser?.uid === user.uuid && (
+					<>
+						<Divider style={{ margin: 16 }} />
+						<Button
+							onPress={() => router.push(editProfileRoute(from || 'profile'))}
+							mode="outlined"
+						>
+							Edit Profile
+						</Button>
+					</>
+				)}
 			</View>
 			<Snackbar
 				style={{
@@ -152,7 +142,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 					label: 'Dismiss',
 				}}
 			>
-				{`${isFollowing ? 'Unfollowed' : 'Followed'} ${name}`}
+				{`${!isFollowing ? 'Unfollowed' : 'Followed'} ${name}`}
 			</Snackbar>
 		</>
 	);
