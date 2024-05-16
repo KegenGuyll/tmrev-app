@@ -24,6 +24,10 @@ export const editProfileRoute = (from: FromLocation) => {
 	return `${baseTabUrl}/(${from})/profile/editProfile?from=${from}`;
 };
 
+export const updatePinnedReviewsRoute = (from: FromLocation) => {
+	return `${baseTabUrl}/(${from})/profile/updatePinnedReviews?from=${from}`;
+};
+
 export const watchedMoviesRoute = (from: FromLocation, profileId: string) => {
 	return `${baseTabUrl}/(${from})/profile/${profileId}/watchedMovies?from=${from}`;
 };
