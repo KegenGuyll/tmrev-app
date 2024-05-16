@@ -30,6 +30,7 @@ const TitledSlider: React.FC<TitledSliderProps> = ({
 				minimumTrackTintColor={theme.colors.secondary}
 				onValueChange={(v) => onValueChange(Number(v))}
 				animationType="timing"
+				trackClickable={false}
 			/>
 		</View>
 	);
