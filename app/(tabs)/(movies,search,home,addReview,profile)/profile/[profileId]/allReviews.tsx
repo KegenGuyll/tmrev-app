@@ -140,7 +140,22 @@ const AllReviews = () => {
 						data={reviews}
 						itemContainerStyle={{ maxHeight: 170 }}
 						spacing={8}
-						renderItem={({ item }) => <MovieReviewCard from={from || 'home'} review={item} />}
+						renderItem={({ item }) => (
+							<MovieReviewCard
+								titleEllipsizeSettings={{
+									ellipsizeMode: 'tail',
+									numberOflines: 1,
+									width: 250,
+								}}
+								notesEllipsizeSettings={{
+									ellipsizeMode: 'tail',
+									numberOflines: 6,
+									width: 200,
+								}}
+								from={from || 'home'}
+								review={item}
+							/>
+						)}
 						keyExtractor={(item) => item._id.toString()}
 						refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
 						onEndReached={incrementPage}

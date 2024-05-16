@@ -6,15 +6,18 @@ import MoviePoster from './MoviePoster';
 import { FromLocation } from '@/models';
 import { movieDetailsRoute } from '@/constants/routes';
 
+type EllipsizeSettings = {
+	numberOflines: number;
+	ellipsizeMode: 'head' | 'middle' | 'tail' | 'clip';
+	width: DimensionValue | undefined;
+};
+
 type MovieReviewCardProps = {
 	review: TmrevReview;
 	from: FromLocation;
 	containerStyle?: StyleProp<ViewStyle>;
-	titleEllipsizeSettings?: {
-		numberOflines: number;
-		ellipsizeMode: 'head' | 'middle' | 'tail' | 'clip';
-		width: DimensionValue | undefined;
-	};
+	titleEllipsizeSettings?: EllipsizeSettings;
+	notesEllipsizeSettings?: EllipsizeSettings;
 	onPress?: () => void;
 };
 
@@ -23,6 +26,7 @@ const MovieReviewCard: React.FC<MovieReviewCardProps> = ({
 	from,
 	containerStyle,
 	titleEllipsizeSettings,
+	notesEllipsizeSettings,
 	onPress,
 }: MovieReviewCardProps) => {
 	const router = useRouter();
@@ -71,7 +75,17 @@ const MovieReviewCard: React.FC<MovieReviewCardProps> = ({
 						clickable={false}
 						location="movies"
 					/>
-					<Text style={{ flex: 1, flexWrap: 'wrap' }}>{review.notes}</Text>
+					{notesEllipsizeSettings ? (
+						<Text
+							ellipsizeMode={notesEllipsizeSettings.ellipsizeMode}
+							numberOfLines={notesEllipsizeSettings.numberOflines}
+							style={{ flex: 1, flexWrap: 'wrap', width: notesEllipsizeSettings.width }}
+						>
+							{review.notes}
+						</Text>
+					) : (
+						<Text style={{ flex: 1, flexWrap: 'wrap' }}>{review.notes}</Text>
+					)}
 				</View>
 			</Surface>
 		</TouchableRipple>
