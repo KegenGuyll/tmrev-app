@@ -1,13 +1,13 @@
 /* eslint-disable react-native/no-color-literals */
 import { FlatList, View, StyleSheet } from 'react-native';
-import { Icon, Text, TouchableRipple } from 'react-native-paper';
+import { Button, Icon, Text, TouchableRipple } from 'react-native-paper';
 import auth from '@react-native-firebase/auth';
 import { useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { FromLocation } from '@/models';
 import { useGetPinnedMoviesQuery } from '@/redux/api/tmrev';
 import MovieReviewCard from '../MovieReviewCard';
-import { allReviewsRoute } from '@/constants/routes';
+import { updatePinnedReviewsRoute } from '@/constants/routes';
 
 type ProfilePinnedMoviesProps = {
 	profileId: string;
@@ -26,38 +26,65 @@ const ProfilePinnedMovies: React.FC<ProfilePinnedMoviesProps> = ({
 
 	return (
 		<View style={{ gap: 12 }}>
-			<View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-				<Icon source="pin" size={12} />
-				<Text variant="labelSmall">Pinned Reviews</Text>
+			<View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+				<View
+					style={{
+						display: 'flex',
+						flexDirection: 'row',
+						alignItems: 'center',
+						gap: 8,
+						flexGrow: 1,
+					}}
+				>
+					<Icon source="pin" size={12} />
+					<Text variant="labelSmall">Pinned Reviews</Text>
+				</View>
+				{isCurrentUser && (
+					<View>
+						<Button onPress={() => router.push(updatePinnedReviewsRoute(from))}>Update</Button>
+					</View>
+				)}
 			</View>
 			{pinnedData?.body && !!pinnedData.body.length && (
-				<View style={{ borderWidth: 1, borderColor: 'blue' }}>
+				<View>
 					<FlatList
-						style={{ borderWidth: 1, borderColor: 'red' }}
+						style={{ flex: 1 }}
 						data={pinnedData.body}
+						showsHorizontalScrollIndicator={false}
+						contentContainerStyle={{ alignItems: 'stretch', alignContent: 'stretch' }}
 						renderItem={({ item }) => (
 							<View
 								style={{
-									marginRight: 8,
-									borderWidth: 1,
-									borderColor: 'green',
+									marginRight: 12,
 									display: 'flex',
 									flexDirection: 'row',
 									width: 300,
+									height: 165,
 								}}
 							>
-								<MovieReviewCard review={item} from={from || 'home'} />
+								<MovieReviewCard
+									titleEllipsizeSettings={{
+										numberOflines: 1,
+										ellipsizeMode: 'tail',
+										width: 200,
+									}}
+									review={item}
+									from={from || 'home'}
+								/>
 							</View>
 						)}
 						keyExtractor={(item) => item._id}
 						horizontal
+						snapToAlignment="center"
+						decelerationRate="normal"
+						snapToInterval={325}
 					/>
 				</View>
 			)}
 			{isCurrentUser && (!pinnedData?.body || !pinnedData.body.length) && (
 				<TouchableRipple
 					style={styles.pinnedContainer}
-					onPress={() => router.push(allReviewsRoute(from, profileId))}
+					onPress={() => router.push(updatePinnedReviewsRoute(from))}
 				>
 					<Text variant="labelSmall">Click to pin your favorite reviews</Text>
 				</TouchableRipple>
