@@ -138,6 +138,7 @@ const AllReviews = () => {
 						itemDimension={200}
 						style={styles.list}
 						data={reviews}
+						itemContainerStyle={{ maxHeight: 170 }}
 						spacing={8}
 						renderItem={({ item }) => <MovieReviewCard from={from || 'home'} review={item} />}
 						keyExtractor={(item) => item._id.toString()}
