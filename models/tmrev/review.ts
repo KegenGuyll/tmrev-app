@@ -46,12 +46,15 @@ type GetUserMovieReviewsResponse = {
 
 type GetUserMovieReviewsPayload = {
 	userId: string;
-	query?: {
-		sort_by: GetMovieReviewSortBy;
-		pageNumber: number;
-		pageSize: number;
-		advancedScore?: string;
-	};
+	query?: GetUserMovieReviewsQuery;
+};
+
+type GetUserMovieReviewsQuery = {
+	sort_by: GetMovieReviewSortBy;
+	pageNumber: number;
+	pageSize: number;
+	advancedScore?: string;
+	textSearch?: string;
 };
 
 interface CreateTmrevReviewQuery {
@@ -157,4 +160,5 @@ export type {
 	GetUserMovieReviewsResponse,
 	GetUserMovieReviewsPayload,
 	GetUserHighlightedReviewsResponse,
+	GetUserMovieReviewsQuery,
 };
