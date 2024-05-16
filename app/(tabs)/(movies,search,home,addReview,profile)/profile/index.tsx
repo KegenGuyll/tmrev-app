@@ -76,10 +76,10 @@ const Profile = () => {
 					),
 				}}
 			/>
-			<ScrollView>
+			<ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
 				<View style={{ gap: 32 }}>
 					<View>
-						<ProfileHeader from="profile" editVisible user={data.body} />
+						<ProfileHeader from="profile" user={data.body} />
 						<ProfileNavigation
 							from="profile"
 							profileId={currentUser.uid}
