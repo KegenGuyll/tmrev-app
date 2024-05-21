@@ -50,6 +50,8 @@ import {
 	GetListPayload,
 	GetUserWatchListPayload,
 	GetUserWatchListResponse,
+	GetWatchListDetailsPayload,
+	GetWatchListDetailsResponse,
 	UpdateWatchList,
 } from '@/models/tmrev/watchList';
 import { IMovieQueryGeneral } from '@/models/tmdb/movie/tmdbMovie';
@@ -192,9 +194,15 @@ export const tmrevApi = createApi({
 					params: {
 						...data,
 					},
-					url: `/movie/v2/user/watchlist/${data.userId}`,
+					url: `/movie/v2/user/${data.userId}/watchlist`,
 				};
 			},
+		}),
+		getWatchListDetails: builder.query<GetWatchListDetailsResponse, GetWatchListDetailsPayload>({
+			providesTags: ['WATCH_LIST'],
+			query: (body) => ({
+				url: `/movie/v2/user/watchlist/${body.listId}`,
+			}),
 		}),
 		createWatched: builder.mutation<WatchedResponse, WatchedPayload>({
 			invalidatesTags: ['WATCHED', 'MOVIE'],
@@ -524,6 +532,7 @@ export const {
 	useGetPinnedMoviesQuery,
 	useCreatePinnedMovieMutation,
 	useUpdatePinnedMovieMutation,
+	useGetWatchListDetailsQuery,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;
 

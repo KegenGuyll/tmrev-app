@@ -67,6 +67,15 @@ type GetUserWatchListPayload = {
 	sortBy?: string;
 };
 
+type GetWatchListDetailsResponse = {
+	success: boolean;
+	body: WatchList;
+};
+
+type GetWatchListDetailsPayload = {
+	listId: string;
+};
+
 export type {
 	AddMovieToWatchList,
 	GetListPayload,
@@ -77,4 +86,6 @@ export type {
 	GetUserWatchListResponse,
 	GetUserWatchListResponseData,
 	GetUserWatchListPayload,
+	GetWatchListDetailsResponse,
+	GetWatchListDetailsPayload,
 };
