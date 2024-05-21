@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { View } from 'react-native';
 import { Icon, List, useTheme, Text } from 'react-native-paper';
 import { FromLocation } from '@/models';
-import { allReviewsRoute, watchedMoviesRoute } from '@/constants/routes';
+import { allListsRoute, allReviewsRoute, watchedMoviesRoute } from '@/constants/routes';
 
 type ProfileNavigationProps = {
 	profileId: string;
@@ -50,6 +50,7 @@ const ProfileNavigation: React.FC<ProfileNavigationProps> = ({
 				)}
 			/>
 			<List.Item
+				onPress={() => router.push(allListsRoute(from, profileId))}
 				style={{ borderBottomColor: theme.colors.background, borderBottomWidth: 1 }}
 				title="Created Lists"
 				left={(props) => <List.Icon {...props} icon="format-list-numbered" />}

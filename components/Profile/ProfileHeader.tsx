@@ -8,6 +8,7 @@ import { useFollowUserV2Mutation, useUnfollowUserV2Mutation } from '@/redux/api/
 import { UserV2 } from '@/models/tmrev/user';
 import { FromLocation } from '@/models';
 import {
+	allListsRoute,
 	allReviewsRoute,
 	editProfileRoute,
 	profileFollowerRoute,
@@ -91,10 +92,12 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, from }: ProfileHead
 						</View>
 					</Link>
 					{user.listCount > 0 ? (
-						<View style={styles.statDisplay}>
-							<Text>{numberShortHand(user.listCount)}</Text>
-							<Text variant="labelLarge">lists</Text>
-						</View>
+						<Link href={allListsRoute(from || 'profile', user.uuid)}>
+							<View style={styles.statDisplay}>
+								<Text>{numberShortHand(user.listCount)}</Text>
+								<Text variant="labelLarge">lists</Text>
+							</View>
+						</Link>
 					) : null}
 				</View>
 				<View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
