@@ -60,7 +60,7 @@ const Profile = () => {
 			<ScrollView>
 				<View style={{ gap: 32 }}>
 					<View>
-						<ProfileHeader followVisible user={profileData.body} from={from} />
+						<ProfileHeader user={profileData.body} from={from} />
 						<ProfileNavigation
 							from={from || 'home'}
 							profileId={profileId}
