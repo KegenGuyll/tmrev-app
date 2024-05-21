@@ -1,4 +1,4 @@
-import { View, Image, StyleSheet, TouchableHighlight } from 'react-native';
+import { View, Image, StyleSheet, TouchableHighlight, ImageStyle, StyleProp } from 'react-native';
 import React from 'react';
 import { useRouter } from 'expo-router';
 
@@ -15,6 +15,8 @@ type MoviePosterProps = {
 	width?: number;
 	clickable?: boolean;
 	location: FromLocation;
+	isSelected?: boolean;
+	onPress?: () => void;
 };
 
 type MoviePosterStyleProps = {
@@ -22,11 +24,15 @@ type MoviePosterStyleProps = {
 	width?: number;
 };
 
+type MoviePosterImageSize = 92 | 154 | 185 | 342 | 500 | 780 | 'original';
+
 type MoviePosterImageProps = {
 	moviePoster: string | null | undefined;
 	height?: number;
 	width?: number;
-	style?: any;
+	style?: StyleProp<ImageStyle>;
+	isSelected?: boolean;
+	posterSize?: MoviePosterImageSize;
 };
 
 export const MoviePosterImage: React.FC<MoviePosterImageProps> = ({
@@ -34,19 +40,23 @@ export const MoviePosterImage: React.FC<MoviePosterImageProps> = ({
 	height,
 	width,
 	style,
+	isSelected,
+	posterSize = 342,
 }: MoviePosterImageProps) => {
+	const styles = makeStyles({ height, width });
+
 	if (moviePoster) {
 		return (
 			<Image
-				style={styles({ height, width }).moviePoster}
-				source={{ uri: imageUrl(moviePoster, 200) }}
+				style={[styles.moviePoster, style, isSelected && styles.selected]}
+				source={{ uri: imageUrl(moviePoster, posterSize) }}
 			/>
 		);
 	}
 
 	return (
 		<Image
-			style={{ ...styles({ height, width }).moviePoster, ...style }}
+			style={[styles.moviePoster, style, isSelected && styles.selected]}
 			source={require('@/assets/images/movie-poster-placeholder.jpg')}
 		/>
 	);
@@ -59,6 +69,8 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 	width,
 	location,
 	clickable = true,
+	isSelected,
+	onPress,
 }: MoviePosterProps) => {
 	const router = useRouter();
 	const dispatch = useAppDispatch();
@@ -71,7 +83,12 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 	if (!clickable) {
 		return (
 			<View>
-				<MoviePosterImage moviePoster={moviePoster} height={height} width={width} />
+				<MoviePosterImage
+					isSelected={isSelected}
+					moviePoster={moviePoster}
+					height={height}
+					width={width}
+				/>
 			</View>
 		);
 	}
@@ -80,11 +97,20 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 		<TouchableHighlight
 			onLongPress={handleLongPress}
 			onPress={() => {
-				router.push(movieDetailsRoute(location, movieId));
+				if (onPress) {
+					onPress();
+				} else {
+					router.push(movieDetailsRoute(location, movieId));
+				}
 			}}
 		>
 			<View>
-				<MoviePosterImage moviePoster={moviePoster} height={height} width={width} />
+				<MoviePosterImage
+					isSelected={isSelected}
+					moviePoster={moviePoster}
+					height={height}
+					width={width}
+				/>
 			</View>
 		</TouchableHighlight>
 	);
@@ -92,7 +118,7 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 
 export default MoviePoster;
 
-const styles = ({ height = 175, width = 100 }: MoviePosterStyleProps) =>
+const makeStyles = ({ height = 175, width = 100 }: MoviePosterStyleProps) =>
 	StyleSheet.create({
 		moviePoster: {
 			width: width ?? 100,
@@ -112,5 +138,9 @@ const styles = ({ height = 175, width = 100 }: MoviePosterStyleProps) =>
 			flex: 1,
 			alignItems: 'center',
 			backgroundColor: '#121212',
+		},
+		selected: {
+			borderColor: 'red',
+			borderWidth: 2,
 		},
 	});

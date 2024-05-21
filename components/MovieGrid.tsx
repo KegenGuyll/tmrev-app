@@ -14,6 +14,11 @@ type MovieGridProps = {
 	posterPath: FromLocation;
 	onPress?: (item: MovieGeneral) => void;
 	bottomPadding?: number;
+	selectedMovieIds?: number[];
+	itemSpacing?: number;
+	itemDimension?: number;
+	imageHeight?: number;
+	imageWidth?: number;
 };
 
 const MovieGrid: React.FC<MovieGridProps> = ({
@@ -24,33 +29,48 @@ const MovieGrid: React.FC<MovieGridProps> = ({
 	posterPath,
 	onPress,
 	bottomPadding,
+	selectedMovieIds,
+	itemSpacing = 8,
+	itemDimension = 100,
+	imageHeight,
+	imageWidth,
 }: MovieGridProps) => {
 	return (
 		<>
 			{isLoading && <Text>Loading...</Text>}
 			{movies && (
 				<FlatGrid
-					itemDimension={100}
+					itemDimension={itemDimension}
 					style={styles.list}
 					data={movies}
-					spacing={8}
+					spacing={itemSpacing}
 					contentContainerStyle={{ paddingBottom: bottomPadding }}
 					renderItem={({ item }) => {
 						if (onPress) {
 							return (
 								<TouchableRipple onPress={() => onPress(item)}>
 									<MoviePoster
+										height={imageHeight}
+										width={imageWidth}
 										clickable={false}
 										movieId={item.id}
 										moviePoster={item.poster_path}
 										location={posterPath}
+										isSelected={selectedMovieIds?.includes(item.id)}
 									/>
 								</TouchableRipple>
 							);
 						}
 
 						return (
-							<MoviePoster movieId={item.id} moviePoster={item.poster_path} location={posterPath} />
+							<MoviePoster
+								height={imageHeight}
+								width={imageWidth}
+								isSelected={selectedMovieIds?.includes(item.id)}
+								movieId={item.id}
+								moviePoster={item.poster_path}
+								location={posterPath}
+							/>
 						);
 					}}
 					keyExtractor={(item, i) => `${item.id}-${i}`}
