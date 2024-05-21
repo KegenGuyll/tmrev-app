@@ -12,6 +12,10 @@ export const allReviewsRoute = (from: FromLocation, profileId: string, advancedS
 	return `${baseUrl}?from=${from}`;
 };
 
+export const allListsRoute = (from: FromLocation, profileId: string) => {
+	return `${baseTabUrl}/(${from})/profile/${profileId}/allLists?from=${from}`;
+};
+
 export const movieReviewsRoute = (from: FromLocation, movieId: string, movieTitle: string) => {
 	return `${baseTabUrl}/(${from})/reviews/${movieId}?from=${from}&title=${movieTitle}`;
 };
