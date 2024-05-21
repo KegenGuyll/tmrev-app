@@ -44,7 +44,14 @@ import {
 } from '@/models/tmrev/review';
 import { SearchResponse } from '@/models/tmrev/search';
 import { WatchedDeletePayload, WatchedPayload, WatchedResponse } from '@/models/tmrev/watched';
-import { AddMovieToWatchList, GetListPayload, UpdateWatchList } from '@/models/tmrev/watchList';
+import {
+	AddMovieToWatchList,
+	CreateWatchList,
+	GetListPayload,
+	GetUserWatchListPayload,
+	GetUserWatchListResponse,
+	UpdateWatchList,
+} from '@/models/tmrev/watchList';
 import { IMovieQueryGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import {
 	FollowUserV2Payload,
@@ -160,7 +167,7 @@ export const tmrevApi = createApi({
 				url: `/user/${uid}/categoryRatings`,
 			}),
 		}),
-		createWatchList: builder.mutation<WatchList, UpdateWatchList>({
+		createWatchList: builder.mutation<WatchList, CreateWatchList>({
 			invalidatesTags: ['WATCH_LIST'],
 			query: (body) => ({
 				body: {
@@ -170,12 +177,24 @@ export const tmrevApi = createApi({
 					tags: body.tags,
 					title: body.title,
 				},
-				headers: {
-					authorization: body.token,
-				},
 				method: 'POST',
 				url: '/watch-list/',
 			}),
+		}),
+		getUserWatchLists: builder.query<GetUserWatchListResponse, GetUserWatchListPayload>({
+			providesTags: ['WATCH_LIST'],
+			query: (data) => {
+				const newData = { ...data };
+
+				delete newData.userId;
+
+				return {
+					params: {
+						...data,
+					},
+					url: `/movie/v2/user/watchlist/${data.userId}`,
+				};
+			},
 		}),
 		createWatched: builder.mutation<WatchedResponse, WatchedPayload>({
 			invalidatesTags: ['WATCHED', 'MOVIE'],
@@ -287,18 +306,9 @@ export const tmrevApi = createApi({
 			transformResponse: (response: User) => response,
 		}),
 		getV2User: builder.query<GetUserV2Response, GetUserV2Payload>({
-			providesTags: ['USER'],
+			providesTags: ['USER', 'FOLLOW', 'REVIEW', 'MOVIE', 'WATCHED', 'WATCH_LIST'],
 			query: (data) => ({
 				url: `/user/v2/${data.uid}`,
-			}),
-		}),
-		getUserWatchLists: builder.query<WatchList[], string>({
-			providesTags: ['WATCH_LIST'],
-			query: (data) => ({
-				headers: {
-					authorization: data,
-				},
-				url: '/watch-list',
 			}),
 		}),
 		getWatched: builder.query<WatchedResponse, string>({
@@ -379,9 +389,6 @@ export const tmrevApi = createApi({
 					public: body.public,
 					tags: body.tags,
 					title: body.title,
-				},
-				headers: {
-					authorization: body.token,
 				},
 				method: 'PUT',
 				url: `/watch-list/${body.watchListId}`,
