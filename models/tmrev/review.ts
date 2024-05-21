@@ -3,16 +3,16 @@ import { GetMovieReviewSortBy } from '.';
 import { Comment, Vote } from './comments';
 import { Genre, Profile } from './movie';
 
-type MovieDetails = {
-	backdrop_path: string;
-	budget: number;
+export type MovieDetails = {
+	backdrop_path: string | undefined;
+	budget: number | undefined;
 	genres: Genre[];
 	id: number;
-	imdb_id: string;
+	imdb_id: string | undefined;
 	original_language: string;
-	poster_path: string;
+	poster_path: string | undefined;
 	release_date: string;
-	revenue: number;
+	revenue: number | undefined;
 	runtime: number;
 	title: string;
 };

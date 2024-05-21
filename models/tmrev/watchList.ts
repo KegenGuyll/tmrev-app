@@ -1,4 +1,4 @@
-import { Movie } from '../tmdb';
+import { MovieDetails } from './review';
 
 interface WatchList {
 	_id: string;
@@ -6,17 +6,10 @@ interface WatchList {
 	public: boolean;
 	title: string;
 	userId: string;
-	movies: number[];
-	created_at: {
-		_seconds: number;
-		_nanoseconds: number;
-	};
-	updated_at: {
-		_seconds: number;
-		_nanoseconds: number;
-	};
+	movies: MovieDetails[];
+	createdAt: string;
+	updatedAt: string;
 	tags: string[];
-	movieData: Movie[];
 }
 
 interface GetListPayload {
@@ -37,19 +30,51 @@ interface AddMovieToWatchList {
 }
 
 interface UpdateWatchList {
-	token: string;
 	description: string;
 	title: string;
 	public: boolean;
 	tags: string[];
-	movies: number[];
-	watchListId?: string;
+	movies: MovieDetails[];
+	watchListId: string;
 }
+
+type CreateWatchList = {
+	description: string;
+	title: string;
+	public: boolean;
+	tags: string[];
+	movies: MovieDetails[];
+};
+
+type GetUserWatchListResponseData = {
+	pageNumber: number;
+	pageSize: number;
+	totalNumberOfPages: number;
+	totalCount: number;
+	watchlists: WatchList[];
+};
+
+type GetUserWatchListResponse = {
+	success: boolean;
+	body: GetUserWatchListResponseData;
+};
+
+type GetUserWatchListPayload = {
+	pageNumber: number;
+	pageSize: number;
+	userId?: string;
+	textSearch?: string;
+	sortBy?: string;
+};
 
 export type {
 	AddMovieToWatchList,
 	GetListPayload,
 	UpdateWatchList,
+	CreateWatchList,
 	WatchList,
 	WatchListSearchQuery,
+	GetUserWatchListResponse,
+	GetUserWatchListResponseData,
+	GetUserWatchListPayload,
 };

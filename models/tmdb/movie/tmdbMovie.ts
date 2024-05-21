@@ -22,6 +22,8 @@ type MovieGeneral = {
 	status?: string;
 	genres: Genre[];
 	runtime: number;
+	imdb_id?: string;
+	revenue?: number;
 };
 
 interface Genre {
