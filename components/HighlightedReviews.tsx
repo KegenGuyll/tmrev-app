@@ -26,7 +26,11 @@ const HighlightedReviewItem: React.FC<HighlightedReviewItemProps> = ({
 				<Chip style={{ position: 'absolute', bottom: 4, right: 8, zIndex: 1 }} icon="star">
 					{movie.averagedAdvancedScore}
 				</Chip>
-				<MoviePoster movieId={movie.tmdbID} moviePoster={movie.moviePoster} location={from} />
+				<MoviePoster
+					movieId={movie.tmdbID}
+					moviePoster={movie.movieDetails.poster_path}
+					location={from}
+				/>
 			</>
 		</TouchableRipple>
 	);

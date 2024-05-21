@@ -19,7 +19,7 @@ const JustReviewedMovies: React.FC<JustReviewedMoviesProps> = ({
 		if (data) {
 			const newlyFormattedData: MovieHorizontalGridData[] = data.body.movies.map((movie) => ({
 				movieId: movie.tmdbID,
-				moviePoster: movie.moviePoster,
+				moviePoster: movie.movieDetails.poster_path,
 				uniqueId: movie._id,
 			}));
 			setFormattedData(newlyFormattedData);

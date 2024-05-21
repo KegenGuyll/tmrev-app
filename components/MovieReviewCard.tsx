@@ -71,7 +71,7 @@ const MovieReviewCard: React.FC<MovieReviewCardProps> = ({
 						height={100}
 						width={200}
 						movieId={review.tmdbID}
-						moviePoster={review.moviePoster}
+						moviePoster={review.movieDetails.poster_path}
 						clickable={false}
 						location="movies"
 					/>

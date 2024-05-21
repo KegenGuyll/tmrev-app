@@ -1,7 +1,21 @@
 import { GetMovieReviewSortBy } from '.';
 // eslint-disable-next-line import/no-cycle
 import { Comment, Vote } from './comments';
-import { Profile } from './movie';
+import { Genre, Profile } from './movie';
+
+type MovieDetails = {
+	backdrop_path: string;
+	budget: number;
+	genres: Genre[];
+	id: number;
+	imdb_id: string;
+	original_language: string;
+	poster_path: string;
+	release_date: string;
+	revenue: number;
+	runtime: number;
+	title: string;
+};
 
 interface TmrevReview {
 	_id: string;
@@ -15,11 +29,10 @@ interface TmrevReview {
 	tmdbID: number;
 	userId: string;
 	reviewedDate: string;
-	profile: Profile;
+	profile?: Profile;
 	comments?: Comment[];
 	votes?: Vote;
-	user: string;
-	moviePoster: string;
+	movieDetails: MovieDetails;
 }
 
 interface AllReviewsResponse {
