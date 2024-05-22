@@ -42,7 +42,11 @@ export type GetMovieReviewSortBy =
 	| 'visuals.asc.advancedScore'
 	| 'visuals.desc.advancedScore'
 	| 'reviewedDate.asc'
-	| 'reviewedDate.desc';
+	| 'reviewedDate.desc'
+	| 'budget.asc.movieDetails'
+	| 'budget.desc.movieDetails'
+	| 'runtime.asc.movieDetails'
+	| 'runtime.desc.movieDetails';
 
 interface MovieReviewQuery {
 	count?: number;

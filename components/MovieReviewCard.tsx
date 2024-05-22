@@ -1,16 +1,20 @@
 import { Chip, Surface, Text, TouchableRipple } from 'react-native-paper';
 import { DimensionValue, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { useRouter } from 'expo-router';
+import dayjs from 'dayjs';
 import { TmrevReview } from '@/models/tmrev';
 import MoviePoster from './MoviePoster';
 import { FromLocation } from '@/models';
 import { movieDetailsRoute } from '@/constants/routes';
+import { formatRuntime, numberShortHand } from '@/utils/common';
 
 type EllipsizeSettings = {
 	numberOflines: number;
 	ellipsizeMode: 'head' | 'middle' | 'tail' | 'clip';
 	width: DimensionValue | undefined;
 };
+
+export type MovieReviewDisplayChip = 'averagedAdvancedScore' | 'budget' | 'reviewDate' | 'runtime';
 
 type MovieReviewCardProps = {
 	review: TmrevReview;
@@ -19,6 +23,7 @@ type MovieReviewCardProps = {
 	titleEllipsizeSettings?: EllipsizeSettings;
 	notesEllipsizeSettings?: EllipsizeSettings;
 	onPress?: () => void;
+	displayedChip?: MovieReviewDisplayChip;
 };
 
 const MovieReviewCard: React.FC<MovieReviewCardProps> = ({
@@ -28,6 +33,7 @@ const MovieReviewCard: React.FC<MovieReviewCardProps> = ({
 	titleEllipsizeSettings,
 	notesEllipsizeSettings,
 	onPress,
+	displayedChip = 'averagedAdvancedScore',
 }: MovieReviewCardProps) => {
 	const router = useRouter();
 
@@ -62,7 +68,20 @@ const MovieReviewCard: React.FC<MovieReviewCardProps> = ({
 					</View>
 
 					<View style={{ display: 'flex', flexDirection: 'row' }}>
-						<Chip icon="star">{review.averagedAdvancedScore}</Chip>
+						{displayedChip === 'averagedAdvancedScore' && (
+							<Chip icon="star">{review.averagedAdvancedScore}</Chip>
+						)}
+						{displayedChip === 'budget' && (
+							<Chip icon="cash">{numberShortHand(review.movieDetails.budget || 0)}</Chip>
+						)}
+						{displayedChip === 'reviewDate' && (
+							<Chip icon="calendar-blank">{dayjs(review.reviewedDate).format('M/DD/YY')}</Chip>
+						)}
+						{displayedChip === 'runtime' && (
+							<Chip icon="clock-time-four-outline">
+								{formatRuntime(review.movieDetails.runtime)}
+							</Chip>
+						)}
 					</View>
 				</View>
 
