@@ -6,7 +6,6 @@ export function numberShortHand(number: number): string {
 }
 
 export function formatRuntime(runtime: number): string {
-	console.log(runtime);
 	const hours = runtime / 60;
 	const rhours = Math.floor(hours);
 	const minutes = (hours - rhours) * 60;
