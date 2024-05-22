@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Button, Divider, Snackbar, Switch, Text } from 'react-native-paper';
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import dayjs from 'dayjs';
 import { MoviePosterImage } from '@/components/MoviePoster';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import CustomBottomSheetBackground from '@/components/CustomBottomSheetBackground';
@@ -83,7 +84,7 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 						visuals: ratings.visuals,
 						personalScore: ratings.personalScore,
 					},
-					reviewedDate: new Date().toISOString(),
+					reviewedDate: dayjs(new Date()).format('YYYY-MM-DD'),
 					title: selectedMovie.title,
 					moviePoster: selectedMovie.poster_path || '',
 					notes: note,
