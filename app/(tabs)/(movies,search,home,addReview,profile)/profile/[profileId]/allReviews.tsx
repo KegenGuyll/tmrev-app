@@ -1,6 +1,14 @@
 /* eslint-disable react-native/no-color-literals */
 import { View, StyleSheet } from 'react-native';
-import { ActivityIndicator, Chip, IconButton, MD3Theme, Text, useTheme } from 'react-native-paper';
+import {
+	ActivityIndicator,
+	Chip,
+	IconButton,
+	MD3Theme,
+	Text,
+	useTheme,
+	Searchbar,
+} from 'react-native-paper';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { FlatGrid } from 'react-native-super-grid';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
@@ -11,6 +19,7 @@ import { GetMovieReviewSortBy, TmrevReview } from '@/models/tmrev';
 import AllMovieReviewsFilters from '@/components/AllMovieReviewFilters';
 import { camelCaseToWords } from '@/utils/common';
 import { FromLocation } from '@/models';
+import useDebounce from '@/hooks/useDebounce';
 
 const pageSize = 15;
 
@@ -50,6 +59,9 @@ const AllReviews = () => {
 	const [page, setPage] = useState(0);
 	const [openFilters, setOpenFilters] = useState(false);
 	const flatListRef = useRef<FlatList<TmrevReview>>(null);
+	const [search, setSearch] = useState<string>('');
+
+	const debouncedSearchTerm = useDebounce(search, 200);
 
 	const handleMoveToTop = () => {
 		flatListRef.current?.scrollToOffset({ offset: 0 });
@@ -68,8 +80,12 @@ const AllReviews = () => {
 			return { sort_by: sort, pageNumber: page, pageSize, advancedScore };
 		}
 
+		if (debouncedSearchTerm) {
+			return { sort_by: sort, pageNumber: page, pageSize, textSearch: debouncedSearchTerm };
+		}
+
 		return { sort_by: sort, pageNumber: page, pageSize };
-	}, [sort, page, showAdvancedScoreFilter]);
+	}, [sort, page, showAdvancedScoreFilter, debouncedSearchTerm]);
 
 	const {
 		data: userMovieReviewResponse,
@@ -145,51 +161,74 @@ const AllReviews = () => {
 						</Chip>
 					)}
 				</View>
-				{!userMovieReviewResponse.body.reviews.length ? (
-					<Text>No reviews found</Text>
-				) : (
-					<FlatGrid
-						ref={flatListRef}
-						itemDimension={200}
-						style={styles.list}
-						data={userMovieReviewResponse.body.reviews}
-						contentContainerStyle={{ paddingBottom: 100 }}
-						itemContainerStyle={{ maxHeight: 170 }}
-						onEndReachedThreshold={1}
-						spacing={8}
-						renderItem={({ item }) => (
-							<MovieReviewCard
-								titleEllipsizeSettings={{
-									ellipsizeMode: 'tail',
-									numberOflines: 1,
-									width: 250,
-								}}
-								notesEllipsizeSettings={{
-									ellipsizeMode: 'tail',
-									numberOflines: 6,
-									width: 200,
-								}}
-								displayedChip={convertSortToDisplayChip(sort)}
-								from={from || 'home'}
-								review={item}
+				<FlatGrid
+					ListHeaderComponent={
+						<View style={{ paddingBottom: 16, width: '100%' }}>
+							<Searchbar
+								value={search}
+								onChangeText={(s) => setSearch(s)}
+								placeholder="Search..."
 							/>
-						)}
-						keyExtractor={(item) => item._id.toString()}
-						refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-						onEndReached={incrementPage}
-						ListFooterComponent={() => {
-							if (isLoading || isFetching) {
-								return (
-									<View>
-										<ActivityIndicator />
-									</View>
-								);
-							}
+						</View>
+					}
+					ref={flatListRef}
+					itemDimension={200}
+					style={styles.list}
+					data={userMovieReviewResponse.body.reviews}
+					contentContainerStyle={{ alignItems: 'stretch', width: '100%' }}
+					itemContainerStyle={{ maxHeight: 170 }}
+					onEndReachedThreshold={1}
+					spacing={8}
+					renderItem={({ item }) => (
+						<MovieReviewCard
+							titleEllipsizeSettings={{
+								ellipsizeMode: 'tail',
+								numberOflines: 1,
+								width: 250,
+							}}
+							notesEllipsizeSettings={{
+								ellipsizeMode: 'tail',
+								numberOflines: 6,
+								width: 200,
+							}}
+							displayedChip={convertSortToDisplayChip(sort)}
+							from={from || 'home'}
+							review={item}
+						/>
+					)}
+					ListEmptyComponent={
+						<View
+							style={{
+								borderStyle: 'dotted',
+								borderColor: 'gray',
+								borderWidth: 2,
+								paddingHorizontal: 16,
+								paddingVertical: 32,
+								alignItems: 'center',
+								borderRadius: 4,
+								flex: 1,
+								flexDirection: 'row',
+								justifyContent: 'center',
+							}}
+						>
+							<Text>No Results Found :(</Text>
+						</View>
+					}
+					keyExtractor={(item) => item._id.toString()}
+					refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+					onEndReached={incrementPage}
+					ListFooterComponent={() => {
+						if (isLoading || isFetching) {
+							return (
+								<View>
+									<ActivityIndicator />
+								</View>
+							);
+						}
 
-							return null;
-						}}
-					/>
-				)}
+						return null;
+					}}
+				/>
 			</View>
 			<AllMovieReviewsFilters
 				open={openFilters}
@@ -220,5 +259,6 @@ const makeStyles = ({ colors }: MD3Theme) =>
 			display: 'flex',
 			flexDirection: 'row',
 			flexWrap: 'wrap',
+			width: '100%',
 		},
 	});

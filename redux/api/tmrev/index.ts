@@ -141,7 +141,13 @@ export const tmrevApi = createApi({
 				url: `movie/v2/user/review/${userId}`,
 			}),
 			serializeQueryArgs: ({ queryArgs }) => {
-				return queryArgs.query!.sort_by;
+				const refetchQueries = { ...queryArgs.query };
+
+				delete refetchQueries.pageNumber;
+
+				return {
+					...refetchQueries,
+				};
 			},
 			merge: (currentCache, newItems) => {
 				// make sure there isn't duplicate data being added
