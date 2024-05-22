@@ -140,6 +140,23 @@ export const tmrevApi = createApi({
 				},
 				url: `movie/v2/user/review/${userId}`,
 			}),
+			serializeQueryArgs: ({ queryArgs }) => {
+				return queryArgs.query!.sort_by;
+			},
+			merge: (currentCache, newItems) => {
+				// make sure there isn't duplicate data being added
+				const newData = [...currentCache.body.reviews, ...newItems.body.reviews];
+
+				// remove duplicates
+				const uniqueData = newData.filter((v, i, a) => a.findIndex((t) => t._id === v._id) === i);
+
+				// Merge the new items into the cache
+				currentCache.body.reviews = uniqueData;
+			},
+			// Refetch when the page arg changes
+			forceRefetch({ currentArg, previousArg }) {
+				return currentArg?.query?.pageNumber !== previousArg?.query?.pageNumber;
+			},
 		}),
 		getUserHighlightedReviews: builder.query<GetUserHighlightedReviewsResponse, string>({
 			providesTags: ['REVIEW', 'MOVIE'],

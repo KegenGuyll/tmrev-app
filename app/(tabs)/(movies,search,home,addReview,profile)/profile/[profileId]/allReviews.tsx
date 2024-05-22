@@ -1,13 +1,12 @@
 /* eslint-disable react-native/no-color-literals */
 import { View, StyleSheet } from 'react-native';
-import { Chip, IconButton, MD3Theme, Text, useTheme } from 'react-native-paper';
+import { ActivityIndicator, Chip, IconButton, MD3Theme, Text, useTheme } from 'react-native-paper';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { FlatGrid } from 'react-native-super-grid';
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { RefreshControl } from 'react-native-gesture-handler';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { FlatList, RefreshControl } from 'react-native-gesture-handler';
 import { useGetUserMovieReviewsQuery } from '@/redux/api/tmrev';
-import MovieReviewCard from '@/components/MovieReviewCard';
+import MovieReviewCard, { MovieReviewDisplayChip } from '@/components/MovieReviewCard';
 import { GetMovieReviewSortBy, TmrevReview } from '@/models/tmrev';
 import AllMovieReviewsFilters from '@/components/AllMovieReviewFilters';
 import { camelCaseToWords } from '@/utils/common';
@@ -21,12 +20,46 @@ type AllReviewsSearchParams = {
 	from?: FromLocation;
 };
 
+const convertSortToDisplayChip = (sort: GetMovieReviewSortBy): MovieReviewDisplayChip => {
+	switch (sort) {
+		case 'reviewedDate.desc':
+			return 'reviewDate';
+		case 'reviewedDate.asc':
+			return 'reviewDate';
+		case 'averagedAdvancedScore.desc':
+			return 'averagedAdvancedScore';
+		case 'averagedAdvancedScore.asc':
+			return 'averagedAdvancedScore';
+		case 'budget.desc.movieDetails':
+			return 'budget';
+		case 'budget.asc.movieDetails':
+			return 'budget';
+		case 'runtime.desc.movieDetails':
+			return 'runtime';
+		case 'runtime.asc.movieDetails':
+			return 'runtime';
+		default:
+			return 'reviewDate';
+	}
+};
+
 const AllReviews = () => {
 	const [refreshing, setRefreshing] = useState(false);
 	const [showAdvancedScoreFilter, setShowAdvancedScoreFilter] = useState(true);
 	const [sort, setSort] = useState<GetMovieReviewSortBy>('reviewedDate.desc');
 	const [page, setPage] = useState(0);
-	const [reviews, setReviews] = useState<TmrevReview[]>([]);
+	const [openFilters, setOpenFilters] = useState(false);
+	const flatListRef = useRef<FlatList<TmrevReview>>(null);
+
+	const handleMoveToTop = () => {
+		flatListRef.current?.scrollToOffset({ offset: 0 });
+	};
+
+	const handleSetSort = (s: GetMovieReviewSortBy) => {
+		handleMoveToTop();
+		setPage(0);
+		setSort(s);
+	};
 
 	const { profileId, advancedScore, from } = useLocalSearchParams<AllReviewsSearchParams>();
 
@@ -41,9 +74,10 @@ const AllReviews = () => {
 	const {
 		data: userMovieReviewResponse,
 		isLoading,
+		isFetching,
 		refetch,
 	} = useGetUserMovieReviewsQuery({ userId: profileId!, query }, { skip: !profileId });
-	const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
 	const theme = useTheme();
 	const styles = makeStyles(theme);
 
@@ -52,18 +86,6 @@ const AllReviews = () => {
 		refetch().then(() => setRefreshing(false));
 	}, []);
 
-	// Reset page and reviews when sort changes
-	useEffect(() => {
-		setPage(0);
-		setReviews([]);
-	}, [sort, showAdvancedScoreFilter]);
-
-	useEffect(() => {
-		if (userMovieReviewResponse) {
-			setReviews((prev) => [...prev, ...userMovieReviewResponse.body.reviews]);
-		}
-	}, [userMovieReviewResponse]);
-
 	const incrementPage = useCallback(() => {
 		if (
 			userMovieReviewResponse?.body.pageNumber === userMovieReviewResponse?.body.totalNumberOfPages
@@ -71,21 +93,13 @@ const AllReviews = () => {
 			return;
 		}
 
+		if (isLoading) return;
+
 		setPage((prev) => prev + 1);
 	}, [userMovieReviewResponse]);
 
-	const snapPoints = useMemo(() => ['95%'], []);
-
-	const handleOpenBottomSheet = () => {
-		bottomSheetModalRef.current?.present();
-	};
-
-	const handleCloseBottomSheet = () => {
-		bottomSheetModalRef.current?.dismiss();
-	};
-
 	if (isLoading || !userMovieReviewResponse) {
-		return <Text>Loading...</Text>;
+		return <ActivityIndicator />;
 	}
 
 	return (
@@ -93,7 +107,7 @@ const AllReviews = () => {
 			<Stack.Screen
 				options={{
 					title: `Reviews`,
-					headerRight: () => <IconButton icon="filter" onPress={handleOpenBottomSheet} />,
+					headerRight: () => <IconButton icon="filter" onPress={() => setOpenFilters(true)} />,
 				}}
 			/>
 			<View style={{ marginTop: 8 }}>
@@ -135,11 +149,13 @@ const AllReviews = () => {
 					<Text>No reviews found</Text>
 				) : (
 					<FlatGrid
+						ref={flatListRef}
 						itemDimension={200}
 						style={styles.list}
-						data={reviews}
+						data={userMovieReviewResponse.body.reviews}
 						contentContainerStyle={{ paddingBottom: 100 }}
 						itemContainerStyle={{ maxHeight: 170 }}
+						onEndReachedThreshold={1}
 						spacing={8}
 						renderItem={({ item }) => (
 							<MovieReviewCard
@@ -153,6 +169,7 @@ const AllReviews = () => {
 									numberOflines: 6,
 									width: 200,
 								}}
+								displayedChip={convertSortToDisplayChip(sort)}
 								from={from || 'home'}
 								review={item}
 							/>
@@ -160,24 +177,26 @@ const AllReviews = () => {
 						keyExtractor={(item) => item._id.toString()}
 						refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
 						onEndReached={incrementPage}
+						ListFooterComponent={() => {
+							if (isLoading || isFetching) {
+								return (
+									<View>
+										<ActivityIndicator />
+									</View>
+								);
+							}
+
+							return null;
+						}}
 					/>
 				)}
 			</View>
-			<BottomSheetModal
-				handleIndicatorStyle={{ backgroundColor: 'white' }}
-				handleStyle={{ backgroundColor: theme.colors.background }}
-				style={{ backgroundColor: theme.colors.background }}
-				snapPoints={snapPoints}
-				ref={bottomSheetModalRef}
-			>
-				<BottomSheetView style={styles.bottomSheetContainer}>
-					<AllMovieReviewsFilters
-						handleCloseBottomSheet={handleCloseBottomSheet}
-						setSortByQuery={setSort}
-						sortQuery={sort}
-					/>
-				</BottomSheetView>
-			</BottomSheetModal>
+			<AllMovieReviewsFilters
+				open={openFilters}
+				handleClose={() => setOpenFilters(false)}
+				setSortByQuery={handleSetSort}
+				sortQuery={sort}
+			/>
 		</>
 	);
 };
