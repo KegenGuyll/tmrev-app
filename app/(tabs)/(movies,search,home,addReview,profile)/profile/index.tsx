@@ -1,10 +1,8 @@
-import { View } from 'react-native';
+import { RefreshControl, View, SafeAreaView, ScrollView } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import { Button, Divider, IconButton, Menu, Text } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ScrollView } from 'react-native-gesture-handler';
 import ProfileHeader from '@/components/Profile/ProfileHeader';
 import { useGetV2UserQuery } from '@/redux/api/tmrev';
 import ProfileNavigation from '@/components/Profile/ProfileListNavigationt';
@@ -14,12 +12,19 @@ import { loginRoute, signupRoute } from '@/constants/routes';
 const Profile = () => {
 	const { currentUser } = auth();
 	const router = useRouter();
+	const [refreshing, setRefreshing] = useState(false);
 
-	const { data, isLoading } = useGetV2UserQuery(
+	const { data, isLoading, refetch } = useGetV2UserQuery(
 		{ uid: currentUser?.uid as string },
 		{ skip: !currentUser || !currentUser.uid }
 	);
 	const [visible, setVisible] = useState(false);
+
+	const handleRefresh = async () => {
+		setRefreshing(true);
+		await refetch().unwrap();
+		setRefreshing(false);
+	};
 
 	const openMenu = () => setVisible(true);
 	const closeMenu = () => setVisible(false);
@@ -76,21 +81,28 @@ const Profile = () => {
 					),
 				}}
 			/>
-			<ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-				<View style={{ gap: 32 }}>
-					<View>
-						<ProfileHeader from="profile" user={data.body} />
-						<ProfileNavigation
-							from="profile"
-							profileId={currentUser.uid}
-							listCount={data.body.listCount}
-							reviewCount={data.body.reviewCount}
-							watchedCount={data.body.watchedCount}
-						/>
+			<SafeAreaView>
+				<ScrollView
+					refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+					contentContainerStyle={{ paddingBottom: 100 }}
+				>
+					<View style={{ gap: 32 }}>
+						<View>
+							<ProfileHeader from="profile" user={data.body} />
+							<ProfileNavigation
+								from="profile"
+								profileId={currentUser.uid}
+								listCount={data.body.listCount}
+								reviewCount={data.body.reviewCount}
+								watchedCount={data.body.watchedCount}
+							/>
+						</View>
+						<View style={{ paddingHorizontal: 8 }}>
+							<ProfilePinnedMovies profileId={currentUser.uid} from="profile" />
+						</View>
 					</View>
-					<ProfilePinnedMovies profileId={currentUser.uid} from="profile" />
-				</View>
-			</ScrollView>
+				</ScrollView>
+			</SafeAreaView>
 		</>
 	);
 };

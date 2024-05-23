@@ -1,8 +1,7 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { IconButton, Menu, Text } from 'react-native-paper';
 import { useMemo, useState } from 'react';
-import { ScrollView } from 'react-native-gesture-handler';
-import { View } from 'react-native';
+import { View, SafeAreaView, ScrollView, RefreshControl } from 'react-native';
 import ProfileHeader from '@/components/Profile/ProfileHeader';
 import { useGetV2UserQuery } from '@/redux/api/tmrev';
 import { FromLocation } from '@/models';
@@ -16,15 +15,23 @@ export type ProfileSearchParams = {
 
 const Profile = () => {
 	const { profileId, from } = useLocalSearchParams<ProfileSearchParams>();
+	const [refreshing, setRefreshing] = useState(false);
 
 	if (!profileId) return null;
 
-	const { data: profileData, isLoading: isProfileLoading } = useGetV2UserQuery(
-		{ uid: profileId },
-		{ skip: !profileId }
-	);
+	const {
+		data: profileData,
+		isLoading: isProfileLoading,
+		refetch,
+	} = useGetV2UserQuery({ uid: profileId }, { skip: !profileId });
 
 	const [visible, setVisible] = useState(false);
+
+	const handleRefresh = async () => {
+		setRefreshing(true);
+		await refetch().unwrap();
+		setRefreshing(false);
+	};
 
 	const openMenu = () => setVisible(true);
 	const closeMenu = () => setVisible(false);
@@ -57,21 +64,28 @@ const Profile = () => {
 					),
 				}}
 			/>
-			<ScrollView>
-				<View style={{ gap: 32 }}>
-					<View>
-						<ProfileHeader user={profileData.body} from={from} />
-						<ProfileNavigation
-							from={from || 'home'}
-							profileId={profileId}
-							listCount={profileData.body.listCount}
-							reviewCount={profileData.body.reviewCount}
-							watchedCount={profileData.body.watchedCount}
-						/>
+			<SafeAreaView>
+				<ScrollView
+					refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+					contentContainerStyle={{ paddingBottom: 100 }}
+				>
+					<View style={{ gap: 32 }}>
+						<View>
+							<ProfileHeader user={profileData.body} from={from} />
+							<ProfileNavigation
+								from={from || 'home'}
+								profileId={profileId}
+								listCount={profileData.body.listCount}
+								reviewCount={profileData.body.reviewCount}
+								watchedCount={profileData.body.watchedCount}
+							/>
+						</View>
+						<View style={{ paddingHorizontal: 8 }}>
+							<ProfilePinnedMovies profileId={profileId} from={from || 'home'} />
+						</View>
 					</View>
-					<ProfilePinnedMovies profileId={profileId} from={from || 'home'} />
-				</View>
-			</ScrollView>
+				</ScrollView>
+			</SafeAreaView>
 		</>
 	);
 };
