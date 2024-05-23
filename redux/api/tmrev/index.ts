@@ -141,7 +141,7 @@ export const tmrevApi = createApi({
 				url: `movie/v2/user/review/${userId}`,
 			}),
 			serializeQueryArgs: ({ queryArgs }) => {
-				const refetchQueries = { ...queryArgs.query };
+				const refetchQueries = { ...queryArgs.query, userId: queryArgs.userId };
 
 				delete refetchQueries.pageNumber;
 
