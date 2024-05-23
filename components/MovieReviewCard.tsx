@@ -74,7 +74,7 @@ const MovieReviewCard: React.FC<MovieReviewCardProps> = ({
 						{displayedChip === 'budget' && (
 							<Chip icon="cash">{numberShortHand(review.movieDetails.budget || 0)}</Chip>
 						)}
-						{displayedChip === 'reviewDate' && (
+						{displayedChip === 'reviewDate' && review.reviewedDate && (
 							<Chip icon="calendar-blank">{dayjs(review.reviewedDate).format('M/DD/YY')}</Chip>
 						)}
 						{displayedChip === 'runtime' && (
