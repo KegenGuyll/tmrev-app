@@ -1,10 +1,10 @@
 /* eslint-disable react/no-array-index-key */
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { View } from 'react-native';
-import { IconButton, Surface, Text, TouchableRipple } from 'react-native-paper';
+import { IconButton, Surface, Text, TouchableRipple, ActivityIndicator } from 'react-native-paper';
 import { FlatGrid } from 'react-native-super-grid';
-import { Shadow } from 'react-native-shadow-2';
+// import { Shadow } from 'react-native-shadow-2';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import CreateWatchListModal from '@/components/CreateWatchListModal';
 import { useGetUserWatchListsQuery } from '@/redux/api/tmrev';
@@ -44,21 +44,23 @@ const WatchListItem: React.FC<WatchListItemProps> = ({
 					<View style={{ display: 'flex', flexDirection: 'row' }}>
 						{firstFiveMovies.map((movie, index) => (
 							// keep an eye on this shadow, it may be causing performance issues
-							<Shadow
+							// <Shadow
+							// 	key={`${movie.id}-${index}`}
+							// 	distance={2}
+							// 	offset={[-5, 0]}
+							// 	style={{
+							// 		marginRight: -10,
+							// 	}}
+							// >
+							<MoviePosterImage
 								key={`${movie.id}-${index}`}
-								distance={2}
-								offset={[-5, 0]}
-								style={{
-									marginRight: -10,
-								}}
-							>
-								<MoviePosterImage
-									style={{ borderWidth: 0 }}
-									height={110}
-									moviePoster={movie.poster_path}
-									posterSize={154}
-								/>
-							</Shadow>
+								style={{ borderWidth: 0, marginRight: -12 }}
+								height={110}
+								width={73}
+								moviePoster={movie.poster_path}
+								posterSize={154}
+							/>
+							// </Shadow>
 						))}
 					</View>
 				</View>
@@ -67,23 +69,39 @@ const WatchListItem: React.FC<WatchListItemProps> = ({
 	);
 };
 
+const pageSize = 10;
+
 const AllListsPage: React.FC = () => {
 	const { profileId, from } = useLocalSearchParams<AllListsSearchParams>();
+	const [page, setPage] = useState(0);
+
+	const query = useMemo(() => {
+		return { pageNumber: page, userId: profileId, pageSize };
+	}, [page, profileId]);
 
 	const [refreshing, setRefreshing] = useState(false);
 	const [movies, setMovies] = useState<MovieGeneral[]>([]);
 	const [openCreateModal, setOpenCreateModal] = useState(false);
 
-	const { data, isLoading, refetch } = useGetUserWatchListsQuery(
-		{ pageNumber: 0, pageSize: 10, userId: profileId! },
-		{ skip: !profileId }
-	);
+	const { data, isLoading, refetch, isFetching } = useGetUserWatchListsQuery(query, {
+		skip: !profileId,
+	});
 
 	const handleRefresh = async () => {
 		setRefreshing(true);
 		await refetch().unwrap();
 		setRefreshing(false);
 	};
+
+	const incrementPage = useCallback(() => {
+		if (page === data?.body.totalNumberOfPages) {
+			return;
+		}
+
+		if (isLoading) return;
+
+		setPage((prev) => prev + 1);
+	}, [data, page]);
 
 	const handleOpenBottomSheet = () => {
 		setOpenCreateModal(true);
@@ -114,6 +132,19 @@ const AllListsPage: React.FC = () => {
 				keyExtractor={(item) => item._id}
 				refreshing={refreshing}
 				onRefresh={handleRefresh}
+				onEndReachedThreshold={1}
+				onEndReached={incrementPage}
+				ListFooterComponent={() => {
+					if (isLoading || isFetching) {
+						return (
+							<View>
+								<ActivityIndicator />
+							</View>
+						);
+					}
+
+					return null;
+				}}
 			/>
 			<CreateWatchListModal
 				handleClose={() => setOpenCreateModal(false)}

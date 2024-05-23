@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 import { TMREV_API_URL } from '@env';
@@ -219,6 +220,30 @@ export const tmrevApi = createApi({
 					},
 					url: `/movie/v2/user/${data.userId}/watchlist`,
 				};
+			},
+			serializeQueryArgs: ({ queryArgs }) => {
+				const refetchQueries = { ...queryArgs };
+
+				// @ts-expect-error
+				delete refetchQueries.pageNumber;
+
+				return {
+					...refetchQueries,
+				};
+			},
+			merge: (currentCache, newItems) => {
+				// make sure there isn't duplicate data being added
+				const newData = [...currentCache.body.watchlists, ...newItems.body.watchlists];
+
+				// remove duplicates
+				const uniqueData = newData.filter((v, i, a) => a.findIndex((t) => t._id === v._id) === i);
+
+				// Merge the new items into the cache
+				currentCache.body.watchlists = uniqueData;
+			},
+			// Refetch when the page arg changes
+			forceRefetch({ currentArg, previousArg }) {
+				return currentArg?.pageNumber !== previousArg?.pageNumber;
 			},
 		}),
 		getWatchListDetails: builder.query<GetWatchListDetailsResponse, GetWatchListDetailsPayload>({
