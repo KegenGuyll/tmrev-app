@@ -98,7 +98,11 @@ const Profile = () => {
 							/>
 						</View>
 						<View style={{ paddingHorizontal: 8 }}>
-							<ProfilePinnedMovies profileId={currentUser.uid} from="profile" />
+							<ProfilePinnedMovies
+								refreshing={refreshing}
+								profileId={currentUser.uid}
+								from="profile"
+							/>
 						</View>
 					</View>
 				</ScrollView>
