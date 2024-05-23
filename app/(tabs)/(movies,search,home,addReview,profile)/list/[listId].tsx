@@ -48,7 +48,6 @@ const ListMovieItem: React.FC<ListMovieItemProps> = ({
 							icon="arrow-up-thick"
 						/>
 					)}
-
 					<Text variant="bodyLarge">{index + 1}</Text>
 					{isCurrentUser && (
 						<IconButton

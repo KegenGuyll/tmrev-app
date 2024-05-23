@@ -37,7 +37,11 @@ const WatchedMovieItem: React.FC<WatchedMovieItemProps> = ({
 			>
 				{item.liked ? <Icon source="thumb-up" size={24} /> : <Icon source="thumb-down" size={24} />}
 			</View>
-			<MoviePoster movieId={item.tmdbID} moviePoster={item.posterPath} location={from} />
+			<MoviePoster
+				movieId={item.tmdbID}
+				moviePoster={item.movieDetails.poster_path}
+				location={from}
+			/>
 		</View>
 	);
 };

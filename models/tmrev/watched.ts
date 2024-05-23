@@ -1,4 +1,4 @@
-import { TimeStamp } from './movie';
+import { MovieDetails } from './review';
 
 interface WatchedResponse {
 	success: boolean;
@@ -23,13 +23,11 @@ interface WatchedDeletePayload {
 type Watched = {
 	_id: string;
 	liked: boolean;
-	posterPath: string;
-	title: string;
 	tmdbID: number;
-	createdAt: TimeStamp;
-	updatedAt: TimeStamp;
+	createdAt: string;
+	updatedAt: string;
 	userId: string;
-	user: string;
+	movieDetails: MovieDetails;
 };
 
 export type { Watched, WatchedDeletePayload, WatchedPayload, WatchedResponse };
