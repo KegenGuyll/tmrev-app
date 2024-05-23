@@ -44,7 +44,12 @@ import {
 	GetUserMovieReviewsResponse,
 } from '@/models/tmrev/review';
 import { SearchResponse } from '@/models/tmrev/search';
-import { WatchedDeletePayload, WatchedPayload, WatchedResponse } from '@/models/tmrev/watched';
+import {
+	WatchedDeletePayload,
+	WatchedPayload,
+	WatchedQuery,
+	WatchedResponse,
+} from '@/models/tmrev/watched';
 import {
 	AddMovieToWatchList,
 	CreateWatchList,
@@ -367,12 +372,39 @@ export const tmrevApi = createApi({
 				url: `/user/v2/${data.uid}`,
 			}),
 		}),
-		getWatched: builder.query<WatchedResponse, string>({
+		getWatched: builder.query<WatchedResponse, WatchedQuery>({
 			providesTags: ['WATCHED', 'MOVIE'],
-			query: (userId) => ({
+			query: ({ userId, query }) => ({
 				method: 'GET',
+				params: {
+					...query,
+				},
 				url: `/movie/watched/${userId}`,
 			}),
+			serializeQueryArgs: ({ queryArgs }) => {
+				const refetchQueries = { ...queryArgs.query, userId: queryArgs.userId };
+
+				// @ts-expect-error
+				delete refetchQueries.pageNumber;
+
+				return {
+					...refetchQueries,
+				};
+			},
+			merge: (currentCache, newItems) => {
+				// make sure there isn't duplicate data being added
+				const newData = [...currentCache.body.watched, ...newItems.body.watched];
+
+				// remove duplicates
+				const uniqueData = newData.filter((v, i, a) => a.findIndex((t) => t._id === v._id) === i);
+
+				// Merge the new items into the cache
+				currentCache.body.watched = uniqueData;
+			},
+			// Refetch when the page arg changes
+			forceRefetch({ currentArg, previousArg }) {
+				return currentArg?.query?.pageNumber !== previousArg?.query?.pageNumber;
+			},
 		}),
 		readNotification: builder.mutation<void, IUpdateNotificationQuery>({
 			invalidatesTags: ['NOTIFICATIONS'],

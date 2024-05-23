@@ -1,7 +1,7 @@
 import { View, StyleSheet } from 'react-native';
-import { Icon, Text, useTheme } from 'react-native-paper';
+import { ActivityIndicator, Icon, Text, useTheme } from 'react-native-paper';
 import { FlatGrid } from 'react-native-super-grid';
-import React from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useGetWatchedQuery } from '@/redux/api/tmrev';
 import { FromLocation } from '@/models';
 import MoviePoster from './MoviePoster';
@@ -46,13 +46,31 @@ const WatchedMovieItem: React.FC<WatchedMovieItemProps> = ({
 	);
 };
 
+const pageSize = 20;
+
 const WatchedMovieList: React.FC<WatchedMovieListProps> = ({
 	userId,
 	from,
 }: WatchedMovieListProps) => {
 	if (!userId) return null;
 
-	const { data, isLoading } = useGetWatchedQuery(userId, { skip: !userId });
+	const [page, setPage] = useState(0);
+
+	const query = useMemo(() => {
+		return { pageNumber: page, pageSize };
+	}, [page]);
+
+	const { data, isLoading, isFetching } = useGetWatchedQuery({ userId, query }, { skip: !userId });
+
+	const incrementPage = useCallback(() => {
+		if (page === data?.body.totalNumberOfPages) {
+			return;
+		}
+
+		if (isLoading) return;
+
+		setPage((prev) => prev + 1);
+	}, [data]);
 
 	if (isLoading && !data) {
 		return <Text>Loading...</Text>;
@@ -65,10 +83,23 @@ const WatchedMovieList: React.FC<WatchedMovieListProps> = ({
 			<FlatGrid
 				itemDimension={100}
 				style={styles.list}
-				data={data.body}
+				data={data.body.watched}
 				spacing={8}
 				renderItem={({ item }) => <WatchedMovieItem item={item} from={from} />}
 				keyExtractor={(item) => item._id}
+				onEndReached={incrementPage}
+				onEndReachedThreshold={1}
+				ListFooterComponent={() => {
+					if (isLoading || isFetching) {
+						return (
+							<View>
+								<ActivityIndicator />
+							</View>
+						);
+					}
+
+					return null;
+				}}
 			/>
 		</View>
 	);

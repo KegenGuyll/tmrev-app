@@ -2,9 +2,23 @@ import { MovieDetails } from './review';
 
 interface WatchedResponse {
 	success: boolean;
-	body: Watched[];
+	body: {
+		pageNumber: number;
+		pageSize: number;
+		totalNumberOfPages: number;
+		totalCount: number;
+		watched: Watched[];
+	};
 	error?: any;
 }
+
+type WatchedQuery = {
+	query: {
+		pageNumber: number;
+		pageSize: number;
+	};
+	userId: string;
+};
 
 interface WatchedPayload {
 	liked: boolean;
@@ -30,4 +44,4 @@ type Watched = {
 	movieDetails: MovieDetails;
 };
 
-export type { Watched, WatchedDeletePayload, WatchedPayload, WatchedResponse };
+export type { Watched, WatchedDeletePayload, WatchedPayload, WatchedResponse, WatchedQuery };
