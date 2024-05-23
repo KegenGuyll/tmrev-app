@@ -1,12 +1,6 @@
 import { Link, Stack } from 'expo-router';
 import React from 'react';
-import {
-	NativeSyntheticEvent,
-	TextInputChangeEventData,
-	StyleSheet,
-	View,
-	FlatList,
-} from 'react-native';
+import { StyleSheet, View, FlatList } from 'react-native';
 import { Chip, Divider, List, Searchbar, Text } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFindMoviesQuery, useFindPeopleQuery } from '@/redux/api/tmdb/searchApi';
@@ -16,6 +10,7 @@ import MovieQuickActions from '@/components/MovieQuickActions';
 import { useAppSelector } from '@/hooks/reduxHooks';
 import { personDetailsRoute } from '@/constants/routes';
 import MovieDiscoverGrid from '@/components/MovieDiscoverGrid';
+import useDebounce from '@/hooks/useDebounce';
 
 type SearchSelection = 'movies' | 'crew';
 
@@ -42,16 +37,15 @@ const Search: React.FC = () => {
 	const [searchSelection, setSearchSelection] = React.useState<SearchSelection>('movies');
 	const { moviePosterQuickActionData } = useAppSelector((state) => state.bottomSheet);
 
-	const onChangeSearch = (e: NativeSyntheticEvent<TextInputChangeEventData>) =>
-		setSearchQuery(e.nativeEvent.text);
+	const debouncedSearchTerm = useDebounce(searchQuery, 500);
 
 	const { data: movieData, isFetching: movieIsFetching } = useFindMoviesQuery(
-		{ query: searchQuery },
+		{ query: debouncedSearchTerm },
 		{ skip: searchSelection !== 'movies' }
 	);
 
 	const { data: peopleData } = useFindPeopleQuery(
-		{ query: searchQuery },
+		{ query: debouncedSearchTerm },
 		{ skip: searchSelection !== 'crew' }
 	);
 
@@ -66,12 +60,10 @@ const Search: React.FC = () => {
 			<Stack.Screen options={{ headerShown: false }} />
 			<SafeAreaView style={{ marginTop: 16 }}>
 				<Searchbar
-					onClearIconPress={() => setSearchQuery('')}
-					placeholder="Search"
+					placeholder="Search..."
 					value={searchQuery}
-					onChange={onChangeSearch}
+					onChangeText={(t) => setSearchQuery(t)}
 				/>
-				{/* <ScrollView horizontal> */}
 				<View style={styles.chipContainer}>
 					<SearchSelectionChip
 						label="Movies"

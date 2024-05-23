@@ -1,12 +1,6 @@
 /* eslint-disable react/no-unstable-nested-components */
 import { Stack, useRouter } from 'expo-router';
-import {
-	View,
-	StyleSheet,
-	useWindowDimensions,
-	NativeSyntheticEvent,
-	TextInputChangeEventData,
-} from 'react-native';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { Button, Checkbox, MD3Theme, Searchbar, useTheme } from 'react-native-paper';
 import auth from '@react-native-firebase/auth';
 import { useEffect, useMemo, useState } from 'react';
@@ -19,6 +13,7 @@ import {
 import { GetUserMovieReviewsQuery, TmrevReview } from '@/models/tmrev/review';
 import MovieReviewCard from '@/components/MovieReviewCard';
 import { profileRoute } from '@/constants/routes';
+import useDebounce from '@/hooks/useDebounce';
 
 const pageSize = 15;
 const page = 0;
@@ -34,13 +29,15 @@ const UpdatePinnedReviews = () => {
 	const [updatPinned] = useUpdatePinnedMovieMutation();
 	const router = useRouter();
 
+	const debouncedSearchTerm = useDebounce(search, 500);
+
 	const query: GetUserMovieReviewsQuery = useMemo(() => {
-		if (search) {
-			return { sort_by: sort, pageNumber: page, pageSize, textSearch: search };
+		if (debouncedSearchTerm) {
+			return { sort_by: sort, pageNumber: page, pageSize, textSearch: debouncedSearchTerm };
 		}
 
 		return { sort_by: sort, pageNumber: page, pageSize };
-	}, [sort, page, search]);
+	}, [sort, page, debouncedSearchTerm]);
 
 	const { data: movieReviews } = useGetUserMovieReviewsQuery(
 		{ userId: currentUser!.uid, query },
@@ -81,15 +78,15 @@ const UpdatePinnedReviews = () => {
 		}
 	};
 
-	const onChangeSearch = (e: NativeSyntheticEvent<TextInputChangeEventData>) => {
-		setSearch(e.nativeEvent.text);
-	};
-
 	return (
 		<>
 			<Stack.Screen options={{ title: 'Update Pinned Reviews' }} />
 			<View style={{ marginTop: 8, position: 'relative', gap: 8 }}>
-				<Searchbar value={search} onChange={onChangeSearch} placeholder="Search for reviews" />
+				<Searchbar
+					value={search}
+					onChangeText={(t) => setSearch(t)}
+					placeholder="Search for reviews"
+				/>
 				<Button onPress={handleUpdatePinnedReviews} style={{ width: '100%' }} mode="contained">
 					Save
 				</Button>

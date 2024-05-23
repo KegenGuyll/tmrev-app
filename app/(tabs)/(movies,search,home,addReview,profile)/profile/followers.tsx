@@ -9,6 +9,7 @@ import { FromLocation } from '@/models';
 import { useGetFollowersV2Query } from '@/redux/api/tmrev';
 import { BasicUserV2 } from '@/models/tmrev/user';
 import { profileRoute } from '@/constants/routes';
+import useDebounce from '@/hooks/useDebounce';
 
 type FollowerSearchParams = {
 	userId: string;
@@ -61,10 +62,12 @@ const Followers: React.FC = () => {
 	const { userId, from } = useLocalSearchParams<FollowerSearchParams>();
 	const [search, setSearch] = useState<string>('');
 
+	const debouncedSearchTerm = useDebounce(search, 500);
+
 	const { currentUser } = auth();
 
 	const { data, isLoading } = useGetFollowersV2Query(
-		{ uid: userId!, query: { search } },
+		{ uid: userId!, query: { search: debouncedSearchTerm } },
 		{ skip: !userId }
 	);
 
@@ -80,7 +83,7 @@ const Followers: React.FC = () => {
 			<View style={{ padding: 8, gap: 16 }}>
 				<Searchbar
 					value={search}
-					onChange={(e) => setSearch(e.nativeEvent.text)}
+					onChangeText={(t) => setSearch(t)}
 					mode="bar"
 					placeholder="Search"
 				/>

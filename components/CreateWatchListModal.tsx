@@ -10,6 +10,7 @@ import { useCreateWatchListMutation } from '@/redux/api/tmrev';
 import { profileRoute } from '@/constants/routes';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import { useFindMoviesQuery } from '@/redux/api/tmdb/searchApi';
+import useDebounce from '@/hooks/useDebounce';
 
 type CreateWatchListModalProps = {
 	movies: MovieGeneral[];
@@ -26,11 +27,13 @@ const CreateWatchListModal: React.FC<CreateWatchListModalProps> = ({
 }: CreateWatchListModalProps) => {
 	const [title, setTitle] = useState('');
 	const [description, setDescription] = useState('');
-	const [searchQuery, setSearchQuery] = useState('step brothers');
+	const [searchQuery, setSearchQuery] = useState('');
 	const bottomSheetModalCreateListRef = useRef<BottomSheetModal>(null);
 	const bottomSheetModalAddMoviesRef = useRef<BottomSheetModal>(null);
 	const [createWatchList] = useCreateWatchListMutation();
 	const router = useRouter();
+
+	const debouncedSearchTerm = useDebounce(searchQuery, 500);
 
 	useEffect(() => {
 		if (open) {
@@ -62,7 +65,7 @@ const CreateWatchListModal: React.FC<CreateWatchListModalProps> = ({
 	};
 
 	const { data: movieData, isFetching: movieIsFetching } = useFindMoviesQuery({
-		query: searchQuery,
+		query: debouncedSearchTerm,
 	});
 
 	const handleAddMovies = (item: MovieGeneral) => {

@@ -13,6 +13,7 @@ import {
 } from '@/redux/api/tmrev';
 import { BasicUserV2 } from '@/models/tmrev/user';
 import { profileRoute } from '@/constants/routes';
+import useDebounce from '@/hooks/useDebounce';
 
 type FollowerSearchParams = {
 	userId: string;
@@ -80,8 +81,10 @@ const Following: React.FC = () => {
 	const [search, setSearch] = useState<string>('');
 	const { currentUser } = auth();
 
+	const debouncedSearchTerm = useDebounce(search, 500);
+
 	const { data, isLoading } = useGetFollowingV2Query(
-		{ uid: userId!, query: { search } },
+		{ uid: userId!, query: { search: debouncedSearchTerm } },
 		{ skip: !userId }
 	);
 
@@ -97,7 +100,7 @@ const Following: React.FC = () => {
 			<View style={{ padding: 8, gap: 16 }}>
 				<Searchbar
 					value={search}
-					onChange={(e) => setSearch(e.nativeEvent.text)}
+					onChangeText={(t) => setSearch(t)}
 					mode="bar"
 					placeholder="Search"
 				/>

@@ -1,6 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { NativeSyntheticEvent, TextInputChangeEventData, View, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Divider, Searchbar, Snackbar } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlatGrid } from 'react-native-super-grid';
@@ -12,6 +12,7 @@ import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import CreateMovieReviewModal from '@/components/CreateMovieReviewModal';
 import MovieDiscoverGrid from '@/components/MovieDiscoverGrid';
 import { loginRoute } from '@/constants/routes';
+import useDebounce from '@/hooks/useDebounce';
 
 const AddReviewPage = () => {
 	const [searchQuery, setSearchQuery] = useState('');
@@ -21,12 +22,10 @@ const AddReviewPage = () => {
 
 	const { currentUser } = auth();
 
-	const onChangeSearch = (e: NativeSyntheticEvent<TextInputChangeEventData>) => {
-		setSearchQuery(e.nativeEvent.text);
-	};
+	const debouncedSearchTerm = useDebounce(searchQuery, 500);
 
 	const { data: movieData } = useFindMoviesQuery({
-		query: searchQuery,
+		query: debouncedSearchTerm,
 	});
 
 	return (
@@ -35,10 +34,9 @@ const AddReviewPage = () => {
 			<SafeAreaView style={{ marginTop: 16 }}>
 				<View style={{ gap: 8 }}>
 					<Searchbar
-						onClearIconPress={() => setSearchQuery('')}
-						placeholder="Search"
+						placeholder="Search..."
 						value={searchQuery}
-						onChange={onChangeSearch}
+						onChangeText={(t) => setSearchQuery(t)}
 					/>
 					<Divider />
 					{!searchQuery && (
