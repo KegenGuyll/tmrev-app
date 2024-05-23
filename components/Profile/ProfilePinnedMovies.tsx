@@ -25,7 +25,7 @@ const ProfilePinnedMovies: React.FC<ProfilePinnedMoviesProps> = ({
 	const isCurrentUser = useMemo(() => currentUser?.uid === profileId, [currentUser, profileId]);
 
 	return (
-		<View style={{ gap: 12 }}>
+		<View>
 			<View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
 				<View
 					style={{
