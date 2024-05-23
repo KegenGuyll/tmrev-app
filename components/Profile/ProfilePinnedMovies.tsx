@@ -12,15 +12,23 @@ import { updatePinnedReviewsRoute } from '@/constants/routes';
 type ProfilePinnedMoviesProps = {
 	profileId: string;
 	from: FromLocation;
+	refreshing: boolean;
 };
 
 const ProfilePinnedMovies: React.FC<ProfilePinnedMoviesProps> = ({
 	profileId,
 	from,
+	refreshing,
 }: ProfilePinnedMoviesProps) => {
 	const { currentUser } = auth();
 	const router = useRouter();
-	const { data: pinnedData } = useGetPinnedMoviesQuery(profileId);
+	const { data: pinnedData, refetch } = useGetPinnedMoviesQuery(profileId);
+
+	useMemo(() => {
+		if (refreshing) {
+			refetch();
+		}
+	}, [refreshing]);
 
 	const isCurrentUser = useMemo(() => currentUser?.uid === profileId, [currentUser, profileId]);
 
