@@ -184,12 +184,12 @@ const AllReviews = () => {
 							titleEllipsizeSettings={{
 								ellipsizeMode: 'tail',
 								numberOflines: 1,
-								width: 250,
+								width: 200,
 							}}
 							notesEllipsizeSettings={{
 								ellipsizeMode: 'tail',
 								numberOflines: 6,
-								width: 150,
+								width: 200,
 							}}
 							displayedChip={convertSortToDisplayChip(sort)}
 							from={from || 'home'}
