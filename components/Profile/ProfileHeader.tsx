@@ -1,5 +1,14 @@
 import { View, Image, StyleSheet } from 'react-native';
-import { Icon, Text, useTheme, MD3Theme, Button, Divider, Snackbar } from 'react-native-paper';
+import {
+	Icon,
+	Text,
+	useTheme,
+	MD3Theme,
+	Button,
+	Divider,
+	Snackbar,
+	Chip,
+} from 'react-native-paper';
 import { useMemo, useState } from 'react';
 import auth from '@react-native-firebase/auth';
 import { Link, useRouter } from 'expo-router';
@@ -18,9 +27,14 @@ import {
 type ProfileHeaderProps = {
 	user: UserV2;
 	from?: FromLocation;
+	favoriteGenres?: string[];
 };
 
-const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, from }: ProfileHeaderProps) => {
+const ProfileHeader: React.FC<ProfileHeaderProps> = ({
+	user,
+	from,
+	favoriteGenres,
+}: ProfileHeaderProps) => {
 	const theme = useTheme();
 	const styles = makeStyles(theme);
 	const [isFollowing, setIsFollowing] = useState(user.isFollowing);
@@ -108,6 +122,16 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, from }: ProfileHead
 					<View style={{ display: 'flex', gap: 8, flexDirection: 'row', alignItems: 'center' }}>
 						<Icon size={24} source="map-marker" />
 						<Text>{user.location}</Text>
+					</View>
+				)}
+				{favoriteGenres && (
+					<View style={{ gap: 4, marginTop: 8 }}>
+						<Text variant="labelSmall">Favorite Genres:</Text>
+						<View style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
+							{favoriteGenres.map((genre) => (
+								<Chip key={genre}>{genre}</Chip>
+							))}
+						</View>
 					</View>
 				)}
 				{currentUser?.uid !== user.uuid && (
