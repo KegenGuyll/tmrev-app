@@ -18,6 +18,7 @@
     "@react-native-google-signin/google-signin": "^11.0.1",
     "@react-navigation/native": "^6.0.2",
     "@reduxjs/toolkit": "^2.2.3",
+    "@shopify/react-native-skia": "0.1.221",
     "@techvox/react-native-image-viewing": "^0.2.4",
     "dayjs": "^1.11.11",
     "expo": "~50.0.14",
