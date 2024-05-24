@@ -70,6 +70,7 @@ import {
 	GetUserV2Response,
 	UpdateUserQuery,
 } from '@/models/tmrev/user';
+import { MovieGenreInsightResponse } from '@/models/tmrev/insights';
 
 export const tmrevApi = createApi({
 	baseQuery: fetchBaseQuery({
@@ -406,6 +407,11 @@ export const tmrevApi = createApi({
 				return currentArg?.query?.pageNumber !== previousArg?.query?.pageNumber;
 			},
 		}),
+		getGenreInsights: builder.query<MovieGenreInsightResponse, string>({
+			query: (userId) => ({
+				url: `/movie/genre/insights/${userId}`,
+			}),
+		}),
 		readNotification: builder.mutation<void, IUpdateNotificationQuery>({
 			invalidatesTags: ['NOTIFICATIONS'],
 			query: ({ authToken, notificationId }) => ({
@@ -613,6 +619,7 @@ export const {
 	useCreatePinnedMovieMutation,
 	useUpdatePinnedMovieMutation,
 	useGetWatchListDetailsQuery,
+	useGetGenreInsightsQuery,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;
 
