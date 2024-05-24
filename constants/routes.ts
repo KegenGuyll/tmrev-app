@@ -56,6 +56,14 @@ export const profileFollowingRoute = (from: FromLocation, profileId: string) => 
 	return `${baseTabUrl}/(${from})/profile/following?userId=${profileId}&from=${from}`;
 };
 
+export const profileInsightNavigationRoute = (from: FromLocation, profileId: string) => {
+	return `${baseTabUrl}/(${from})/profile/${profileId}/insights?from=${from}`;
+};
+
+export const profileInsightGenreRoute = (from: FromLocation, profileId: string) => {
+	return `${baseTabUrl}/(${from})/profile/${profileId}/insights/genre?from=${from}`;
+};
+
 export const loginRoute = () => '/login';
 
 export const signupRoute = () => '/signup';

@@ -30,6 +30,9 @@ type BarChartProps = {
 	fontSize?: number;
 	canvasHeight?: number;
 	chartTitle?: string;
+	appendValueLabel?: string;
+	displayValue?: boolean;
+	barWidth?: number;
 };
 
 const BarChart: React.FC<BarChartProps> = ({
@@ -40,11 +43,14 @@ const BarChart: React.FC<BarChartProps> = ({
 	fontSize = 14,
 	canvasHeight = 300,
 	chartTitle = '',
+	appendValueLabel = '',
+	displayValue = true,
+	barWidth: bW = 200,
 }: BarChartProps) => {
 	const translateY = useSharedValue(0);
 	const font = useFont(robotoBold, fontSize);
 
-	const barHeight = 200 / data.length;
+	const barHeight = bW / data.length;
 	const maxValue = Math.max(...data.map((item) => item.value));
 
 	return (
@@ -78,11 +84,11 @@ const BarChart: React.FC<BarChartProps> = ({
 											color={barLabelColor}
 										/>
 									)}
-									{font && (
+									{font && displayValue && (
 										<Text
 											x={barWidth + 10} // End label
 											y={y + translateY.value + barHeight / 2}
-											text={`${item.value.toString()} Movies`}
+											text={`${item.value.toString()} ${appendValueLabel}`}
 											font={font}
 											color={valueLabelColor}
 										/>

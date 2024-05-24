@@ -3,7 +3,12 @@ import { useRouter } from 'expo-router';
 import { View } from 'react-native';
 import { Icon, List, useTheme, Text } from 'react-native-paper';
 import { FromLocation } from '@/models';
-import { allListsRoute, allReviewsRoute, watchedMoviesRoute } from '@/constants/routes';
+import {
+	allListsRoute,
+	allReviewsRoute,
+	profileInsightNavigationRoute,
+	watchedMoviesRoute,
+} from '@/constants/routes';
 
 type ProfileNavigationProps = {
 	profileId: string;
@@ -87,6 +92,24 @@ const ProfileNavigation: React.FC<ProfileNavigationProps> = ({
 						<Text theme={{ colors: { onSurface: 'gray' } }} variant="labelLarge">
 							{watchedCount}
 						</Text>
+						<Icon source="chevron-right" color="gray" size={24} />
+					</View>
+				)}
+			/>
+			<List.Item
+				onPress={() => router.push(profileInsightNavigationRoute(from, profileId))}
+				style={{ borderBottomColor: theme.colors.background, borderBottomWidth: 1 }}
+				title="Movies Insights"
+				left={(props) => <List.Icon {...props} icon="chart-timeline-variant-shimmer" />}
+				right={() => (
+					<View
+						style={{
+							display: 'flex',
+							flexDirection: 'row',
+							alignItems: 'center',
+							gap: 4,
+						}}
+					>
 						<Icon source="chevron-right" color="gray" size={24} />
 					</View>
 				)}
