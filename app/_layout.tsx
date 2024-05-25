@@ -8,7 +8,7 @@ import React, { useEffect } from 'react';
 import { MD3DarkTheme, PaperProvider } from 'react-native-paper';
 import { Provider } from 'react-redux';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { View } from 'react-native';
+import { StatusBar, View } from 'react-native';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { store } from '@/redux/store';
 
@@ -58,6 +58,7 @@ export default RootLayout;
 const RootLayoutNav = () => {
 	return (
 		<GestureHandlerRootView style={{ flex: 1 }}>
+			<StatusBar barStyle="light-content" />
 			<PaperProvider theme={MD3DarkTheme}>
 				<BottomSheetModalProvider>
 					<ThemeProvider value={DarkTheme}>
