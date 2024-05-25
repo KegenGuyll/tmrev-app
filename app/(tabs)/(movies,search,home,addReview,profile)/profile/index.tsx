@@ -22,7 +22,7 @@ const Profile = () => {
 		{ skip: !currentUser || !currentUser.uid }
 	);
 	const { data: insightData, refetch: refetchInsights } = useGetGenreInsightsQuery(
-		currentUser!.uid,
+		currentUser?.uid as string,
 		{
 			skip: !currentUser || !currentUser.uid,
 		}
