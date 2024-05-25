@@ -17,6 +17,14 @@ module.exports = {
 			supportsTablet: true,
 			googleServicesFile: process.env.GOOGLE_SERVICES_PLIST,
 			bundleIdentifier: 'com.tmrev',
+			privacyManifests: {
+        NSPrivacyAccessedAPITypes: [
+          {
+            NSPrivacyAccessedAPIType: "NSPrivacyAccessedAPICategoryUserDefaults",
+            NSPrivacyAccessedAPITypeReasons: ["CA92.1"]
+          }
+        ]
+      }
 		},
 		android: {
 			adaptiveIcon: {
