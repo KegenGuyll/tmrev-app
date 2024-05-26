@@ -63,7 +63,11 @@ const RootLayoutNav = () => {
 				<BottomSheetModalProvider>
 					<ThemeProvider value={DarkTheme}>
 						<View style={{ height: '100%', width: '100%' }}>
-							<Stack>
+							<Stack
+								screenOptions={{
+									headerTintColor: 'white',
+								}}
+							>
 								<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 								<Stack.Screen name="login" />
 							</Stack>

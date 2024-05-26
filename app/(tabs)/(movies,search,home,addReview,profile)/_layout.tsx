@@ -7,9 +7,9 @@ type DynamicLayoutProps = {
 
 const DynamicLayout = ({ segment }: DynamicLayoutProps) => {
 	if (segment === '(profile)' || segment === '(addReview)')
-		return <Stack screenOptions={{ headerShown: false }} />;
+		return <Stack screenOptions={{ headerShown: false, headerTintColor: 'white' }} />;
 
-	return <Stack screenOptions={{ headerShown: true }} />;
+	return <Stack screenOptions={{ headerShown: true, headerTintColor: 'white' }} />;
 };
 
 export default DynamicLayout;
