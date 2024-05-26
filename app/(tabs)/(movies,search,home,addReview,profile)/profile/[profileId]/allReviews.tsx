@@ -172,7 +172,7 @@ const AllReviews = () => {
 						</View>
 					}
 					ref={flatListRef}
-					itemDimension={200}
+					itemDimension={400}
 					style={styles.list}
 					data={userMovieReviewResponse.body.reviews}
 					contentContainerStyle={{ alignItems: 'stretch', width: '100%' }}
