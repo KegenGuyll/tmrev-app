@@ -120,7 +120,7 @@ const UpdatePinnedReviews = () => {
 						stickyHeaderIndices={[0]}
 						renderItem={({ item }) => (
 							<View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-								<Checkbox
+								<Checkbox.Android
 									status={
 										pinnedReviews.filter((v) => v._id === item._id).length ? 'checked' : 'unchecked'
 									}
