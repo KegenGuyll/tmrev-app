@@ -88,7 +88,7 @@ const BarChart: React.FC<BarChartProps> = ({
 										<Text
 											x={barWidth + 10} // End label
 											y={y + translateY.value + barHeight / 2}
-											text={`${item.value.toString()} ${appendValueLabel}`}
+											text={`${String(item.value).toString()} ${appendValueLabel}`}
 											font={font}
 											color={valueLabelColor}
 										/>

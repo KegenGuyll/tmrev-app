@@ -1,5 +1,5 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { RefreshControl, ScrollView, View } from 'react-native';
+import { RefreshControl, ScrollView } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { useState } from 'react';
 import { FromLocation } from '@/models';
@@ -11,7 +11,7 @@ type InsightsGenreSearchParams = {
 	profileId: string;
 };
 
-const genreInsights: React.FC = () => {
+const GenreInsights: React.FC = () => {
 	const { profileId } = useLocalSearchParams<InsightsGenreSearchParams>();
 	const [refreshing, setRefreshing] = useState(false);
 	const theme = useTheme();
@@ -30,25 +30,23 @@ const genreInsights: React.FC = () => {
 		<>
 			<Stack.Screen options={{ title: 'Genre Insights' }} />
 			<ScrollView
-				contentContainerStyle={{ paddingBottom: 64, paddingTop: 16 }}
+				contentContainerStyle={{ paddingBottom: 100, paddingTop: 16 }}
 				refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleDataRefresh} />}
 			>
-				<View style={{ gap: 16, paddingHorizontal: 16 }}>
-					{insightData && insightData.data.mostReviewedRankedGenres.length && (
-						<BarChart
-							chartTitle="Highest Ranked Genres"
-							barLabelColor="black"
-							barColor={theme.colors.primary}
-							data={insightData?.data.mostReviewedRankedGenres}
-							canvasHeight={700}
-							displayValue={false}
-							barWidth={500}
-						/>
-					)}
-				</View>
+				{insightData && insightData.data.mostReviewedRankedGenres.length && (
+					<BarChart
+						chartTitle="Highest Ranked Genres"
+						barLabelColor="black"
+						barColor={theme.colors.primary}
+						data={insightData?.data.mostReviewedRankedGenres}
+						canvasHeight={700}
+						displayValue={false}
+						barWidth={500}
+					/>
+				)}
 			</ScrollView>
 		</>
 	);
 };
 
-export default genreInsights;
+export default GenreInsights;

@@ -100,7 +100,6 @@ const ProfileNavigation: React.FC<ProfileNavigationProps> = ({
 				onPress={() => router.navigate(profileInsightNavigationRoute(from, profileId))}
 				style={{ borderBottomColor: theme.colors.background, borderBottomWidth: 1 }}
 				title="Movies Insights"
-				disabled
 				left={(props) => <List.Icon {...props} icon="chart-timeline-variant-shimmer" />}
 				right={() => (
 					<View
