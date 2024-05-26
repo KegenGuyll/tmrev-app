@@ -1,4 +1,15 @@
+import { Platform } from 'react-native';
+
 export function numberShortHand(number: number): string {
+	if (Platform.OS === 'ios') {
+		// iOS doesn't support the 'compact' notation
+		if (number < 1000) return number.toString();
+		if (number < 1000000) return `${Math.floor(number / 1000)}K`;
+		if (number < 1000000000) return `${Math.floor(number / 1000000)}M`;
+		if (number < 1000000000000) return `${Math.floor(number / 1000000000)}B`;
+		if (number < 1000000000000000) return `${Math.floor(number / 1000000000000)}T`;
+	}
+
 	return Intl.NumberFormat('en-US', {
 		maximumFractionDigits: 1,
 		notation: 'compact',
