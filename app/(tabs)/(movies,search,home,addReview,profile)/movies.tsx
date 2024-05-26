@@ -53,7 +53,7 @@ const Movies = () => {
 
 	return (
 		<>
-			<Stack.Screen options={{ headerShown: false }} />
+			<Stack.Screen options={{ headerShown: false, title: 'Movies' }} />
 			<SafeAreaView>
 				<MovieGrid
 					movies={movieData}

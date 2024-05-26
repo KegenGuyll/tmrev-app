@@ -13,12 +13,12 @@ type SearchParams = {
 };
 
 const MovieReviewsPage = () => {
-	const { movieId, from, title } = useLocalSearchParams<SearchParams>();
+	const { movieId, from } = useLocalSearchParams<SearchParams>();
 	const { data: movieReviews } = useGetAllReviewsQuery({ movie_id: Number(movieId) });
 
 	return (
 		<>
-			<Stack.Screen options={{ headerShown: true, title: `Reviews of ${title}` }} />
+			<Stack.Screen options={{ headerShown: true, title: `All Reviews` }} />
 			<SafeAreaView>
 				<ScrollView>
 					<List.Section>

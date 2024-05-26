@@ -57,7 +57,7 @@ const Search: React.FC = () => {
 
 	return (
 		<>
-			<Stack.Screen options={{ headerShown: false }} />
+			<Stack.Screen options={{ headerShown: false, title: 'Search' }} />
 			<SafeAreaView style={{ marginTop: 16 }}>
 				<Searchbar
 					placeholder="Search..."

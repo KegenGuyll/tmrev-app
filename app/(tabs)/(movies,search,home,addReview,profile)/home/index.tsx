@@ -7,7 +7,7 @@ import MostReviewedMovies from '@/features/mostReviewedMovies';
 const HomeScreen = () => {
 	return (
 		<>
-			<Stack.Screen options={{ headerShown: false }} />
+			<Stack.Screen options={{ headerShown: false, title: 'Home Page' }} />
 			<SafeAreaView>
 				<JustReviewedMovies posterSelectionLocation="home" />
 				<MostReviewedMovies posterSelectionLocation="home" />
