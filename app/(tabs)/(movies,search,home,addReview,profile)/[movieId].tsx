@@ -1,5 +1,5 @@
-import { Link, Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { Button, Chip, IconButton, Surface, Text } from 'react-native-paper';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { Button, Chip, IconButton, Surface, Text, TouchableRipple } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Image, StyleSheet, Share, ScrollView, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -211,20 +211,21 @@ const MovieDetails = () => {
 					<View style={{ flexDirection: 'row', marginBottom: 8 }}>
 						{movieCredits?.cast && (
 							<FlatList
+								contentContainerStyle={{ gap: 8, paddingBottom: 100 }}
 								horizontal
 								showsHorizontalScrollIndicator={false}
 								data={movieCredits?.cast}
 								keyExtractor={(item) => item.id.toString()}
 								renderItem={({ item }) => (
-									<Link
-										style={{ marginRight: 8 }}
-										href={personDetailsRoute(from || 'movies', item.id.toString())}
+									<TouchableRipple
+										style={{}}
+										onPress={() =>
+											router.navigate(personDetailsRoute(from || 'movies', item.id.toString()))
+										}
 									>
 										<View
 											style={{
-												marginRight: 8,
 												borderRadius: 4,
-												gap: 8,
 											}}
 										>
 											<ActorPlaceholderImage
@@ -233,10 +234,21 @@ const MovieDetails = () => {
 												height={175}
 												width={150}
 											/>
-											<Text variant="labelLarge">{item.name}</Text>
-											<Text>{`${item.character || item.known_for_department}`}</Text>
+											<Text
+												numberOfLines={1}
+												style={{ width: 150 }}
+												ellipsizeMode="tail"
+												variant="labelLarge"
+											>
+												{item.name}
+											</Text>
+											<Text
+												numberOfLines={1}
+												style={{ width: 150 }}
+												ellipsizeMode="tail"
+											>{`${item.character || item.known_for_department}`}</Text>
 										</View>
-									</Link>
+									</TouchableRipple>
 								)}
 							/>
 						)}
