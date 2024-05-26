@@ -41,6 +41,5 @@ yarn-error.*
 
 # google auth
 google-services.json
-GoogleService-Info.plist
 
 android
