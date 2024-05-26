@@ -33,7 +33,7 @@ const WatchListItem: React.FC<WatchListItemProps> = ({
 	const router = useRouter();
 
 	return (
-		<TouchableRipple onPress={() => router.push(listDetailsRoute(from, item._id, profileId))}>
+		<TouchableRipple onPress={() => router.navigate(listDetailsRoute(from, item._id, profileId))}>
 			<Surface style={{ padding: 8, borderRadius: 4 }}>
 				<View style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
 					<View>

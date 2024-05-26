@@ -187,7 +187,7 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 				action={{
 					label: 'View',
 					onPress: () => {
-						router.push(movieDetailsRoute('addReview', lastReview!.id.toString()));
+						router.navigate(movieDetailsRoute('addReview', lastReview!.id.toString()));
 					},
 				}}
 			>

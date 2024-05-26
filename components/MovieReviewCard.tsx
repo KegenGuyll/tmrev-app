@@ -43,7 +43,7 @@ const MovieReviewCard: React.FC<MovieReviewCardProps> = ({
 			return;
 		}
 
-		router.push(movieDetailsRoute(from, review.tmdbID));
+		router.navigate(movieDetailsRoute(from, review.tmdbID));
 	};
 
 	return (

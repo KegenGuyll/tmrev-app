@@ -100,7 +100,7 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 				if (onPress) {
 					onPress();
 				} else {
-					router.push(movieDetailsRoute(location, movieId));
+					router.navigate(movieDetailsRoute(location, movieId));
 				}
 			}}
 		>

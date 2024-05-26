@@ -49,7 +49,7 @@ const InsightsNavigation = () => {
 				<List.Section style={{ backgroundColor: theme.colors.background, marginTop: 0 }}>
 					{ListItems.map((item) => (
 						<List.Item
-							onPress={() => router.push(item.route(from!, profileId!))}
+							onPress={() => router.navigate(item.route(from!, profileId!))}
 							disabled={!item.enabled}
 							key={item.title}
 							title={item.title}

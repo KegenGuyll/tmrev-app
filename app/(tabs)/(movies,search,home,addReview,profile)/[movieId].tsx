@@ -201,7 +201,7 @@ const MovieDetails = () => {
 					</View>
 					<Button
 						onPress={() =>
-							router.push(movieReviewsRoute(from || 'movies', String(movieId), movieData.title))
+							router.navigate(movieReviewsRoute(from || 'movies', String(movieId), movieData.title))
 						}
 						mode="outlined"
 					>

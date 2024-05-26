@@ -35,7 +35,7 @@ const ProfileNavigation: React.FC<ProfileNavigationProps> = ({
 					borderBottomColor: theme.colors.background,
 					borderBottomWidth: 1,
 				}}
-				onPress={() => router.push(allReviewsRoute(from, profileId))}
+				onPress={() => router.navigate(allReviewsRoute(from, profileId))}
 				title="Reviews"
 				left={(props) => <List.Icon {...props} icon="message-draw" />}
 				right={() => (
@@ -55,7 +55,7 @@ const ProfileNavigation: React.FC<ProfileNavigationProps> = ({
 				)}
 			/>
 			<List.Item
-				onPress={() => router.push(allListsRoute(from, profileId))}
+				onPress={() => router.navigate(allListsRoute(from, profileId))}
 				style={{ borderBottomColor: theme.colors.background, borderBottomWidth: 1 }}
 				title="Created Lists"
 				left={(props) => <List.Icon {...props} icon="format-list-numbered" />}
@@ -76,7 +76,7 @@ const ProfileNavigation: React.FC<ProfileNavigationProps> = ({
 				)}
 			/>
 			<List.Item
-				onPress={() => router.push(watchedMoviesRoute(from, profileId))}
+				onPress={() => router.navigate(watchedMoviesRoute(from, profileId))}
 				style={{ borderBottomColor: theme.colors.background, borderBottomWidth: 1 }}
 				title="Movies Seen"
 				left={(props) => <List.Icon {...props} icon="movie-play" />}
@@ -97,7 +97,7 @@ const ProfileNavigation: React.FC<ProfileNavigationProps> = ({
 				)}
 			/>
 			<List.Item
-				onPress={() => router.push(profileInsightNavigationRoute(from, profileId))}
+				onPress={() => router.navigate(profileInsightNavigationRoute(from, profileId))}
 				style={{ borderBottomColor: theme.colors.background, borderBottomWidth: 1 }}
 				title="Movies Insights"
 				disabled

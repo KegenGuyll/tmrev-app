@@ -31,7 +31,7 @@ const RatingDistribution: React.FC<RatingDistributionProps> = ({
 	const handleRoute = (item: Data) => {
 		const formattedQuery = `${id}.${item.label}`;
 
-		router.push(allReviewsRoute(from || 'home', profileId, formattedQuery));
+		router.navigate(allReviewsRoute(from || 'home', profileId, formattedQuery));
 	};
 
 	return (

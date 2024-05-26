@@ -151,7 +151,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 					<>
 						<Divider style={{ margin: 16 }} />
 						<Button
-							onPress={() => router.push(editProfileRoute(from || 'profile'))}
+							onPress={() => router.navigate(editProfileRoute(from || 'profile'))}
 							mode="outlined"
 						>
 							Edit Profile

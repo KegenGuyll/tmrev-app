@@ -62,11 +62,11 @@ const Profile = () => {
 				<SafeAreaView style={{ gap: 8 }}>
 					<Text variant="headlineMedium">You&apos;re not currently logged in.</Text>
 					<View style={{ gap: 8 }}>
-						<Button onPress={() => router.push(loginRoute())} mode="contained">
+						<Button onPress={() => router.navigate(loginRoute())} mode="contained">
 							Login
 						</Button>
 						<Divider />
-						<Button onPress={() => router.push(signupRoute())} mode="outlined">
+						<Button onPress={() => router.navigate(signupRoute())} mode="outlined">
 							Sign Up
 						</Button>
 					</View>

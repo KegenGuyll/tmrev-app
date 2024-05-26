@@ -49,7 +49,7 @@ const ProfilePinnedMovies: React.FC<ProfilePinnedMoviesProps> = ({
 				</View>
 				{isCurrentUser && (
 					<View>
-						<Button onPress={() => router.push(updatePinnedReviewsRoute(from))}>Update</Button>
+						<Button onPress={() => router.navigate(updatePinnedReviewsRoute(from))}>Update</Button>
 					</View>
 				)}
 			</View>
@@ -92,7 +92,7 @@ const ProfilePinnedMovies: React.FC<ProfilePinnedMoviesProps> = ({
 			{isCurrentUser && (!pinnedData?.body || !pinnedData.body.length) && (
 				<TouchableRipple
 					style={styles.pinnedContainer}
-					onPress={() => router.push(updatePinnedReviewsRoute(from))}
+					onPress={() => router.navigate(updatePinnedReviewsRoute(from))}
 				>
 					<Text variant="labelSmall">Click to pin your favorite reviews</Text>
 				</TouchableRipple>
