@@ -40,6 +40,7 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 }: CreateMovieReviewModalProps) => {
 	const router = useRouter();
 	const [lastReview, setLastReview] = useState<MovieGeneral | null>(null);
+	const [expanded, setExpanded] = useState(true);
 	const [reviewedSuccess, setReviewedSuccess] = useState(false);
 	const [isPrivate, setIsPrivate] = useState(false);
 	const [createReview] = useAddTmrevReviewMutation();
@@ -161,11 +162,17 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 								<Switch value={isPrivate} onValueChange={() => setIsPrivate(!isPrivate)} />
 							</View>
 							<RatingSliderList
+								expanded={expanded}
+								setExpanded={setExpanded}
 								resetRatings={handleClearRatings}
 								ratings={ratings}
 								setRatings={handleSetRatings}
 							/>
-							<ReviewNote note={note} setNote={setNote} />
+							<ReviewNote
+								handleCollapseSlider={() => setExpanded(false)}
+								note={note}
+								setNote={setNote}
+							/>
 							<Divider />
 							<Button mode="outlined" onPress={handleBottomSheetDismiss}>
 								Cancel

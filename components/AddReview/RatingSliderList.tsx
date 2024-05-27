@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { List, Text, Button } from 'react-native-paper';
 import TitledSlider from '../TitledSlider';
 
@@ -21,6 +21,8 @@ type RatingSliderListProps = {
 	setRatings: (key: string, value: number) => void;
 	resetRatings: () => void;
 	showAverageRating?: boolean;
+	expanded?: boolean;
+	setExpanded: (expanded: boolean) => void;
 };
 
 type RatingSlider = {
@@ -33,8 +35,9 @@ const RatingSliderList: React.FC<RatingSliderListProps> = ({
 	ratings,
 	resetRatings,
 	setRatings,
+	expanded = true,
+	setExpanded,
 }: RatingSliderListProps) => {
-	const [expanded, setExpanded] = useState(true);
 	const averageRating = useMemo(() => {
 		const total = Object.values(ratings).reduce((acc, curr) => acc + curr, 0);
 		return total / Object.keys(ratings).length;
