@@ -125,7 +125,7 @@ const AllListsPage: React.FC = () => {
 				}}
 			/>
 			<FlatGrid
-				itemDimension={200}
+				itemDimension={400}
 				spacing={8}
 				data={data.body.watchlists}
 				renderItem={({ item }) => <WatchListItem profileId={profileId!} from={from!} item={item} />}

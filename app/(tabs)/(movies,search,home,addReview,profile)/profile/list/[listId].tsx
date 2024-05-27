@@ -162,7 +162,7 @@ const ListDetailsPage: React.FC = () => {
 			/>
 			<FlatGrid
 				data={rankedList}
-				itemDimension={200}
+				itemDimension={400}
 				renderItem={({ item, index }) => (
 					<ListMovieItem
 						isCurrentUser={isCurrentUser}

@@ -111,7 +111,7 @@ const UpdatePinnedReviews = () => {
 								}}
 							/>
 						)}
-						itemDimension={200}
+						itemDimension={400}
 						style={styles.list}
 						data={movieReviews?.body.reviews}
 						itemContainerStyle={{ maxHeight: 170 }}
