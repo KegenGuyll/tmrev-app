@@ -119,14 +119,14 @@ const MovieDetails = () => {
 							gap: 8,
 						}}
 					>
-						<Button icon="message-draw" mode="outlined">
-							<Text>Review</Text>
+						<Button onPress={() => setSelectedMovie(movieData)} icon="message-draw" mode="outlined">
+							Review
 						</Button>
 						<Button onPress={shareMovie} icon="share" mode="outlined">
-							<Text>Share</Text>
+							Share
 						</Button>
 						<Button icon="plus" mode="outlined">
-							<Text>WatchList</Text>
+							WatchList
 						</Button>
 					</View>
 					<View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
