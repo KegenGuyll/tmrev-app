@@ -41,7 +41,7 @@ const WatchedMovie: React.FC<WatchedMovieProps> = ({
 	}, [singleWatched]);
 
 	const handleOnPress = async (liked: boolean) => {
-		if (hasWatched) {
+		if (hasWatched && singleWatched?.body) {
 			await updateWatched({
 				tmdbID: Number(movieId),
 				liked,
@@ -53,6 +53,7 @@ const WatchedMovie: React.FC<WatchedMovieProps> = ({
 				liked,
 				tmdbID: Number(movieId),
 			}).unwrap();
+			setHasLiked(liked);
 			setHasWatched(true);
 		}
 	};

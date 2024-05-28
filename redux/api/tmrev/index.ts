@@ -405,7 +405,7 @@ export const tmrevApi = createApi({
 			},
 		}),
 		getSingleWatched: builder.query<SingleWatchedResponse, SingleWatchedQuery>({
-			providesTags: ['WATCHED', 'MOVIE'],
+			providesTags: ['WATCHED'],
 			query: ({ userId, tmdbID }) => ({
 				method: 'GET',
 				url: `/movie/watched/${userId}/${tmdbID}`,
