@@ -45,6 +45,8 @@ import {
 } from '@/models/tmrev/review';
 import { SearchResponse } from '@/models/tmrev/search';
 import {
+	SingleWatchedQuery,
+	SingleWatchedResponse,
 	WatchedDeletePayload,
 	WatchedPayload,
 	WatchedQuery,
@@ -263,12 +265,7 @@ export const tmrevApi = createApi({
 			query: (body) => ({
 				body: {
 					liked: body.liked,
-					posterPath: body.posterPath,
-					title: body.title,
 					tmdbID: body.tmdbID,
-				},
-				headers: {
-					authorization: body.authToken,
 				},
 				method: 'POST',
 				url: '/movie/watched',
@@ -407,6 +404,13 @@ export const tmrevApi = createApi({
 				return currentArg?.query?.pageNumber !== previousArg?.query?.pageNumber;
 			},
 		}),
+		getSingleWatched: builder.query<SingleWatchedResponse, SingleWatchedQuery>({
+			providesTags: ['WATCHED', 'MOVIE'],
+			query: ({ userId, tmdbID }) => ({
+				method: 'GET',
+				url: `/movie/watched/${userId}/${tmdbID}`,
+			}),
+		}),
 		getGenreInsights: builder.query<MovieGenreInsightResponse, string>({
 			query: (userId) => ({
 				url: `/movie/genre/insights/${userId}`,
@@ -493,12 +497,7 @@ export const tmrevApi = createApi({
 			query: (body) => ({
 				body: {
 					liked: body.liked,
-					posterPath: body.posterPath,
-					title: body.title,
 					tmdbID: body.tmdbID,
-				},
-				headers: {
-					authorization: body.authToken,
 				},
 				method: 'PUT',
 				// eslint-disable-next-line no-underscore-dangle
@@ -620,6 +619,7 @@ export const {
 	useUpdatePinnedMovieMutation,
 	useGetWatchListDetailsQuery,
 	useGetGenreInsightsQuery,
+	useGetSingleWatchedQuery,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;
 

@@ -1,5 +1,5 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { Button, Chip, IconButton, Surface, Text, TouchableRipple } from 'react-native-paper';
+import { Button, Chip, Surface, Text, TouchableRipple } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Image, StyleSheet, Share, ScrollView, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -21,6 +21,7 @@ import MovieRadarChart from '@/components/MovieRadarChart';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import CreateMovieReviewModal from '@/components/CreateMovieReviewModal';
 import { movieReviewsRoute, personDetailsRoute } from '@/constants/routes';
+import WatchedMovie from '@/features/movieDetails/WatchedMovie';
 
 type MovieDetailsParams = {
 	movieId: string;
@@ -44,9 +45,7 @@ const MovieDetails = () => {
 		isLoading: movieDataIsLoading,
 	} = useGetMovieDetailsQuery({
 		movie_id: Number(movieId),
-		params: {
-			append_to_response: 'cast',
-		},
+		params: {},
 	});
 
 	const { data: movieReleaseDates } = useGetMovieReleaseDatesQuery({
@@ -129,16 +128,13 @@ const MovieDetails = () => {
 							WatchList
 						</Button>
 					</View>
-					<View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-						<View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 8 }}>
-							<IconButton icon="thumb-up-outline" />
-							<Text>{movieReviews?.body.likes}</Text>
-						</View>
-						<View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 8 }}>
-							<IconButton icon="thumb-down-outline" />
-							<Text>{movieReviews?.body.dislikes}</Text>
-						</View>
-					</View>
+					{movieReviews && (
+						<WatchedMovie
+							movieId={Number(movieId!)}
+							likes={movieReviews?.body.likes}
+							dislikes={movieReviews?.body.dislikes}
+						/>
+					)}
 					<Surface
 						style={{
 							flexDirection: 'row',

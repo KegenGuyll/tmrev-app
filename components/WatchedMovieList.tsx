@@ -1,4 +1,4 @@
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, RefreshControl } from 'react-native';
 import { ActivityIndicator, Icon, Text, useTheme } from 'react-native-paper';
 import { FlatGrid } from 'react-native-super-grid';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -46,7 +46,7 @@ const WatchedMovieItem: React.FC<WatchedMovieItemProps> = ({
 	);
 };
 
-const pageSize = 20;
+const pageSize = 10;
 
 const WatchedMovieList: React.FC<WatchedMovieListProps> = ({
 	userId,
@@ -54,23 +54,35 @@ const WatchedMovieList: React.FC<WatchedMovieListProps> = ({
 }: WatchedMovieListProps) => {
 	if (!userId) return null;
 
+	const [isRefreshing, setIsRefreshing] = useState(false);
+
 	const [page, setPage] = useState(0);
 
 	const query = useMemo(() => {
 		return { pageNumber: page, pageSize };
 	}, [page]);
 
-	const { data, isLoading, isFetching } = useGetWatchedQuery({ userId, query }, { skip: !userId });
+	const { data, isLoading, isFetching, refetch } = useGetWatchedQuery(
+		{ userId, query },
+		{ skip: !userId }
+	);
 
 	const incrementPage = useCallback(() => {
-		if (page === data?.body.totalNumberOfPages) {
+		if (!data) return;
+
+		if (page >= data?.body.totalNumberOfPages) {
+			console.log('return');
 			return;
 		}
 
-		if (isLoading) return;
-
-		setPage((prev) => prev + 1);
+		setPage(page + 1);
 	}, [data]);
+
+	const handleRefresh = useCallback(async () => {
+		setIsRefreshing(true);
+		await refetch().unwrap();
+		setIsRefreshing(false);
+	}, [setIsRefreshing, refetch]);
 
 	if (isLoading && !data) {
 		return <Text>Loading...</Text>;
@@ -81,6 +93,9 @@ const WatchedMovieList: React.FC<WatchedMovieListProps> = ({
 	return (
 		<View>
 			<FlatGrid
+				refreshControl={
+					<RefreshControl tintColor="white" refreshing={isRefreshing} onRefresh={handleRefresh} />
+				}
 				itemDimension={100}
 				style={styles.list}
 				data={data.body.watched}
@@ -88,7 +103,6 @@ const WatchedMovieList: React.FC<WatchedMovieListProps> = ({
 				renderItem={({ item }) => <WatchedMovieItem item={item} from={from} />}
 				keyExtractor={(item) => item._id}
 				onEndReached={incrementPage}
-				onEndReachedThreshold={1}
 				ListFooterComponent={() => {
 					if (isLoading || isFetching) {
 						return (

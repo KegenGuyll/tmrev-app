@@ -12,6 +12,16 @@ interface WatchedResponse {
 	error?: any;
 }
 
+type SingleWatchedResponse = {
+	success: boolean;
+	body: Watched | null;
+};
+
+type SingleWatchedQuery = {
+	userId: string;
+	tmdbID: number;
+};
+
 type WatchedQuery = {
 	query: {
 		pageNumber: number;
@@ -22,10 +32,7 @@ type WatchedQuery = {
 
 interface WatchedPayload {
 	liked: boolean;
-	posterPath: string;
-	title: string;
 	tmdbID: number;
-	authToken: string;
 	_id?: string;
 }
 
@@ -44,4 +51,12 @@ type Watched = {
 	movieDetails: MovieDetails;
 };
 
-export type { Watched, WatchedDeletePayload, WatchedPayload, WatchedResponse, WatchedQuery };
+export type {
+	Watched,
+	WatchedDeletePayload,
+	WatchedPayload,
+	WatchedResponse,
+	WatchedQuery,
+	SingleWatchedResponse,
+	SingleWatchedQuery,
+};
