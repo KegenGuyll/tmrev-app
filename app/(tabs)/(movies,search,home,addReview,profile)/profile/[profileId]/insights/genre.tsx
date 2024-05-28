@@ -31,7 +31,9 @@ const GenreInsights: React.FC = () => {
 			<Stack.Screen options={{ title: 'Genre Insights' }} />
 			<ScrollView
 				contentContainerStyle={{ paddingBottom: 100, paddingTop: 16 }}
-				refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleDataRefresh} />}
+				refreshControl={
+					<RefreshControl tintColor="white" refreshing={refreshing} onRefresh={handleDataRefresh} />
+				}
 			>
 				{insightData && insightData.data.mostReviewedRankedGenres.length && (
 					<BarChart

@@ -74,7 +74,9 @@ const Profile = () => {
 			/>
 			<SafeAreaView>
 				<ScrollView
-					refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+					refreshControl={
+						<RefreshControl tintColor="white" refreshing={refreshing} onRefresh={handleRefresh} />
+					}
 					contentContainerStyle={{ paddingBottom: 100 }}
 				>
 					<View style={{ gap: 16 }}>

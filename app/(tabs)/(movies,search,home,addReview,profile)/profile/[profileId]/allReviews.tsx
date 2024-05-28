@@ -215,7 +215,9 @@ const AllReviews = () => {
 						</View>
 					}
 					keyExtractor={(item) => item._id.toString()}
-					refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+					refreshControl={
+						<RefreshControl tintColor="white" refreshing={refreshing} onRefresh={onRefresh} />
+					}
 					onEndReached={incrementPage}
 					ListFooterComponent={() => {
 						if (isLoading || isFetching) {
