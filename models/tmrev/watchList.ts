@@ -34,7 +34,10 @@ interface UpdateWatchList {
 	title: string;
 	public: boolean;
 	tags: string[];
-	movies: MovieDetails[];
+	movies: {
+		order: number;
+		tmdbID: number;
+	}[];
 	watchListId: string;
 }
 
