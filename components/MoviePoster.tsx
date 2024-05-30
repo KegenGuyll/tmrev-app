@@ -1,11 +1,18 @@
-import { View, Image, StyleSheet, TouchableHighlight, ImageStyle, StyleProp } from 'react-native';
+import {
+	View,
+	Image,
+	StyleSheet,
+	TouchableHighlight,
+	ImageStyle,
+	StyleProp,
+	GestureResponderEvent,
+} from 'react-native';
 import React from 'react';
 import { useRouter } from 'expo-router';
 
+import { Text, useTheme } from 'react-native-paper';
 import imageUrl from '@/utils/imageUrl';
 import { FromLocation } from '@/models';
-import { useAppDispatch } from '@/hooks/reduxHooks';
-import { setMoviePosterQuickActionData, setVisibility } from '@/redux/slice/bottomSheet';
 import { movieDetailsRoute } from '@/constants/routes';
 
 type MoviePosterProps = {
@@ -17,6 +24,8 @@ type MoviePosterProps = {
 	location: FromLocation;
 	isSelected?: boolean;
 	onPress?: () => void;
+	rankedPosition?: number;
+	onLongPress?: ((event: GestureResponderEvent) => void) | undefined;
 };
 
 type MoviePosterStyleProps = {
@@ -33,6 +42,55 @@ type MoviePosterImageProps = {
 	style?: StyleProp<ImageStyle>;
 	isSelected?: boolean;
 	posterSize?: MoviePosterImageSize;
+	rankedPosition?: number;
+};
+
+type RankedNumberOverlayProps = {
+	children: React.ReactNode;
+	rankedPosition: number;
+};
+
+const RankedNumberOverlay: React.FC<RankedNumberOverlayProps> = ({
+	children,
+	rankedPosition,
+}: RankedNumberOverlayProps) => {
+	const theme = useTheme();
+	return (
+		<View style={{ position: 'relative' }}>
+			<View
+				style={{
+					position: 'absolute',
+					display: 'flex',
+					alignItems: 'center',
+					bottom: -8,
+					right: 0,
+					left: 0,
+					zIndex: 999,
+					justifyContent: 'center',
+					margin: 'auto',
+				}}
+			>
+				<View
+					style={{
+						backgroundColor: theme.colors.background,
+						borderRadius: 100,
+						paddingVertical: 2,
+						paddingHorizontal: 4,
+						width: 32,
+						height: 32,
+						display: 'flex',
+						justifyContent: 'center',
+						alignItems: 'center',
+					}}
+				>
+					<Text style={{ color: theme.colors.onBackground }} variant="labelLarge">
+						{rankedPosition}
+					</Text>
+				</View>
+			</View>
+			{children}
+		</View>
+	);
 };
 
 export const MoviePosterImage: React.FC<MoviePosterImageProps> = ({
@@ -42,8 +100,20 @@ export const MoviePosterImage: React.FC<MoviePosterImageProps> = ({
 	style,
 	isSelected,
 	posterSize = 342,
+	rankedPosition,
 }: MoviePosterImageProps) => {
 	const styles = makeStyles({ height, width });
+
+	if (rankedPosition && moviePoster) {
+		return (
+			<RankedNumberOverlay rankedPosition={rankedPosition}>
+				<Image
+					style={[styles.moviePoster, style, isSelected && styles.selected]}
+					source={{ uri: imageUrl(moviePoster, posterSize) }}
+				/>
+			</RankedNumberOverlay>
+		);
+	}
 
 	if (moviePoster) {
 		return (
@@ -51,6 +121,17 @@ export const MoviePosterImage: React.FC<MoviePosterImageProps> = ({
 				style={[styles.moviePoster, style, isSelected && styles.selected]}
 				source={{ uri: imageUrl(moviePoster, posterSize) }}
 			/>
+		);
+	}
+
+	if (rankedPosition) {
+		return (
+			<RankedNumberOverlay rankedPosition={rankedPosition}>
+				<Image
+					style={[styles.moviePoster, style, isSelected && styles.selected]}
+					source={require('@/assets/images/movie-poster-placeholder.jpg')}
+				/>
+			</RankedNumberOverlay>
 		);
 	}
 
@@ -71,14 +152,10 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 	clickable = true,
 	isSelected,
 	onPress,
+	rankedPosition,
+	onLongPress,
 }: MoviePosterProps) => {
 	const router = useRouter();
-	const dispatch = useAppDispatch();
-
-	const handleLongPress = () => {
-		dispatch(setVisibility(true));
-		dispatch(setMoviePosterQuickActionData({ movieId, moviePoster }));
-	};
 
 	if (!clickable) {
 		return (
@@ -88,6 +165,7 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 					moviePoster={moviePoster}
 					height={height}
 					width={width}
+					rankedPosition={rankedPosition}
 				/>
 			</View>
 		);
@@ -95,7 +173,7 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 
 	return (
 		<TouchableHighlight
-			onLongPress={handleLongPress}
+			onLongPress={onLongPress}
 			onPress={() => {
 				if (onPress) {
 					onPress();
@@ -110,6 +188,7 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 					moviePoster={moviePoster}
 					height={height}
 					width={width}
+					rankedPosition={rankedPosition}
 				/>
 			</View>
 		</TouchableHighlight>
