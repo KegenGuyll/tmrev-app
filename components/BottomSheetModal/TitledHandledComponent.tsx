@@ -9,7 +9,7 @@ type ButtonProp = {
 };
 
 type TitledHandledComponentProps = BottomSheetHandleProps & {
-	title: string;
+	title: string | React.ReactNode;
 	submitButton?: ButtonProp;
 	cancelButton?: ButtonProp;
 };
@@ -39,7 +39,7 @@ const TitledHandledComponent: React.FC<TitledHandledComponentProps> = ({
 				}}
 			>
 				{cancelButton && <Button onPress={cancelButton.onPress}>{cancelButton.title}</Button>}
-				<Text variant="titleLarge">{title}</Text>
+				{typeof title === 'string' ? <Text variant="titleLarge">{title}</Text> : title}
 				{submitButton && <Button onPress={submitButton.onPress}>{submitButton.title}</Button>}
 			</View>
 			<Divider />
