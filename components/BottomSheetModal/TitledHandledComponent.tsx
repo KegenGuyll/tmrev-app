@@ -39,7 +39,7 @@ const TitledHandledComponent: React.FC<TitledHandledComponentProps> = ({
 				}}
 			>
 				{cancelButton && <Button onPress={cancelButton.onPress}>{cancelButton.title}</Button>}
-				{typeof title === 'string' ? <Text variant="titleLarge">{title}</Text> : title}
+				{typeof title === 'string' ? <Text variant="titleMedium">{title}</Text> : title}
 				{submitButton && <Button onPress={submitButton.onPress}>{submitButton.title}</Button>}
 			</View>
 			<Divider />
