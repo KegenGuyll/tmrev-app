@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Button, Divider, Snackbar, Switch, Text } from 'react-native-paper';
+import { Divider, Snackbar, Switch, Text } from 'react-native-paper';
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import dayjs from 'dayjs';
 import { MoviePosterImage } from '@/components/MoviePoster';
@@ -13,6 +13,7 @@ import ReviewNote from '@/components/AddReview/ReviewNote';
 import { useAddTmrevReviewMutation } from '@/redux/api/tmrev';
 import { CreateTmrevReviewQuery } from '@/models/tmrev';
 import { movieDetailsRoute } from '@/constants/routes';
+import TitledHandledComponent from './BottomSheetModal/TitledHandledComponent';
 
 const defaultRatings: Ratings = {
 	plot: 5,
@@ -30,13 +31,15 @@ const defaultRatings: Ratings = {
 const snapPoints = ['95%'];
 
 type CreateMovieReviewModalProps = {
+	visible: boolean;
+	onDismiss: () => void;
 	selectedMovie: MovieGeneral | null;
-	setSelectedMovie: React.Dispatch<React.SetStateAction<MovieGeneral | null>>;
 };
 
 const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 	selectedMovie,
-	setSelectedMovie,
+	visible,
+	onDismiss,
 }: CreateMovieReviewModalProps) => {
 	const router = useRouter();
 	const [lastReview, setLastReview] = useState<MovieGeneral | null>(null);
@@ -58,14 +61,16 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 	};
 
 	useEffect(() => {
-		if (selectedMovie) {
+		if (visible) {
 			bottomSheetModalRef.current?.present();
+		} else {
+			bottomSheetModalRef.current?.dismiss();
 		}
-	}, [selectedMovie]);
+	}, [visible]);
 
 	const handleBottomSheetDismiss = () => {
-		setSelectedMovie(null);
 		bottomSheetModalRef.current?.dismiss();
+		onDismiss();
 	};
 
 	const handleCreateMovieReview = async () => {
@@ -111,30 +116,31 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 	return (
 		<>
 			<BottomSheetModal
+				handleComponent={({ ...props }) => (
+					<TitledHandledComponent
+						{...props}
+						title="Add Review"
+						cancelButton={{
+							title: 'Cancel',
+							onPress: handleBottomSheetDismiss,
+						}}
+						submitButton={{
+							title: 'Save',
+							onPress: handleCreateMovieReview,
+						}}
+					/>
+				)}
 				handleIndicatorStyle={styles.customHandleStyle}
 				backgroundComponent={CustomBottomSheetBackground}
 				snapPoints={snapPoints}
 				ref={bottomSheetModalRef}
 				onChange={(index) => {
-					if (index === -1) setSelectedMovie(null);
+					if (index === -1) onDismiss();
 				}}
 			>
 				<BottomSheetScrollView style={styles.bottomSheetContainer}>
 					{selectedMovie && (
 						<View style={{ gap: 16, marginBottom: 32 }}>
-							<View
-								style={{
-									display: 'flex',
-									flexDirection: 'row',
-									justifyContent: 'space-between',
-									alignItems: 'center',
-								}}
-							>
-								<Button onPress={handleBottomSheetDismiss}>Cancel</Button>
-								<Text variant="titleMedium">Add Review</Text>
-								<Button onPress={handleCreateMovieReview}>Save</Button>
-							</View>
-							<Divider />
 							<View style={{ display: 'flex', flexDirection: 'row', gap: 8, alignItems: 'center' }}>
 								<MoviePosterImage moviePoster={selectedMovie.poster_path} height={100} width={50} />
 								<View
@@ -174,12 +180,6 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 								setNote={setNote}
 							/>
 							<Divider />
-							<Button mode="outlined" onPress={handleBottomSheetDismiss}>
-								Cancel
-							</Button>
-							<Button mode="contained" onPress={handleCreateMovieReview}>
-								Save
-							</Button>
 						</View>
 					)}
 				</BottomSheetScrollView>
