@@ -1,72 +1,17 @@
-/* eslint-disable react/no-array-index-key */
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { View } from 'react-native';
-import { IconButton, Surface, Text, TouchableRipple, ActivityIndicator } from 'react-native-paper';
+import { IconButton, Text, ActivityIndicator } from 'react-native-paper';
 import { FlatGrid } from 'react-native-super-grid';
-// import { Shadow } from 'react-native-shadow-2';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import CreateWatchListModal from '@/components/CreateWatchListModal';
 import { useGetUserWatchListsQuery } from '@/redux/api/tmrev';
 import { FromLocation } from '@/models';
-import { MoviePosterImage } from '@/components/MoviePoster';
-import { WatchList } from '@/models/tmrev';
-import { listDetailsRoute } from '@/constants/routes';
+import MovieListItem from '@/components/MovieList/MovieListItem';
 
 type AllListsSearchParams = {
 	profileId: string;
 	from: FromLocation;
-};
-
-type WatchListItemProps = {
-	item: WatchList;
-	profileId: string;
-	from: FromLocation;
-};
-
-const WatchListItem: React.FC<WatchListItemProps> = ({
-	item,
-	from,
-	profileId,
-}: WatchListItemProps) => {
-	const firstFiveMovies = useMemo(() => item.movies.slice(0, 5), [item.movies]);
-	const router = useRouter();
-
-	return (
-		<TouchableRipple onPress={() => router.navigate(listDetailsRoute(from, item._id, profileId))}>
-			<Surface style={{ padding: 8, borderRadius: 4 }}>
-				<View style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-					<View>
-						<Text variant="labelLarge">{item.title}</Text>
-						<Text variant="labelSmall">{`${item.movies.length} movies`}</Text>
-					</View>
-
-					<View style={{ display: 'flex', flexDirection: 'row' }}>
-						{firstFiveMovies.map((movie, index) => (
-							// keep an eye on this shadow, it may be causing performance issues
-							// <Shadow
-							// 	key={`${movie.id}-${index}`}
-							// 	distance={2}
-							// 	offset={[-5, 0]}
-							// 	style={{
-							// 		marginRight: -10,
-							// 	}}
-							// >
-							<MoviePosterImage
-								key={`${movie.id}-${index}`}
-								style={{ borderWidth: 0, marginRight: -12 }}
-								height={110}
-								width={73}
-								moviePoster={movie.poster_path}
-								posterSize={154}
-							/>
-							// </Shadow>
-						))}
-					</View>
-				</View>
-			</Surface>
-		</TouchableRipple>
-	);
 };
 
 const pageSize = 10;
@@ -128,7 +73,7 @@ const AllListsPage: React.FC = () => {
 				itemDimension={400}
 				spacing={8}
 				data={data.body.watchlists}
-				renderItem={({ item }) => <WatchListItem profileId={profileId!} from={from!} item={item} />}
+				renderItem={({ item }) => <MovieListItem item={item} profileId={profileId!} from={from!} />}
 				keyExtractor={(item) => item._id}
 				refreshing={refreshing}
 				onRefresh={handleRefresh}
