@@ -107,9 +107,6 @@ export const tmrevApi = createApi({
 			invalidatesTags: ['WATCH_LIST'],
 			query: (body) => ({
 				body: body.data,
-				headers: {
-					authorization: body.token,
-				},
 				method: 'POST',
 				url: `/watch-list/${body.listId}`,
 			}),

@@ -22,7 +22,6 @@ interface WatchListSearchQuery {
 }
 
 interface AddMovieToWatchList {
-	token: string;
 	listId: string;
 	data: {
 		id: number;
