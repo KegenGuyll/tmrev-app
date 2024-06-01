@@ -1,22 +1,24 @@
-import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
-import { View, Alert } from 'react-native';
-import { Button, Divider, IconButton, Menu, Surface, Text } from 'react-native-paper';
+/* eslint-disable react/no-unstable-nested-components */
+import { Stack, useLocalSearchParams, useNavigation } from 'expo-router';
+import { View, Alert, RefreshControl } from 'react-native';
+import { Divider, IconButton, Menu, Snackbar, Surface, Text } from 'react-native-paper';
 import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatGrid } from 'react-native-super-grid';
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import dayjs from 'dayjs';
 import { FromLocation } from '@/models';
 import { useGetWatchListDetailsQuery, useUpdateWatchListMutation } from '@/redux/api/tmrev';
 import { MovieDetails } from '@/models/tmrev/review';
 import MoviePoster, { MoviePosterImage } from '@/components/MoviePoster';
-import CustomBackground from '@/components/CustomBottomSheetBackground';
 import EditRankPosition from '@/features/listDetails/EditRankPosition';
 import { WatchList } from '@/models/tmrev';
-import MultiLineInput from '@/components/Inputs/MultiLineInput';
-import TextInput from '@/components/Inputs/TextInput';
+import EditListDetails from '@/features/listDetails/EditDetails';
+import useDebounce from '@/hooks/useDebounce';
+import AddMovieToListModal from '@/features/listDetails/AddMovieToCurrentListModal';
+import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 
 type ListDetailsPageSearchParams = {
 	listId: string;
@@ -83,7 +85,6 @@ const ListDetailsPage: React.FC = () => {
 	const { listId, profileId, from } = useLocalSearchParams<ListDetailsPageSearchParams>();
 	const [display, setDisplay] = useState<'grid' | 'list'>('grid');
 	const [rankedList, setRankedList] = useState<MovieDetails[]>([]);
-	const bottomSheetEditDetailsRef = useRef<BottomSheetModal>(null);
 	const bottomSheetEditRankRef = useRef<BottomSheetModal>(null);
 	const [selectedMovie, setSelectedMovie] = useState<{
 		position: number;
@@ -92,18 +93,61 @@ const ListDetailsPage: React.FC = () => {
 	const [title, setTitle] = useState('');
 	const [description, setDescription] = useState('');
 	const navigation = useNavigation();
-	const router = useRouter();
 	const [hasSaved, setHasSaved] = useState(false);
 	const [menuVisible, setMenuVisible] = useState(false);
+	const [snackBarMessage, setSnackBarMessage] = useState('');
+	const [editDetails, setEditDetails] = useState(false);
+	const [addMovie, setAddMovie] = useState(false);
+	const [newMovies, setNewMovies] = useState<MovieGeneral[]>([]);
+	const [isRefreshing, setIsRefreshing] = useState(false);
+
+	const debounceRankedList = useDebounce(JSON.stringify(rankedList), 2500);
 
 	const { currentUser } = auth();
 
 	const isCurrentUser = useMemo(() => currentUser?.uid === profileId, [currentUser, profileId]);
 
-	const { data, isLoading } = useGetWatchListDetailsQuery({ listId: listId! }, { skip: !listId });
+	const { data, isLoading, refetch } = useGetWatchListDetailsQuery(
+		{ listId: listId! },
+		{ skip: !listId }
+	);
+
+	const handleRefresh = async () => {
+		setIsRefreshing(true);
+		await refetch().unwrap();
+		setIsRefreshing(false);
+	};
 
 	const [updateWatchList] = useUpdateWatchListMutation();
 
+	useEffect(() => {
+		if (newMovies.length) {
+			const formatNewMovies: MovieDetails[] = newMovies.map((movie) => ({
+				id: movie.id,
+				title: movie.title,
+				poster_path: movie.poster_path,
+				backdrop_path: movie.backdrop_path,
+				budget: movie.budget,
+				genres: movie.genres,
+				imdb_id: movie.imdb_id,
+				original_language: movie.original_language,
+				release_date: movie.release_date,
+				revenue: movie.revenue,
+				runtime: movie.runtime,
+			}));
+
+			const newList = [...rankedList, ...formatNewMovies];
+
+			// remove any duplicate ids
+			const uniqueMovies = newList.filter(
+				(movie, index, self) => index === self.findIndex((m) => m.id === movie.id)
+			);
+
+			setRankedList([...uniqueMovies]);
+		}
+	}, [newMovies]);
+
+	// check if there is any unsaved data in storage
 	const checkStorage = useCallback(async () => {
 		if (!data) return;
 		try {
@@ -146,10 +190,12 @@ const ListDetailsPage: React.FC = () => {
 		}
 	};
 
+	// check for unsaved changes on unmount
 	useEffect(() => {
 		checkStorage();
 	}, [data]);
 
+	// check if there are unsaved changes
 	const hasUnsavedChanges = useMemo(() => {
 		if (!listId) return false;
 
@@ -195,25 +241,21 @@ const ListDetailsPage: React.FC = () => {
 		[navigation, hasUnsavedChanges, rankedList, data, hasSaved, title, description]
 	);
 
-	useEffect(() => {
-		if (data?.body) {
-			setTitle(data.body.title);
-			setDescription(data.body.description);
-		}
-	}, [data]);
-
+	// update ranked list if data is fetched
 	useEffect(() => {
 		if (data && data.success) {
 			setRankedList([...data.body.movies]);
 		}
 	}, [data]);
 
+	// open bottom sheet if a movie is selected
 	useEffect(() => {
 		if (selectedMovie) {
 			bottomSheetEditRankRef.current?.present();
 		}
 	}, [selectedMovie]);
 
+	// update title and description if they are empty
 	useEffect(() => {
 		if (data && data.success) {
 			if (title === '') {
@@ -225,6 +267,7 @@ const ListDetailsPage: React.FC = () => {
 		}
 	}, [data]);
 
+	// handle moving movies up and down in rank
 	const handleMoveUpInRank = (index: number) => {
 		const newRankedList = [...rankedList];
 		const temp = newRankedList[index];
@@ -257,6 +300,18 @@ const ListDetailsPage: React.FC = () => {
 		setRankedList(newRankedList);
 	};
 
+	// remove a movie from the list
+	const handleRemoveMovie = (index: number) => {
+		const movie = rankedList[index];
+
+		const newRankedList = [...rankedList];
+		newRankedList.splice(index, 1);
+		setRankedList(newRankedList);
+
+		setSnackBarMessage(`${movie.title} has been removed from the list`);
+	};
+
+	// set the rank of a movie
 	const handleSetRank = (oldRank: number, newRank: number) => {
 		if (oldRank === newRank) return;
 
@@ -266,26 +321,72 @@ const ListDetailsPage: React.FC = () => {
 		setRankedList(newRankedList);
 	};
 
-	const handleUpdateWatchList = async () => {
-		if (!data) return;
+	// update watchlist
+	const handleUpdateWatchList = useCallback(
+		async (movies?: MovieDetails[]) => {
+			if (!data) return;
 
-		await updateWatchList({
-			watchListId: listId!,
-			title: title || data!.body.title,
-			description: description || data!.body.description,
-			public: data!.body.public,
-			tags: data!.body.tags,
-			movies: rankedList.map((movie, index) => ({ order: index, tmdbID: movie.id })),
-		}).unwrap();
+			const formattedMovies = () => {
+				if (movies) {
+					return movies.map((movie, index) => ({ order: index, tmdbID: movie.id }));
+				}
 
-		setHasSaved(true);
+				return rankedList.map((movie, index) => ({ order: index, tmdbID: movie.id }));
+			};
 
-		router.dismiss();
-	};
+			await updateWatchList({
+				watchListId: listId!,
+				title: title || data!.body.title,
+				description: description || data!.body.description,
+				public: data!.body.public,
+				tags: data!.body.tags,
+				movies: formattedMovies(),
+			}).unwrap();
+
+			setHasSaved(true);
+
+			setSnackBarMessage(`saved`);
+		},
+		[data, description, listId, rankedList, title, updateWatchList]
+	);
+
+	// update watchlist if there are any position changes
+	useEffect(() => {
+		if (debounceRankedList) {
+			const parsedData: MovieDetails[] = JSON.parse(debounceRankedList);
+			if (parsedData.length && hasUnsavedChanges) {
+				handleUpdateWatchList(parsedData);
+			}
+		}
+	}, [debounceRankedList]);
 
 	const handleOpenEditModal = () => {
 		setMenuVisible(false);
-		bottomSheetEditDetailsRef.current?.present();
+		setEditDetails(true);
+	};
+
+	const handleOpenAddMovies = () => {
+		setMenuVisible(false);
+		setAddMovie(true);
+	};
+
+	const updateValues = (
+		key: 'title' | 'description' | 'movies',
+		value: string | MovieDetails[]
+	) => {
+		if (key === 'title') {
+			setTitle(value as string);
+		} else if (key === 'description') {
+			setDescription(value as string);
+		} else {
+			setRankedList(value as MovieDetails[]);
+		}
+	};
+
+	const handleLongPress = (item: MovieDetails) => {
+		if (!isCurrentUser) return;
+
+		setSelectedMovie({ position: rankedList.indexOf(item), details: item });
 	};
 
 	const handleDisplayChange = () => {
@@ -316,28 +417,30 @@ const ListDetailsPage: React.FC = () => {
 							}}
 						>
 							{isCurrentUser && (
-								<>
-									<Button compact onPress={handleUpdateWatchList}>
-										Save
-									</Button>
-									<Menu
-										contentStyle={{ padding: 0, margin: 0 }}
-										visible={menuVisible}
-										onDismiss={() => setMenuVisible(false)}
-										anchor={
-											<IconButton icon="dots-vertical" onPress={() => setMenuVisible(true)} />
-										}
-									>
-										{display === 'grid' && (
-											<Menu.Item onPress={handleDisplayChange} title="List View" />
-										)}
-										{display === 'list' && (
-											<Menu.Item onPress={handleDisplayChange} title="Grid View" />
-										)}
-										<Divider />
-										<Menu.Item onPress={handleOpenEditModal} title="Edit" />
-									</Menu>
-								</>
+								<Menu
+									contentStyle={{ padding: 0, margin: 0 }}
+									visible={menuVisible}
+									onDismiss={() => setMenuVisible(false)}
+									anchor={<IconButton icon="dots-vertical" onPress={() => setMenuVisible(true)} />}
+								>
+									{display === 'grid' && (
+										<Menu.Item
+											leadingIcon="view-list"
+											onPress={handleDisplayChange}
+											title="List View"
+										/>
+									)}
+									{display === 'list' && (
+										<Menu.Item
+											leadingIcon="view-grid"
+											onPress={handleDisplayChange}
+											title="Grid View"
+										/>
+									)}
+									<Divider />
+									<Menu.Item leadingIcon="plus" onPress={handleOpenAddMovies} title="Add Movies" />
+									<Menu.Item leadingIcon="pencil" onPress={handleOpenEditModal} title="Edit" />
+								</Menu>
 							)}
 						</View>
 					),
@@ -345,6 +448,9 @@ const ListDetailsPage: React.FC = () => {
 			/>
 			{display === 'list' && (
 				<FlatGrid
+					refreshControl={
+						<RefreshControl tintColor="white" refreshing={isRefreshing} onRefresh={handleRefresh} />
+					}
 					data={rankedList}
 					itemDimension={400}
 					renderItem={({ item, index }) => (
@@ -363,6 +469,9 @@ const ListDetailsPage: React.FC = () => {
 			)}
 			{display === 'grid' && (
 				<FlatGrid
+					refreshControl={
+						<RefreshControl tintColor="white" refreshing={isRefreshing} onRefresh={handleRefresh} />
+					}
 					data={rankedList}
 					itemDimension={70}
 					contentContainerStyle={{ paddingBottom: selectedMovie ? 200 : 0 }}
@@ -373,40 +482,31 @@ const ListDetailsPage: React.FC = () => {
 							location={from!}
 							moviePoster={item.poster_path}
 							rankedPosition={index + 1}
-							onPress={() => {
-								if (selectedMovie) {
-									setSelectedMovie({ position: index, details: item });
-								}
-							}}
-							onLongPress={() => setSelectedMovie({ position: index, details: item })}
+							onPress={
+								selectedMovie
+									? () => setSelectedMovie({ position: index, details: item })
+									: undefined
+							}
+							onLongPress={() => handleLongPress(item)}
 						/>
 					)}
 					keyExtractor={(item) => `${item.id}`}
 				/>
 			)}
-			<BottomSheetModal
-				snapPoints={['95%']}
-				ref={bottomSheetEditDetailsRef}
-				backgroundComponent={CustomBackground}
-				// eslint-disable-next-line react-native/no-color-literals
-				handleIndicatorStyle={{ backgroundColor: 'white' }}
-			>
-				<BottomSheetView style={{ padding: 8, gap: 12 }}>
-					<TextInput
-						label="Title"
-						placeholder="Title"
-						value={title}
-						onChangeText={(v) => setTitle(v)}
-					/>
-					<MultiLineInput
-						label="Description"
-						placeholder="Description"
-						onChangeText={(v) => setDescription(v)}
-						numberOfLines={8}
-						value={description}
-					/>
-				</BottomSheetView>
-			</BottomSheetModal>
+			<AddMovieToListModal
+				visible={addMovie}
+				onDismiss={() => setAddMovie(false)}
+				setMovies={setNewMovies}
+			/>
+			<EditListDetails
+				visible={editDetails}
+				onDismiss={() => setEditDetails(false)}
+				updateValue={updateValues}
+				rankedList={rankedList}
+				title={title}
+				description={description}
+				handleSave={handleUpdateWatchList}
+			/>
 			{selectedMovie && (
 				<EditRankPosition
 					data={selectedMovie}
@@ -415,8 +515,19 @@ const ListDetailsPage: React.FC = () => {
 					maxRank={rankedList.length - 1}
 					handleMoveDownInRank={handleMoveDownInRank}
 					handleMoveUpInRank={handleMoveUpInRank}
+					handleRemoveMovie={handleRemoveMovie}
 				/>
 			)}
+			<Snackbar
+				action={{
+					label: 'Dismiss',
+					onPress: () => setSnackBarMessage(''),
+				}}
+				visible={!!snackBarMessage}
+				onDismiss={() => setSnackBarMessage('')}
+			>
+				{snackBarMessage}
+			</Snackbar>
 		</>
 	);
 };
