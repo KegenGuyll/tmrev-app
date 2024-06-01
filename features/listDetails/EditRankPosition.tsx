@@ -16,6 +16,7 @@ type EditRankPositionProps = {
 	clearSelectedMovie: () => void;
 	handleMoveUpInRank: (index: number) => void;
 	handleMoveDownInRank: (index: number) => void;
+	handleRemoveMovie: (index: number) => void;
 	maxRank: number;
 };
 
@@ -28,6 +29,7 @@ const EditRankPosition: React.FC<EditRankPositionProps> = ({
 	maxRank,
 	handleMoveUpInRank,
 	handleMoveDownInRank,
+	handleRemoveMovie,
 }: EditRankPositionProps) => {
 	const currentPosition = useMemo(() => Number(data.position + 1), [data]);
 
@@ -61,7 +63,6 @@ const EditRankPosition: React.FC<EditRankPositionProps> = ({
 		} else {
 			setEditPosition(true);
 			bottomSheetEditRankRef.current?.snapToPosition('75%');
-			console.log(customRankInputRef.current);
 		}
 	};
 
@@ -72,7 +73,7 @@ const EditRankPosition: React.FC<EditRankPositionProps> = ({
 					clearSelectedMovie();
 				}
 			}}
-			snapPoints={['30%', '75%', '90%']}
+			snapPoints={['30%', '50%', '90%']}
 			ref={bottomSheetEditRankRef}
 			backgroundComponent={CustomBackground}
 			// eslint-disable-next-line react-native/no-color-literals
@@ -155,6 +156,10 @@ const EditRankPosition: React.FC<EditRankPositionProps> = ({
 					{editPosition ? 'Save Position' : 'Enter Rank Position'}
 				</Button>
 				<Button
+					onPress={() => {
+						handleRemoveMovie(data.position);
+						bottomSheetEditRankRef.current?.dismiss();
+					}}
 					compact
 					mode="contained"
 					buttonColor={theme.colors.errorContainer}
