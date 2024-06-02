@@ -1,5 +1,5 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { Button, Chip, Surface, Text, TouchableRipple } from 'react-native-paper';
+import { Button, Chip, Snackbar, Surface, Text, TouchableRipple } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Image, StyleSheet, Share, ScrollView, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -22,6 +22,7 @@ import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import CreateMovieReviewModal from '@/components/CreateMovieReviewModal';
 import { movieReviewsRoute, personDetailsRoute } from '@/constants/routes';
 import WatchedMovie from '@/features/movieDetails/WatchedMovie';
+import AddMovieToList from '@/features/movieDetails/addMovieToList';
 
 type MovieDetailsParams = {
 	movieId: string;
@@ -34,6 +35,9 @@ const MovieDetails = () => {
 	const { dismissAll } = useBottomSheetModal();
 	const { data: movieReviews } = useGetAllReviewsQuery({ movie_id: Number(movieId) });
 	const [selectedMovie, setSelectedMovie] = useState<MovieGeneral | null>(null);
+	const [showAddMovieToListModal, setShowAddMovieToListModal] = useState(false);
+	const [showCreateReviewModal, setShowCreateReviewModal] = useState(false);
+	const [snackBarMessage, setSnackBarMessage] = useState<string | null>(null);
 
 	useEffect(() => {
 		dismissAll();
@@ -56,6 +60,12 @@ const MovieDetails = () => {
 		movie_id: Number(movieId),
 		params: { language: 'en-US' },
 	});
+
+	useEffect(() => {
+		if (movieData) {
+			setSelectedMovie(movieData);
+		}
+	}, [movieData]);
 
 	const shareMovie = async () => {
 		try {
@@ -118,13 +128,17 @@ const MovieDetails = () => {
 							gap: 8,
 						}}
 					>
-						<Button onPress={() => setSelectedMovie(movieData)} icon="message-draw" mode="outlined">
+						<Button
+							onPress={() => setShowCreateReviewModal(true)}
+							icon="message-draw"
+							mode="outlined"
+						>
 							Review
 						</Button>
 						<Button onPress={shareMovie} icon="share" mode="outlined">
 							Share
 						</Button>
-						<Button icon="plus" mode="outlined">
+						<Button onPress={() => setShowAddMovieToListModal(true)} icon="plus" mode="outlined">
 							WatchList
 						</Button>
 					</View>
@@ -187,13 +201,15 @@ const MovieDetails = () => {
 					</Surface>
 					<View style={{ marginBottom: 8 }}>
 						<Button
-							onPress={() => setSelectedMovie(movieData)}
+							onPress={() => setShowCreateReviewModal(true)}
 							style={{ marginBottom: 8 }}
 							mode="contained"
 						>
 							REVIEW MOVIE
 						</Button>
-						<Button mode="outlined">ADD TO LIST</Button>
+						<Button onPress={() => setShowAddMovieToListModal(true)} mode="outlined">
+							ADD TO LIST
+						</Button>
 					</View>
 					<Button
 						onPress={() =>
@@ -251,7 +267,33 @@ const MovieDetails = () => {
 					</View>
 				</SafeAreaView>
 			</ScrollView>
-			<CreateMovieReviewModal selectedMovie={selectedMovie} setSelectedMovie={setSelectedMovie} />
+			<AddMovieToList
+				visible={showAddMovieToListModal}
+				selectedMovie={selectedMovie}
+				onDismiss={() => setShowAddMovieToListModal(false)}
+				onError={(error) =>
+					setSnackBarMessage(error || 'An error occurred while adding movie to list')
+				}
+				onSuccess={() => setSnackBarMessage('Movie added to list')}
+			/>
+			<CreateMovieReviewModal
+				visible={showCreateReviewModal}
+				onDismiss={() => setShowCreateReviewModal(false)}
+				selectedMovie={selectedMovie}
+			/>
+			{snackBarMessage && (
+				<Snackbar
+					action={{
+						label: 'Dismiss',
+						onPress: () => setSnackBarMessage(null),
+					}}
+					visible={snackBarMessage !== null}
+					onDismiss={() => setSnackBarMessage(null)}
+					duration={3000}
+				>
+					{snackBarMessage}
+				</Snackbar>
+			)}
 		</>
 	);
 };
