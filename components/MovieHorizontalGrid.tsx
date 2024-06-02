@@ -1,39 +1,44 @@
-import { FlatList, View } from 'react-native';
+import { FlatList } from 'react-native';
+import { Text } from 'react-native-paper';
 import MoviePoster from './MoviePoster';
-import { PosterPath } from '@/models';
+import { FromLocation } from '@/models';
 
 type MovieHorizontalGridData = {
 	uniqueId: string;
 	movieId: number;
-	moviePoster: string;
+	moviePoster?: string;
 };
 
 type MovieHorizontalGridProps = {
 	data: MovieHorizontalGridData[];
-	posterSelectionLocation: PosterPath;
+	posterSelectionLocation: FromLocation;
+	posterHeight?: number;
+	isLoading?: boolean;
 };
 
 const MovieHorizontalGrid: React.FC<MovieHorizontalGridProps> = ({
 	data,
 	posterSelectionLocation,
+	posterHeight,
+	isLoading,
 }: MovieHorizontalGridProps) => {
+	if (isLoading) {
+		return <Text>Loading...</Text>;
+	}
+
 	return (
 		<FlatList
 			horizontal
+			contentContainerStyle={{
+				gap: 8,
+			}}
 			renderItem={({ item }) => (
-				<View
-					style={{
-						marginRight: 8,
-						borderRadius: 4,
-						gap: 8,
-					}}
-				>
-					<MoviePoster
-						movieId={item.movieId}
-						moviePoster={item.moviePoster}
-						location={posterSelectionLocation}
-					/>
-				</View>
+				<MoviePoster
+					movieId={item.movieId}
+					moviePoster={item.moviePoster}
+					location={posterSelectionLocation}
+					height={posterHeight}
+				/>
 			)}
 			keyExtractor={(item) => item.uniqueId}
 			data={data}
