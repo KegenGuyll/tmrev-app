@@ -106,7 +106,7 @@ export const tmrevApi = createApi({
 		addMovieToWatchList: builder.mutation<void, AddMovieToWatchList>({
 			invalidatesTags: ['WATCH_LIST'],
 			query: (body) => ({
-				body: body.data,
+				body,
 				method: 'POST',
 				url: `/watch-list/${body.listId}`,
 			}),
@@ -156,14 +156,20 @@ export const tmrevApi = createApi({
 				};
 			},
 			merge: (currentCache, newItems) => {
-				// make sure there isn't duplicate data being added
-				const newData = [...currentCache.body.reviews, ...newItems.body.reviews];
+				if (newItems.body.pageNumber > 1) {
+					// make sure there isn't duplicate data being added
+					const newData = [...currentCache.body.reviews, ...newItems.body.reviews];
 
-				// remove duplicates
-				const uniqueData = newData.filter((v, i, a) => a.findIndex((t) => t._id === v._id) === i);
+					// remove duplicates
+					const uniqueData = newData.filter((v, i, a) => a.findIndex((t) => t._id === v._id) === i);
 
-				// Merge the new items into the cache
-				currentCache.body.reviews = uniqueData;
+					// Merge the new items into the cache
+					currentCache.body.reviews = uniqueData;
+
+					return currentCache;
+				}
+
+				return newItems;
 			},
 			// Refetch when the page arg changes
 			forceRefetch({ currentArg, previousArg }) {
@@ -237,14 +243,20 @@ export const tmrevApi = createApi({
 				};
 			},
 			merge: (currentCache, newItems) => {
-				// make sure there isn't duplicate data being added
-				const newData = [...currentCache.body.watchlists, ...newItems.body.watchlists];
+				if (newItems.body.pageNumber > 1) {
+					// make sure there isn't duplicate data being added
+					const newData = [...currentCache.body.watchlists, ...newItems.body.watchlists];
 
-				// remove duplicates
-				const uniqueData = newData.filter((v, i, a) => a.findIndex((t) => t._id === v._id) === i);
+					// remove duplicates
+					const uniqueData = newData.filter((v, i, a) => a.findIndex((t) => t._id === v._id) === i);
 
-				// Merge the new items into the cache
-				currentCache.body.watchlists = uniqueData;
+					// Merge the new items into the cache
+					currentCache.body.watchlists = uniqueData;
+
+					return currentCache;
+				}
+
+				return newItems;
 			},
 			// Refetch when the page arg changes
 			forceRefetch({ currentArg, previousArg }) {
@@ -387,14 +399,20 @@ export const tmrevApi = createApi({
 				};
 			},
 			merge: (currentCache, newItems) => {
-				// make sure there isn't duplicate data being added
-				const newData = [...currentCache.body.watched, ...newItems.body.watched];
+				if (newItems.body.pageNumber > 1) {
+					// make sure there isn't duplicate data being added
+					const newData = [...currentCache.body.watched, ...newItems.body.watched];
 
-				// remove duplicates
-				const uniqueData = newData.filter((v, i, a) => a.findIndex((t) => t._id === v._id) === i);
+					// remove duplicates
+					const uniqueData = newData.filter((v, i, a) => a.findIndex((t) => t._id === v._id) === i);
 
-				// Merge the new items into the cache
-				currentCache.body.watched = uniqueData;
+					// Merge the new items into the cache
+					currentCache.body.watched = uniqueData;
+
+					return currentCache;
+				}
+
+				return newItems;
 			},
 			// Refetch when the page arg changes
 			forceRefetch({ currentArg, previousArg }) {
