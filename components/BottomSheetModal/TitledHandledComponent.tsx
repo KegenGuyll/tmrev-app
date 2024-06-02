@@ -6,6 +6,7 @@ import { Button, Divider, Text } from 'react-native-paper';
 type ButtonProp = {
 	onPress: (e: GestureResponderEvent) => void;
 	title: string;
+	disabled?: boolean;
 };
 
 type TitledHandledComponentProps = BottomSheetHandleProps & {
@@ -38,9 +39,17 @@ const TitledHandledComponent: React.FC<TitledHandledComponentProps> = ({
 					paddingHorizontal: 16,
 				}}
 			>
-				{cancelButton && <Button onPress={cancelButton.onPress}>{cancelButton.title}</Button>}
+				{cancelButton && (
+					<Button disabled={cancelButton.disabled} onPress={cancelButton.onPress}>
+						{cancelButton.title}
+					</Button>
+				)}
 				{typeof title === 'string' ? <Text variant="titleMedium">{title}</Text> : title}
-				{submitButton && <Button onPress={submitButton.onPress}>{submitButton.title}</Button>}
+				{submitButton && (
+					<Button disabled={submitButton?.disabled} onPress={submitButton.onPress}>
+						{submitButton.title}
+					</Button>
+				)}
 			</View>
 			<Divider />
 		</View>
