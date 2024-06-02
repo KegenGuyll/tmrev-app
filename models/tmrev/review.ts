@@ -88,8 +88,6 @@ interface CreateTmrevReviewQuery {
 	reviewedDate: string;
 	notes: string;
 	public: boolean;
-	release_date: string;
-	moviePoster: string;
 }
 interface CreateTmrevReviewResponse {
 	acknowledged: boolean;
