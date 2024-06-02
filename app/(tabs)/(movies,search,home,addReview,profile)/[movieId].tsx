@@ -5,6 +5,7 @@ import { View, Image, StyleSheet, Share, ScrollView, FlatList } from 'react-nati
 import { LinearGradient } from 'expo-linear-gradient';
 import { useBottomSheetModal } from '@gorhom/bottom-sheet';
 import { useEffect, useState } from 'react';
+import dayjs from 'dayjs';
 import {
 	useGetMovieCreditsQuery,
 	useGetMovieDetailsQuery,
@@ -173,6 +174,7 @@ const MovieDetails = () => {
 						<Chip icon="clock-time-four-outline">
 							<Text>{formatRuntime(movieData.runtime)}</Text>
 						</Chip>
+						<Chip icon="calendar">{dayjs(movieData.release_date).format('MMMM D, YYYY')}</Chip>
 						{movieReleaseDates &&
 							movieReleaseDates.results.find(
 								(dataResults) => dataResults.iso_3166_1 === ISO3166_1.UNITED_STATES
