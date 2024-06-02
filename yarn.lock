@@ -5212,7 +5212,7 @@ data-view-byte-offset@^1.0.0:
     es-errors "^1.3.0"
     is-data-view "^1.0.1"
 
-dayjs@^1.11.11:
+dayjs@^1.11.10, dayjs@^1.11.11:
   version "1.11.11"
   resolved "https://registry.yarnpkg.com/dayjs/-/dayjs-1.11.11.tgz#dfe0e9d54c5f8b68ccf8ca5f72ac603e7e5ed59e"
   integrity sha512-okzr3f11N6WuqYtZSvm+F776mB41wRZMhKP+hc34YdW+KmtYYK9iqvHSwo2k9FEH3fhGXvOPV6yz2IcSrfRUDg==
@@ -9658,6 +9658,16 @@ react-native-svg@14.1.0:
     css-select "^5.1.0"
     css-tree "^1.1.3"
 
+react-native-ui-datepicker@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/react-native-ui-datepicker/-/react-native-ui-datepicker-2.0.3.tgz#a6240f6b8be703dac719f82b155d92b6ab7d51f5"
+  integrity sha512-I7W24zoB5DQEZxAEx5grSbgWWKVCZWxWAiwSl2e7sn8d/tE2psFF6ki8qnUZQGfBfa+DNyLvFiblUl2kbHlfEA==
+  dependencies:
+    dayjs "^1.11.10"
+    lodash "^4.17.21"
+    react-native-wheely "^0.6.0"
+    uninstall "^0.0.0"
+
 react-native-vector-icons@^10.0.3:
   version "10.0.3"
   resolved "https://registry.yarnpkg.com/react-native-vector-icons/-/react-native-vector-icons-10.0.3.tgz#369824a3b17994b2cd65edbaa32dbf9540d49678"
@@ -9695,6 +9705,11 @@ react-native-webview@^11.23.1:
   dependencies:
     escape-string-regexp "2.0.0"
     invariant "2.2.4"
+
+react-native-wheely@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/react-native-wheely/-/react-native-wheely-0.6.0.tgz#c977dfc98b5111818a37e6fd4ad9541e9afb50b8"
+  integrity sha512-WDnynKOdHZ3m0VnXF5pC11dXSJZDC/6/e9LuZ6UKs4IjIRI1NTTd14pRwKYEnTgWmJdlDjqJvNSIVbd7EuMxHQ==
 
 react-native@*:
   version "0.74.0"
@@ -11175,6 +11190,11 @@ unicode-property-aliases-ecmascript@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/unicode-property-aliases-ecmascript/-/unicode-property-aliases-ecmascript-2.1.0.tgz#43d41e3be698bd493ef911077c9b131f827e8ccd"
   integrity sha512-6t3foTQI9qne+OZoVQB/8x8rk2k1eVy1gRXhV3oFQ5T6R1dqQ1xtin3XqSlx3+ATBkliTaR/hHyJBm+LVPNM8w==
+
+uninstall@^0.0.0:
+  version "0.0.0"
+  resolved "https://registry.yarnpkg.com/uninstall/-/uninstall-0.0.0.tgz#103e6e37e9c52ec857542cd259023d71c7a3fb2b"
+  integrity sha512-pjP/0+A4gsbDVa8XH/S2GZdT9NPJW8NFMy3GI7HnsWG+NAmFSSj3QidNosXBI9cPtxxNExEDdhKFO6sli8K3mA==
 
 unique-filename@^1.1.1:
   version "1.1.1"
