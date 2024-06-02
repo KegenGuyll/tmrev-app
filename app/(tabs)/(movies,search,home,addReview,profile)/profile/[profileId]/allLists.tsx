@@ -1,6 +1,6 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { IconButton, Text, ActivityIndicator } from 'react-native-paper';
 import { FlatGrid } from 'react-native-super-grid';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
@@ -28,13 +28,13 @@ const AllListsPage: React.FC = () => {
 	const [movies, setMovies] = useState<MovieGeneral[]>([]);
 	const [openCreateModal, setOpenCreateModal] = useState(false);
 
-	const { data, isLoading, refetch, isFetching } = useGetUserWatchListsQuery(query, {
+	const { data, isLoading, isFetching } = useGetUserWatchListsQuery(query, {
 		skip: !profileId,
 	});
 
 	const handleRefresh = async () => {
 		setRefreshing(true);
-		await refetch().unwrap();
+		setPage(0);
 		setRefreshing(false);
 	};
 
@@ -43,9 +43,7 @@ const AllListsPage: React.FC = () => {
 			return;
 		}
 
-		if (isLoading) return;
-
-		setPage((prev) => prev + 1);
+		setPage(page + 1);
 	}, [data, page]);
 
 	const handleOpenBottomSheet = () => {
@@ -70,13 +68,14 @@ const AllListsPage: React.FC = () => {
 				}}
 			/>
 			<FlatGrid
+				refreshControl={
+					<RefreshControl tintColor="white" refreshing={refreshing} onRefresh={handleRefresh} />
+				}
 				itemDimension={400}
 				spacing={8}
-				data={data.body.watchlists}
+				data={[...data.body.watchlists, ...data.body.emptyWatchlists]}
 				renderItem={({ item }) => <MovieListItem item={item} profileId={profileId!} from={from!} />}
 				keyExtractor={(item) => item._id}
-				refreshing={refreshing}
-				onRefresh={handleRefresh}
 				onEndReachedThreshold={1}
 				onEndReached={incrementPage}
 				ListFooterComponent={() => {
