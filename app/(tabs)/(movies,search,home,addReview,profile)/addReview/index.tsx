@@ -19,6 +19,7 @@ const AddReviewPage = () => {
 	const [selectedMovie, setSelectedMovie] = useState<MovieGeneral | null>(null);
 	const styles = makeStyles();
 	const router = useRouter();
+	const [open, setOpen] = useState(false);
 
 	const { currentUser } = auth();
 
@@ -27,6 +28,11 @@ const AddReviewPage = () => {
 	const { data: movieData } = useFindMoviesQuery({
 		query: debouncedSearchTerm,
 	});
+
+	const handlePosterSelection = (item: MovieGeneral) => {
+		setOpen(true);
+		setSelectedMovie(item);
+	};
 
 	return (
 		<>
@@ -40,7 +46,7 @@ const AddReviewPage = () => {
 					/>
 					<Divider />
 					{!searchQuery && (
-						<MovieDiscoverGrid from="addReview" onPress={(item) => setSelectedMovie(item)} />
+						<MovieDiscoverGrid from="addReview" onPress={(item) => handlePosterSelection(item)} />
 					)}
 					{movieData && (
 						<FlatGrid
@@ -49,7 +55,7 @@ const AddReviewPage = () => {
 							data={movieData?.results}
 							spacing={8}
 							renderItem={({ item }) => (
-								<TouchableHighlight onPress={() => setSelectedMovie(item)}>
+								<TouchableHighlight onPress={() => handlePosterSelection(item)}>
 									<MoviePosterImage moviePoster={item.poster_path} height={170} width={100} />
 								</TouchableHighlight>
 							)}
@@ -59,7 +65,11 @@ const AddReviewPage = () => {
 				</View>
 			</SafeAreaView>
 			{currentUser && (
-				<CreateMovieReviewModal selectedMovie={selectedMovie} setSelectedMovie={setSelectedMovie} />
+				<CreateMovieReviewModal
+					visible={open}
+					onDismiss={() => setOpen(false)}
+					selectedMovie={selectedMovie}
+				/>
 			)}
 			<Snackbar
 				onDismiss={() => setSelectedMovie(null)}
