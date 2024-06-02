@@ -156,7 +156,7 @@ export const tmrevApi = createApi({
 				};
 			},
 			merge: (currentCache, newItems) => {
-				if (newItems.body.pageNumber > 1) {
+				if (newItems.body.pageNumber >= 1) {
 					// make sure there isn't duplicate data being added
 					const newData = [...currentCache.body.reviews, ...newItems.body.reviews];
 
@@ -243,7 +243,7 @@ export const tmrevApi = createApi({
 				};
 			},
 			merge: (currentCache, newItems) => {
-				if (newItems.body.pageNumber > 1) {
+				if (newItems.body.pageNumber >= 1) {
 					// make sure there isn't duplicate data being added
 					const newData = [...currentCache.body.watchlists, ...newItems.body.watchlists];
 
@@ -399,7 +399,7 @@ export const tmrevApi = createApi({
 				};
 			},
 			merge: (currentCache, newItems) => {
-				if (newItems.body.pageNumber > 1) {
+				if (newItems.body.pageNumber >= 1) {
 					// make sure there isn't duplicate data being added
 					const newData = [...currentCache.body.watched, ...newItems.body.watched];
 
