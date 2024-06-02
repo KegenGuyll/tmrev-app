@@ -10,10 +10,13 @@ import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import CustomBackground from '@/components/CustomBottomSheetBackground';
 import MovieListItem from '@/components/MovieList/MovieListItem';
 import TitledHandledComponent from '@/components/BottomSheetModal/TitledHandledComponent';
+import CreateWatchListModal from '@/components/CreateWatchListModal';
 
 type AddMovieToListProps = {
 	visible: boolean;
 	onDismiss: () => void;
+	onSuccess?: () => void;
+	onError?: (message?: string) => void;
 	selectedMovie: MovieGeneral | null;
 };
 
@@ -23,7 +26,11 @@ const AddMovieToList: React.FC<AddMovieToListProps> = ({
 	visible,
 	onDismiss,
 	selectedMovie,
+	onSuccess,
+	onError,
 }: AddMovieToListProps) => {
+	const [movies, setMovies] = useState<MovieGeneral[]>([]);
+	const [openCreateModal, setOpenCreateModal] = useState(false);
 	const bottomSheetModalAddMoviesRef = useRef<BottomSheetModal>(null);
 	const [page, setPage] = useState(0);
 	const [refreshing, setRefreshing] = useState(false);
@@ -55,7 +62,7 @@ const AddMovieToList: React.FC<AddMovieToListProps> = ({
 
 		if (isLoading) return;
 
-		setPage((prev) => prev + 1);
+		setPage(page + 1);
 	}, [data, page]);
 
 	const handleRefresh = async () => {
@@ -66,64 +73,96 @@ const AddMovieToList: React.FC<AddMovieToListProps> = ({
 
 	const handleAddMovie = useCallback(
 		async (watchListId: string) => {
-			if (!selectedMovie) return;
+			try {
+				if (!selectedMovie) return;
 
-			await addMovie({
-				data: {
-					id: selectedMovie.id,
-				},
-				listId: watchListId,
-			}).unwrap();
+				await addMovie({
+					data: {
+						id: selectedMovie.id,
+					},
+					listId: watchListId,
+				}).unwrap();
 
-			onDismiss();
+				if (onSuccess) {
+					onSuccess();
+				}
+			} catch (error: any) {
+				if (onError) {
+					onError(
+						(error.data && error.data.error) || 'An error occurred while adding movie to list'
+					);
+				}
+			} finally {
+				onDismiss();
+			}
 		},
 		[selectedMovie]
 	);
 
 	return (
-		<BottomSheetModal
-			handleComponent={({ ...props }) => <TitledHandledComponent title="Add to List" {...props} />}
-			handleIndicatorStyle={{ backgroundColor: 'white' }}
-			backgroundComponent={CustomBackground}
-			ref={bottomSheetModalAddMoviesRef}
-			snapPoints={['95%']}
-			onChange={(index) => {
-				if (index === -1) {
-					onDismiss();
-				}
-			}}
-		>
-			<BottomSheetView>
-				{data && data.success && data.body && (
-					<FlatGrid
-						refreshControl={
-							<RefreshControl tintColor="white" refreshing={refreshing} onRefresh={handleRefresh} />
-						}
-						contentContainerStyle={{ height: '100%' }}
-						itemDimension={400}
-						spacing={8}
-						data={data.body.watchlists}
-						renderItem={({ item }) => (
-							<MovieListItem onPress={() => handleAddMovie(item._id)} item={item} />
-						)}
-						keyExtractor={(item) => item._id}
-						onEndReachedThreshold={1}
-						onEndReached={incrementPage}
-						ListFooterComponent={() => {
-							if (isLoading || isFetching) {
-								return (
-									<View>
-										<ActivityIndicator />
-									</View>
-								);
-							}
-
-							return null;
-						}}
+		<>
+			<BottomSheetModal
+				stackBehavior="push"
+				handleComponent={({ ...props }) => (
+					<TitledHandledComponent
+						cancelButton={{ title: 'Cancel', onPress: onDismiss }}
+						submitButton={{ title: 'Create List', onPress: () => setOpenCreateModal(true) }}
+						title="Add to List"
+						{...props}
 					/>
 				)}
-			</BottomSheetView>
-		</BottomSheetModal>
+				handleIndicatorStyle={{ backgroundColor: 'white' }}
+				backgroundComponent={CustomBackground}
+				ref={bottomSheetModalAddMoviesRef}
+				snapPoints={['95%']}
+				onChange={(index) => {
+					if (index === -1) {
+						onDismiss();
+					}
+				}}
+			>
+				<BottomSheetView>
+					{data && data.success && data.body && (
+						<FlatGrid
+							refreshControl={
+								<RefreshControl
+									tintColor="white"
+									refreshing={refreshing}
+									onRefresh={handleRefresh}
+								/>
+							}
+							itemDimension={400}
+							spacing={8}
+							data={[...data.body.emptyWatchlists, ...data.body.watchlists]}
+							renderItem={({ item }) => (
+								<MovieListItem onPress={() => handleAddMovie(item._id)} item={item} />
+							)}
+							keyExtractor={(item) => item._id}
+							onEndReachedThreshold={1}
+							onEndReached={incrementPage}
+							ListFooterComponent={() => {
+								if (isLoading || isFetching) {
+									return (
+										<View>
+											<ActivityIndicator />
+										</View>
+									);
+								}
+
+								return null;
+							}}
+						/>
+					)}
+				</BottomSheetView>
+			</BottomSheetModal>
+			<CreateWatchListModal
+				open={openCreateModal}
+				handleClose={() => setOpenCreateModal(false)}
+				movies={movies}
+				setMovies={setMovies}
+				onSuccess={() => setOpenCreateModal(false)}
+			/>
+		</>
 	);
 };
 
