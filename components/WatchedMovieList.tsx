@@ -71,7 +71,6 @@ const WatchedMovieList: React.FC<WatchedMovieListProps> = ({
 		if (!data) return;
 
 		if (page >= data?.body.totalNumberOfPages) {
-			console.log('return');
 			return;
 		}
 
