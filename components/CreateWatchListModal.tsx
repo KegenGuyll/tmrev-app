@@ -1,6 +1,6 @@
 import { BottomSheetModal, BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
 import { View } from 'react-native';
-import { Divider, Badge, Searchbar, Button, Text } from 'react-native-paper';
+import { Divider, Badge, Searchbar, Button, Text, Switch } from 'react-native-paper';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
 import CustomBackground from './CustomBottomSheetBackground';
@@ -31,11 +31,19 @@ const CreateWatchListModal: React.FC<CreateWatchListModalProps> = ({
 }: CreateWatchListModalProps) => {
 	const [title, setTitle] = useState('');
 	const [description, setDescription] = useState('');
+	const [publicList, setPublicList] = useState(true);
 	const [searchQuery, setSearchQuery] = useState('');
 	const bottomSheetModalCreateListRef = useRef<BottomSheetModal>(null);
 	const bottomSheetModalAddMoviesRef = useRef<BottomSheetModal>(null);
 	const [createWatchList] = useCreateWatchListMutation();
 	const router = useRouter();
+
+	const resetValues = () => {
+		setTitle('');
+		setDescription('');
+		setMovies([]);
+		setPublicList(true);
+	};
 
 	const debouncedSearchTerm = useDebounce(searchQuery, 500);
 
@@ -85,7 +93,7 @@ const CreateWatchListModal: React.FC<CreateWatchListModalProps> = ({
 		const response = await createWatchList({
 			description,
 			title,
-			public: true,
+			public: publicList,
 			tags: [],
 			movies: movies.map((movie, i) => ({
 				order: i,
@@ -95,9 +103,7 @@ const CreateWatchListModal: React.FC<CreateWatchListModalProps> = ({
 
 		handleCloseBottomSheet();
 		if (response) {
-			setTitle('');
-			setDescription('');
-			setMovies([]);
+			resetValues();
 			if (onSuccess) {
 				onSuccess();
 			} else if (router.canDismiss()) {
@@ -134,6 +140,11 @@ const CreateWatchListModal: React.FC<CreateWatchListModalProps> = ({
 							<Button onPress={handleCreateWatchList}>Save</Button>
 						</View>
 						<Divider />
+						<View style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+							<Text variant="labelLarge">Public</Text>
+							<Switch value={publicList} onChange={() => setPublicList(!publicList)} />
+						</View>
+
 						<TextInput
 							onChangeText={(text) => setTitle(text)}
 							placeholder="Add list name..."
