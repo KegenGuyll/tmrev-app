@@ -1,6 +1,6 @@
 import { BottomSheetModal, BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
 import { View } from 'react-native';
-import { Divider, Badge, Searchbar, Button, TextInput, Text } from 'react-native-paper';
+import { Divider, Badge, Searchbar, Button, Text } from 'react-native-paper';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
 import CustomBackground from './CustomBottomSheetBackground';
@@ -11,12 +11,15 @@ import { profileRoute } from '@/constants/routes';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import { useFindMoviesQuery } from '@/redux/api/tmdb/searchApi';
 import useDebounce from '@/hooks/useDebounce';
+import TextInput from './Inputs/TextInput';
+import MultiLineInput from './Inputs/MultiLineInput';
 
 type CreateWatchListModalProps = {
 	movies: MovieGeneral[];
 	setMovies: (movies: MovieGeneral[]) => void;
 	open: boolean;
 	handleClose: () => void;
+	onSuccess?: () => void;
 };
 
 const CreateWatchListModal: React.FC<CreateWatchListModalProps> = ({
@@ -24,6 +27,7 @@ const CreateWatchListModal: React.FC<CreateWatchListModalProps> = ({
 	setMovies,
 	open,
 	handleClose,
+	onSuccess,
 }: CreateWatchListModalProps) => {
 	const [title, setTitle] = useState('');
 	const [description, setDescription] = useState('');
@@ -83,24 +87,20 @@ const CreateWatchListModal: React.FC<CreateWatchListModalProps> = ({
 			title,
 			public: true,
 			tags: [],
-			movies: movies.map((movie) => ({
-				backdrop_path: movie.backdrop_path,
-				budget: movie.budget,
-				genres: movie.genres,
-				id: movie.id,
-				imdb_id: movie.imdb_id,
-				original_language: movie.original_language,
-				poster_path: movie.poster_path,
-				release_date: movie.release_date,
-				revenue: movie.revenue,
-				runtime: movie.runtime,
-				title: movie.title,
+			movies: movies.map((movie, i) => ({
+				order: i,
+				tmdbID: movie.id,
 			})),
 		}).unwrap();
 
 		handleCloseBottomSheet();
 		if (response) {
-			if (router.canDismiss()) {
+			setTitle('');
+			setDescription('');
+			setMovies([]);
+			if (onSuccess) {
+				onSuccess();
+			} else if (router.canDismiss()) {
 				router.dismiss();
 			} else {
 				router.navigate(profileRoute('profile', response.userId));
@@ -111,6 +111,9 @@ const CreateWatchListModal: React.FC<CreateWatchListModalProps> = ({
 	return (
 		<>
 			<BottomSheetModal
+				stackBehavior="push"
+				// eslint-disable-next-line react-native/no-color-literals
+				handleIndicatorStyle={{ backgroundColor: 'white' }}
 				onChange={handleCreateModalChange}
 				backgroundComponent={CustomBackground}
 				ref={bottomSheetModalCreateListRef}
@@ -136,16 +139,13 @@ const CreateWatchListModal: React.FC<CreateWatchListModalProps> = ({
 							placeholder="Add list name..."
 							label="List Name"
 							value={title}
-							dense
 						/>
-						<TextInput
+						<MultiLineInput
 							onChangeText={(text) => setDescription(text)}
 							placeholder="Add list description..."
 							label="List Description"
-							multiline
 							value={description}
 							numberOfLines={5}
-							dense
 						/>
 						<View style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 							{movies.map((movie) => (
@@ -167,6 +167,9 @@ const CreateWatchListModal: React.FC<CreateWatchListModalProps> = ({
 				</BottomSheetScrollView>
 			</BottomSheetModal>
 			<BottomSheetModal
+				// eslint-disable-next-line react-native/no-color-literals
+				handleIndicatorStyle={{ backgroundColor: 'white' }}
+				stackBehavior="push"
 				backgroundComponent={CustomBackground}
 				ref={bottomSheetModalAddMoviesRef}
 				snapPoints={['95%']}
