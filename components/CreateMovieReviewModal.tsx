@@ -9,11 +9,12 @@ import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import CustomBottomSheetBackground from '@/components/CustomBottomSheetBackground';
 import formatDateYear from '@/utils/formatDateYear';
 import RatingSliderList, { Ratings } from '@/components/AddReview/RatingSliderList';
-import ReviewNote from '@/components/AddReview/ReviewNote';
 import { useAddTmrevReviewMutation } from '@/redux/api/tmrev';
 import { CreateTmrevReviewQuery } from '@/models/tmrev';
 import { movieDetailsRoute } from '@/constants/routes';
 import TitledHandledComponent from './BottomSheetModal/TitledHandledComponent';
+import TextInput from './Inputs/TextInput';
+import MultiLineInput from './Inputs/MultiLineInput';
 
 const defaultRatings: Ratings = {
 	plot: 5,
@@ -45,7 +46,8 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 	const [lastReview, setLastReview] = useState<MovieGeneral | null>(null);
 	const [expanded, setExpanded] = useState(true);
 	const [reviewedSuccess, setReviewedSuccess] = useState(false);
-	const [isPrivate, setIsPrivate] = useState(false);
+	const [title, setTitle] = useState('');
+	const [isPublic, setIsPublic] = useState(true);
 	const [createReview] = useAddTmrevReviewMutation();
 	const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 	const [ratings, setRatings] = useState<Ratings>(defaultRatings);
@@ -58,6 +60,12 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 
 	const handleClearRatings = () => {
 		setRatings(defaultRatings);
+	};
+
+	const resetAllValues = () => {
+		handleClearRatings();
+		setNote('');
+		setIsPublic(true);
 	};
 
 	useEffect(() => {
@@ -92,10 +100,8 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 					},
 					reviewedDate: dayjs(new Date()).format('YYYY-MM-DD'),
 					title: selectedMovie.title,
-					moviePoster: selectedMovie.poster_path || '',
 					notes: note,
-					public: !isPrivate,
-					release_date: selectedMovie.release_date,
+					public: isPublic,
 				};
 				await createReview(review).unwrap();
 
@@ -164,8 +170,8 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 									gap: 4,
 								}}
 							>
-								<Text variant="labelLarge">{!isPrivate ? 'Public' : 'Private'} Review</Text>
-								<Switch value={isPrivate} onValueChange={() => setIsPrivate(!isPrivate)} />
+								<Text variant="labelLarge">Public Review</Text>
+								<Switch value={isPublic} onValueChange={() => setIsPublic(!isPublic)} />
 							</View>
 							<RatingSliderList
 								expanded={expanded}
@@ -174,10 +180,18 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 								ratings={ratings}
 								setRatings={handleSetRatings}
 							/>
-							<ReviewNote
-								handleCollapseSlider={() => setExpanded(false)}
-								note={note}
-								setNote={setNote}
+							<TextInput
+								label="Title"
+								placeholder="Review Title"
+								value={selectedMovie.title || title}
+								onChangeText={setTitle}
+							/>
+							<MultiLineInput
+								onFocus={() => setExpanded(false)}
+								value={note}
+								onChangeText={setNote}
+								numberOfLines={6}
+								label="Review Notes"
 							/>
 							<Divider />
 						</View>
