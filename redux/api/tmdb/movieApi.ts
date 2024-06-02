@@ -35,6 +35,7 @@ import {
 	IRetrieveWatchProvidersQuery,
 	IRetrieveWatchProvidersResponse,
 } from '@/models/tmdb/movie/movieWatchProviders';
+import { MovieTrendingPayload, MovieTrendingResponse } from '@/models/tmdb/movie/movieTrending';
 
 export const movieApi = createApi({
 	baseQuery: fetchBaseQuery({
@@ -223,6 +224,15 @@ export const movieApi = createApi({
 				results: response.results.sort((a, b) => a.display_priorities.US - b.display_priorities.US),
 			}),
 		}),
+		getTrendingMovies: builder.query<MovieTrendingResponse, MovieTrendingPayload>({
+			query: ({ pathParams, queryParams }) => ({
+				params: {
+					api_key: tmdbAPIKey,
+					...queryParams,
+				},
+				url: `/trending/movie/${pathParams.timeWindow}`,
+			}),
+		}),
 	}),
 	reducerPath: 'movieApi',
 });
@@ -248,4 +258,5 @@ export const {
 	useGetMovieDiscoverQuery,
 	useGetMovieGenreListQuery,
 	useGetWatchProviderListQuery,
+	useGetTrendingMoviesQuery,
 } = movieApi;
