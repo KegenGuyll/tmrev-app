@@ -440,6 +440,11 @@ const ListDetailsPage: React.FC = () => {
 									<Divider />
 									<Menu.Item leadingIcon="plus" onPress={handleOpenAddMovies} title="Add Movies" />
 									<Menu.Item leadingIcon="pencil" onPress={handleOpenEditModal} title="Edit" />
+									<Menu.Item
+										leadingIcon="content-save"
+										onPress={() => handleUpdateWatchList()}
+										title="Save"
+									/>
 								</Menu>
 							)}
 						</View>
