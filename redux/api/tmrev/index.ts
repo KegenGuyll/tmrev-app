@@ -290,14 +290,11 @@ export const tmrevApi = createApi({
 				url: `/movie/review/${body.reviewId}`,
 			}),
 		}),
-		deleteWatchList: builder.mutation<void, GetListPayload>({
+		deleteWatchList: builder.mutation<void, string>({
 			invalidatesTags: ['WATCH_LIST'],
-			query: (body) => ({
-				headers: {
-					authorization: body.authToken,
-				},
+			query: (listId) => ({
 				method: 'DELETE',
-				url: `/watch-list/${body.id}`,
+				url: `/watch-list/${listId}`,
 			}),
 		}),
 		deleteWatched: builder.mutation<void, WatchedDeletePayload>({
@@ -341,9 +338,6 @@ export const tmrevApi = createApi({
 		getList: builder.query<WatchList, GetListPayload>({
 			providesTags: ['WATCH_LIST'],
 			query: (body) => ({
-				headers: {
-					authorization: body.authToken,
-				},
 				url: `/watch-list/${body.id}`,
 			}),
 		}),

@@ -10,7 +10,11 @@ import { FlatGrid } from 'react-native-super-grid';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import dayjs from 'dayjs';
 import { FromLocation } from '@/models';
-import { useGetWatchListDetailsQuery, useUpdateWatchListMutation } from '@/redux/api/tmrev';
+import {
+	useDeleteWatchListMutation,
+	useGetWatchListDetailsQuery,
+	useUpdateWatchListMutation,
+} from '@/redux/api/tmrev';
 import { MovieDetails } from '@/models/tmrev/review';
 import MoviePoster, { MoviePosterImage } from '@/components/MoviePoster';
 import EditRankPosition from '@/features/listDetails/EditRankPosition';
@@ -119,6 +123,7 @@ const ListDetailsPage: React.FC = () => {
 	};
 
 	const [updateWatchList] = useUpdateWatchListMutation();
+	const [deleteWatchList] = useDeleteWatchListMutation();
 
 	useEffect(() => {
 		if (newMovies.length) {
@@ -325,7 +330,7 @@ const ListDetailsPage: React.FC = () => {
 	const handleUpdateWatchList = useCallback(
 		async (movies?: MovieDetails[]) => {
 			if (!data) return;
-
+			setMenuVisible(false);
 			const formattedMovies = () => {
 				if (movies) {
 					return movies.map((movie, index) => ({ order: index, tmdbID: movie.id }));
@@ -345,10 +350,18 @@ const ListDetailsPage: React.FC = () => {
 
 			setHasSaved(true);
 
-			setSnackBarMessage(`saved`);
+			setSnackBarMessage(`Saved ${title || data!.body.title}`);
 		},
 		[data, description, listId, rankedList, title, updateWatchList]
 	);
+
+	const handleDeleteWatchList = async () => {
+		if (!data) return;
+
+		setMenuVisible(false);
+		await deleteWatchList(data.body._id).unwrap();
+		navigation.goBack();
+	};
 
 	// update watchlist if there are any position changes
 	useEffect(() => {
@@ -444,6 +457,25 @@ const ListDetailsPage: React.FC = () => {
 										leadingIcon="content-save"
 										onPress={() => handleUpdateWatchList()}
 										title="Save"
+									/>
+									<Divider />
+									<Menu.Item
+										leadingIcon="delete"
+										onPress={() => {
+											setMenuVisible(false);
+											Alert.alert('Delete List', 'Are you sure you want to delete this list?', [
+												{
+													text: 'Cancel',
+													style: 'cancel',
+												},
+												{
+													text: 'Delete',
+													style: 'destructive',
+													onPress: handleDeleteWatchList,
+												},
+											]);
+										}}
+										title="Delete"
 									/>
 								</Menu>
 							)}

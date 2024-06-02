@@ -14,7 +14,6 @@ interface WatchList {
 
 interface GetListPayload {
 	id: string;
-	authToken: string;
 }
 
 interface WatchListSearchQuery {
