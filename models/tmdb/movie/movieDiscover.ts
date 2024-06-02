@@ -38,6 +38,8 @@ interface IMovieDiscoverQuery {
 		with_watch_providers?: string;
 		with_genres?: string;
 		with_people?: string;
+		with_origin_country?: string;
+		with_original_language?: string;
 	};
 }
 
