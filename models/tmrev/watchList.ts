@@ -45,7 +45,7 @@ type CreateWatchList = {
 	title: string;
 	public: boolean;
 	tags: string[];
-	movies: MovieDetails[];
+	movies: { order: number; tmdbID: number }[];
 };
 
 type GetUserWatchListResponseData = {
@@ -54,6 +54,7 @@ type GetUserWatchListResponseData = {
 	totalNumberOfPages: number;
 	totalCount: number;
 	watchlists: WatchList[];
+	emptyWatchlists: WatchList[];
 };
 
 type GetUserWatchListResponse = {
