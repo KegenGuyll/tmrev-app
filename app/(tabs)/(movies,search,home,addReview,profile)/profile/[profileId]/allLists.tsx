@@ -1,5 +1,6 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
+import auth from '@react-native-firebase/auth';
 import { RefreshControl, View } from 'react-native';
 import { IconButton, Text, ActivityIndicator } from 'react-native-paper';
 import { FlatGrid } from 'react-native-super-grid';
@@ -32,6 +33,10 @@ const AllListsPage: React.FC = () => {
 		skip: !profileId,
 	});
 
+	const { currentUser } = auth();
+
+	const isCurrentUser = useMemo(() => currentUser?.uid === profileId, [currentUser, profileId]);
+
 	const handleRefresh = async () => {
 		setRefreshing(true);
 		setPage(0);
@@ -59,12 +64,17 @@ const AllListsPage: React.FC = () => {
 			<Stack.Screen
 				options={{
 					title: 'All Lists',
-					headerRight: () => (
-						<View style={{ display: 'flex', flexDirection: 'row' }}>
-							<IconButton onPress={handleOpenBottomSheet} icon="plus" size={24} />
-							<IconButton onPress={handleOpenBottomSheet} icon="filter" size={24} />
-						</View>
-					),
+					headerRight: () => {
+						if (isCurrentUser) {
+							return (
+								<View style={{ display: 'flex', flexDirection: 'row' }}>
+									<IconButton onPress={handleOpenBottomSheet} icon="plus" size={24} />
+								</View>
+							);
+						}
+
+						return null;
+					},
 				}}
 			/>
 			<FlatGrid
