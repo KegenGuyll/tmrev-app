@@ -91,7 +91,6 @@ const AllReviews = () => {
 		data: userMovieReviewResponse,
 		isLoading,
 		isFetching,
-		refetch,
 	} = useGetUserMovieReviewsQuery({ userId: profileId!, query }, { skip: !profileId });
 
 	const theme = useTheme();
@@ -99,19 +98,16 @@ const AllReviews = () => {
 
 	const onRefresh = useCallback(() => {
 		setRefreshing(true);
-		refetch().then(() => setRefreshing(false));
+		setPage(0);
+		setRefreshing(false);
 	}, []);
 
 	const incrementPage = useCallback(() => {
-		if (
-			userMovieReviewResponse?.body.pageNumber === userMovieReviewResponse?.body.totalNumberOfPages
-		) {
+		if (page === userMovieReviewResponse?.body.totalNumberOfPages) {
 			return;
 		}
 
-		if (isLoading) return;
-
-		setPage((prev) => prev + 1);
+		setPage(page + 1);
 	}, [userMovieReviewResponse]);
 
 	if (isLoading || !userMovieReviewResponse) {
@@ -177,7 +173,6 @@ const AllReviews = () => {
 					data={userMovieReviewResponse.body.reviews}
 					contentContainerStyle={{ alignItems: 'stretch', width: '100%' }}
 					itemContainerStyle={{ maxHeight: 170 }}
-					onEndReachedThreshold={1}
 					spacing={8}
 					renderItem={({ item }) => (
 						<MovieReviewCard
