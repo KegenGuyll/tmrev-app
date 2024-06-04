@@ -73,6 +73,7 @@ import {
 	UpdateUserQuery,
 } from '@/models/tmrev/user';
 import { MovieGenreInsightResponse } from '@/models/tmrev/insights';
+import { FeedQuery, FeedResponse } from '@/models/tmrev/feed';
 
 export const tmrevApi = createApi({
 	baseQuery: fetchBaseQuery({
@@ -568,6 +569,44 @@ export const tmrevApi = createApi({
 				url: '/movie/v2/pinned',
 			}),
 		}),
+		getUserFeed: builder.query<FeedResponse, FeedQuery>({
+			query: (data) => ({
+				params: {
+					...data,
+				},
+				url: '/user/v2/feed',
+			}),
+			serializeQueryArgs: ({ queryArgs }) => {
+				const refetchQueries = { ...queryArgs };
+
+				// @ts-expect-error
+				delete refetchQueries.pageNumber;
+
+				return {
+					...refetchQueries,
+				};
+			},
+			merge: (currentCache, newItems) => {
+				if (newItems.body.pageNumber >= 1) {
+					// make sure there isn't duplicate data being added
+					const newData = [...currentCache.body.feed.reviews, ...newItems.body.feed.reviews];
+
+					// remove duplicates
+					const uniqueData = newData.filter((v, i, a) => a.findIndex((t) => t._id === v._id) === i);
+
+					// Merge the new items into the cache
+					currentCache.body.feed.reviews = uniqueData;
+
+					return currentCache;
+				}
+
+				return newItems;
+			},
+			// Refetch when the page arg changes
+			forceRefetch({ currentArg, previousArg }) {
+				return currentArg?.pageNumber !== previousArg?.pageNumber;
+			},
+		}),
 	}),
 	reducerPath: 'tmrevApi',
 	tagTypes: [
@@ -629,6 +668,7 @@ export const {
 	useGetWatchListDetailsQuery,
 	useGetGenreInsightsQuery,
 	useGetSingleWatchedQuery,
+	useGetUserFeedQuery,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;
 
