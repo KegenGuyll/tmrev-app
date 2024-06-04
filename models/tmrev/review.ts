@@ -109,15 +109,9 @@ interface AdvancedScore {
 	_id: number;
 }
 
-interface CreatedAt {
-	seconds: number;
-	nanoseconds: number;
-}
+type CreatedAt = string;
 
-interface UpdatedAt {
-	seconds: number;
-	nanoseconds: number;
-}
+type UpdatedAt = string;
 
 interface MovieScore {
 	_id: ID;
