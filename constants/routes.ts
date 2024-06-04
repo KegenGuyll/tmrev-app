@@ -12,6 +12,10 @@ export const allReviewsRoute = (from: FromLocation, profileId: string, advancedS
 	return `${baseUrl}?from=${from}`;
 };
 
+export const feedReviewRoute = (reviewId: string) => {
+	return `${baseTabUrl}/(home)/home/${reviewId}`;
+};
+
 export const allListsRoute = (from: FromLocation, profileId: string) => {
 	return `${baseTabUrl}/(${from})/profile/${profileId}/allLists?from=${from}`;
 };

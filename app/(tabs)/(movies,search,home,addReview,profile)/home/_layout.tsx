@@ -2,7 +2,7 @@ import { Stack } from 'expo-router';
 
 const HomeLayout = () => {
 	return (
-		<Stack screenOptions={{ headerShown: false, title: 'Home Page', headerTintColor: 'white' }} />
+		<Stack screenOptions={{ headerShown: true, title: 'Home Page', headerTintColor: 'white' }} />
 	);
 };
 

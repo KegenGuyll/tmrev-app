@@ -45,7 +45,7 @@ const HomeScreen = () => {
 
 	return (
 		<>
-			<Stack.Screen options={{ headerShown: false, title: 'Home Page' }} />
+			<Stack.Screen options={{ headerShown: true, title: 'Home' }} />
 			<View>
 				<FlatList
 					onEndReached={onEndReached}

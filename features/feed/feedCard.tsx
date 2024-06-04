@@ -1,8 +1,10 @@
 import { StyleSheet, View, Image, TouchableHighlight } from 'react-native';
 import { TouchableRipple, Text, IconButton, Chip } from 'react-native-paper';
 import dayjs from 'dayjs';
+import { useRouter } from 'expo-router';
 import { FeedReviews } from '@/models/tmrev/feed';
 import { MoviePosterImage } from '@/components/MoviePoster';
+import { feedReviewRoute } from '@/constants/routes';
 
 type FeedCardProps = {
 	review: FeedReviews;
@@ -10,10 +12,11 @@ type FeedCardProps = {
 
 const FeedCard: React.FC<FeedCardProps> = ({ review }: FeedCardProps) => {
 	const styles = makeStyle();
+	const router = useRouter();
 
 	return (
 		<TouchableRipple
-			onPress={() => console.log('card pressed')}
+			onPress={() => router.navigate(feedReviewRoute(review._id))}
 			style={[styles.container, styles.flexColumn, { gap: 8 }]}
 		>
 			<>
