@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Stack } from 'expo-router';
 import { FlatList, RefreshControl, View } from 'react-native';
 import { ActivityIndicator, Divider, Text } from 'react-native-paper';
@@ -10,23 +10,18 @@ const pageSize = 10;
 const HomeScreen = () => {
 	const [isRefreshing, setIsRefreshing] = useState(false);
 	const [page, setPage] = useState(0);
-	const { data, isLoading, isFetching } = useGetUserFeedQuery({
+	const { data, isLoading, refetch } = useGetUserFeedQuery({
 		pageNumber: page,
 		pageSize,
 	});
 
 	const hasReachedEnd = useMemo(() => data?.body.totalNumberOfPages === page, [data, page]);
 
-	useEffect(() => {
-		if (isFetching) {
-			setIsRefreshing(true);
-		} else {
-			setIsRefreshing(false);
-		}
-	}, [isFetching]);
-
 	const onRefresh = async () => {
+		setIsRefreshing(true);
 		setPage(0);
+		await refetch().unwrap();
+		setIsRefreshing(false);
 	};
 
 	const onEndReached = async () => {
