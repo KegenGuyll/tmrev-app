@@ -138,6 +138,9 @@ PODS:
   - Firebase/Crashlytics (10.24.0):
     - Firebase/CoreOnly
     - FirebaseCrashlytics (~> 10.24.0)
+  - Firebase/Messaging (10.24.0):
+    - Firebase/CoreOnly
+    - FirebaseMessaging (~> 10.24.0)
   - FirebaseAppCheckInterop (10.25.0)
   - FirebaseAuth (10.24.0):
     - FirebaseAppCheckInterop (~> 10.17)
@@ -168,6 +171,15 @@ PODS:
     - GoogleUtilities/Environment (~> 7.8)
     - GoogleUtilities/UserDefaults (~> 7.8)
     - PromisesObjC (~> 2.1)
+  - FirebaseMessaging (10.24.0):
+    - FirebaseCore (~> 10.0)
+    - FirebaseInstallations (~> 10.0)
+    - GoogleDataTransport (~> 9.3)
+    - GoogleUtilities/AppDelegateSwizzler (~> 7.8)
+    - GoogleUtilities/Environment (~> 7.8)
+    - GoogleUtilities/Reachability (~> 7.8)
+    - GoogleUtilities/UserDefaults (~> 7.8)
+    - nanopb (< 2.30911.0, >= 2.30908.0)
   - FirebaseRemoteConfigInterop (10.25.0)
   - FirebaseSessions (10.25.0):
     - FirebaseCore (~> 10.5)
@@ -1298,6 +1310,11 @@ PODS:
     - FirebaseCoreExtension
     - React-Core
     - RNFBApp
+  - RNFBMessaging (20.1.0):
+    - Firebase/Messaging (= 10.24.0)
+    - FirebaseCoreExtension
+    - React-Core
+    - RNFBApp
   - RNGestureHandler (2.14.1):
     - glog
     - RCT-Folly (= 2022.05.16.00)
@@ -1404,6 +1421,7 @@ DEPENDENCIES:
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBAuth (from `../node_modules/@react-native-firebase/auth`)"
   - "RNFBCrashlytics (from `../node_modules/@react-native-firebase/crashlytics`)"
+  - "RNFBMessaging (from `../node_modules/@react-native-firebase/messaging`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
   - RNReanimated (from `../node_modules/react-native-reanimated`)
@@ -1424,6 +1442,7 @@ SPEC REPOS:
     - FirebaseCoreInternal
     - FirebaseCrashlytics
     - FirebaseInstallations
+    - FirebaseMessaging
     - FirebaseRemoteConfigInterop
     - FirebaseSessions
     - fmt
@@ -1594,6 +1613,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/auth"
   RNFBCrashlytics:
     :path: "../node_modules/@react-native-firebase/crashlytics"
+  RNFBMessaging:
+    :path: "../node_modules/@react-native-firebase/messaging"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
   RNGoogleSignin:
@@ -1645,6 +1666,7 @@ SPEC CHECKSUMS:
   FirebaseCoreInternal: 910a81992c33715fec9263ca7381d59ab3a750b7
   FirebaseCrashlytics: af38ea4adfa606f6e63fcc22091b61e7938fcf66
   FirebaseInstallations: 91950fe859846fff0fbd296180909dd273103b09
+  FirebaseMessaging: 4d52717dd820707cc4eadec5eb981b4832ec8d5d
   FirebaseRemoteConfigInterop: b25018791b204c0d78a90e394d6c62d9b1f22da8
   FirebaseSessions: c0939656253a1fa0e94ecc266ccf770cc8b33732
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
@@ -1709,6 +1731,7 @@ SPEC CHECKSUMS:
   RNFBApp: 614f1621b49db54ebd258df8c45427370d8d84a2
   RNFBAuth: fbfd567c34579b2a081b9ae5d6f0e33c2f4d1205
   RNFBCrashlytics: c39e903af97cb426f36a10d3268fb0623a1ccddf
+  RNFBMessaging: 7e2a1b2f83c3bcff3a8df1241b511681b5c39bb4
   RNGestureHandler: 12833709769dde5fdb36ec9d4cdf4d3a1a024122
   RNGoogleSignin: 24d3b3261f78b0fae0aa013f8ab6f8d25e369b0c
   RNReanimated: 41963a348e738c496a9b129bba9a9217017cd530
