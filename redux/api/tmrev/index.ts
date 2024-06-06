@@ -552,6 +552,16 @@ export const tmrevApi = createApi({
 				url: `/movie/review/vote/${data.reviewId}`,
 			}),
 		}),
+		voteComment: builder.mutation<void, { vote: boolean; commentId: string }>({
+			invalidatesTags: ['COMMENT'],
+			query: (data) => ({
+				body: {
+					vote: data.vote,
+				},
+				method: 'POST',
+				url: `/comments/vote/${data.commentId}`,
+			}),
+		}),
 		getPinnedMovies: builder.query<GetPinnedMoviesResponse, string>({
 			providesTags: ['PINNED'],
 			query: (userId) => ({
@@ -579,6 +589,7 @@ export const tmrevApi = createApi({
 			}),
 		}),
 		getUserFeed: builder.query<FeedResponse, FeedQuery>({
+			providesTags: ['COMMENT'],
 			query: (data) => ({
 				params: {
 					...data,
@@ -680,6 +691,7 @@ export const {
 	useGetUserFeedQuery,
 	useGetCommentsQuery,
 	useGetCommentDetailsQuery,
+	useVoteCommentMutation,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;
 
