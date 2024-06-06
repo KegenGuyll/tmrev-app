@@ -118,6 +118,13 @@ export const tmrevApi = createApi({
 				url: `/comments/${commentId}/details`,
 			}),
 		}),
+		deleteComment: builder.mutation<void, string>({
+			invalidatesTags: ['COMMENT'],
+			query: (commentId) => ({
+				method: 'DELETE',
+				url: `/comments/${commentId}`,
+			}),
+		}),
 		addMovieToWatchList: builder.mutation<void, AddMovieToWatchList>({
 			invalidatesTags: ['WATCH_LIST'],
 			query: (body) => ({
@@ -692,6 +699,7 @@ export const {
 	useGetCommentsQuery,
 	useGetCommentDetailsQuery,
 	useVoteCommentMutation,
+	useDeleteCommentMutation,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;
 

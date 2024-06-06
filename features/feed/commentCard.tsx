@@ -4,16 +4,17 @@ import {
 	Image,
 	TouchableWithoutFeedback,
 	TouchableHighlight,
+	Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Text, Divider, Button, Snackbar } from 'react-native-paper';
+import { Text, Divider, Button, Snackbar, IconButton, Menu } from 'react-native-paper';
 import dayjs from 'dayjs';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import auth from '@react-native-firebase/auth';
 import { CommentWithUser } from '@/models/tmrev/comments';
 import { feedReviewDetailsRoute, feedReviewRoute, profileRoute } from '@/constants/routes';
 import { numberShortHand } from '@/utils/common';
-import { useVoteCommentMutation } from '@/redux/api/tmrev';
+import { useDeleteCommentMutation, useVoteCommentMutation } from '@/redux/api/tmrev';
 
 type CommentCardProps = {
 	comment: CommentWithUser;
@@ -26,9 +27,16 @@ const CommentCard: React.FC<CommentCardProps> = ({
 }: CommentCardProps) => {
 	const styles = makeStyles();
 	const router = useRouter();
+	const [openMenu, setOpenMenu] = useState<boolean>(false);
 
 	const [voteComment] = useVoteCommentMutation();
+	const [deleteComment] = useDeleteCommentMutation();
 	const { currentUser } = auth();
+
+	const isCurrentUsersComment = useMemo(
+		() => currentUser?.uid === comment.user.uuid,
+		[currentUser, comment]
+	);
 
 	const [hasLiked, setHasLiked] = useState<boolean>(false);
 	const [hasDisliked, setHasDisliked] = useState<boolean>(false);
@@ -65,6 +73,27 @@ const CommentCard: React.FC<CommentCardProps> = ({
 		}
 	};
 
+	const handleDeleteComment = async () => {
+		try {
+			setOpenMenu(false);
+			Alert.alert('Delete Comment', 'Are you sure you want to delete this comment?', [
+				{
+					text: 'Cancel',
+					style: 'cancel',
+				},
+				{
+					style: 'destructive',
+					text: 'Delete',
+					onPress: async () => {
+						await deleteComment(comment._id).unwrap();
+					},
+				},
+			]);
+		} catch (error) {
+			setSnackBarMessage('Error has occurred');
+		}
+	};
+
 	return (
 		<>
 			<TouchableHighlight onPress={() => router.push(feedReviewRoute(comment._id, 'comments'))}>
@@ -76,22 +105,46 @@ const CommentCard: React.FC<CommentCardProps> = ({
 							width={50}
 							style={{ borderRadius: 100 }}
 						/>
-						<View style={{ gap: 16 }}>
+						<View style={{ flex: 1, gap: 16 }}>
 							<TouchableWithoutFeedback
 								onPress={() => router.navigate(profileRoute('home', comment.user.uuid))}
 							>
-								<View style={styles.flexColumn}>
-									<Text variant="labelLarge">
-										{comment.user.firstName} {comment.user.lastName}
-									</Text>
-									<Text variant="labelSmall">
-										{dayjs(comment.createdAt).format('hh:mm A · MMM DD, YYYY')}
-									</Text>
+								<View
+									style={[styles.flexRow, { alignItems: 'flex-start', flex: 1, width: '100%' }]}
+								>
+									<View style={[styles.flexColumn, { flexGrow: 1 }]}>
+										<Text variant="labelLarge">
+											{comment.user.firstName} {comment.user.lastName}
+										</Text>
+										<Text variant="labelSmall">
+											{dayjs(comment.createdAt).format('hh:mm A · MMM DD, YYYY')}
+										</Text>
+									</View>
+									<View>
+										{isCurrentUsersComment && (
+											<View>
+												<Menu
+													anchor={
+														<IconButton icon="dots-vertical" onPress={() => setOpenMenu(true)} />
+													}
+													visible={openMenu}
+													onDismiss={() => setOpenMenu(false)}
+												>
+													<Menu.Item
+														dense
+														leadingIcon="delete"
+														onPress={handleDeleteComment}
+														title="Delete"
+													/>
+												</Menu>
+											</View>
+										)}
+									</View>
 								</View>
 							</TouchableWithoutFeedback>
-							<View>
-								<Text variant="bodyMedium">{comment.comment}</Text>
-							</View>
+							<Text style={{ flex: 1, flexWrap: 'wrap', width: '90%' }} variant="bodyMedium">
+								{comment.comment}
+							</Text>
 						</View>
 					</View>
 					<Divider />
