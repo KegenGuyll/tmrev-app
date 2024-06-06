@@ -3,9 +3,11 @@ import { StyleSheet, View, Image } from 'react-native';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import auth from '@react-native-firebase/auth';
+import { useRouter } from 'expo-router';
 import MoviePoster from '@/components/MoviePoster';
 import { ReviewResponse } from '@/models/tmrev/movie';
 import { useVoteTmrevReviewMutation } from '@/redux/api/tmrev';
+import { feedReviewDetailsRoute } from '@/constants/routes';
 
 type ReviewCardProps = {
 	reviewData: ReviewResponse | undefined;
@@ -19,6 +21,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 	numberOfComments = 0,
 }: ReviewCardProps) => {
 	const styles = makeStyles(useTheme());
+	const router = useRouter();
 	const [hasLiked, setHasLiked] = useState<boolean>(false);
 	const [hasDisliked, setHasDisliked] = useState<boolean>(false);
 
@@ -53,6 +56,12 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 		} catch (error) {
 			console.error(error);
 		}
+	};
+
+	const handleComment = () => {
+		if (!reviewData || !reviewData?.body) return;
+
+		router.navigate(feedReviewDetailsRoute(reviewData.body?._id, 'reviews'));
 	};
 
 	if (!reviewData) return null;
@@ -114,7 +123,12 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 						>
 							{reviewData.body?.votes?.downVote.length}
 						</Button>
-						<Button textColor="white" icon="comment-outline" style={styles.flexRow}>
+						<Button
+							onPress={handleComment}
+							textColor="white"
+							icon="comment-outline"
+							style={styles.flexRow}
+						>
 							{numberOfComments}
 						</Button>
 						<Button textColor="white" onPress={() => console.log('share')} icon="share-outline">
