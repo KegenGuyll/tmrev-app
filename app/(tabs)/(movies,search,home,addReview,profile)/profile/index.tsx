@@ -1,10 +1,23 @@
-import { RefreshControl, View, SafeAreaView, ScrollView } from 'react-native';
+import {
+	RefreshControl,
+	View,
+	SafeAreaView,
+	ScrollView,
+	Platform,
+	// eslint-disable-next-line react-native/split-platform-components
+	PermissionsAndroid,
+} from 'react-native';
 import auth from '@react-native-firebase/auth';
-import { Button, Divider, IconButton, Menu, Text, useTheme } from 'react-native-paper';
+import messaging from '@react-native-firebase/messaging';
+import { Button, Divider, IconButton, Menu, Snackbar, Text, useTheme } from 'react-native-paper';
 import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import ProfileHeader from '@/components/Profile/ProfileHeader';
-import { useGetGenreInsightsQuery, useGetV2UserQuery } from '@/redux/api/tmrev';
+import {
+	useGetGenreInsightsQuery,
+	useGetV2UserQuery,
+	useSaveUserDeviceTokenMutation,
+} from '@/redux/api/tmrev';
 import ProfileNavigation from '@/components/Profile/ProfileListNavigationt';
 import ProfilePinnedMovies from '@/components/Profile/ProfilePinnedMovies';
 import { loginRoute, signupRoute } from '@/constants/routes';
@@ -14,6 +27,9 @@ const Profile = () => {
 	const { currentUser } = auth();
 	const router = useRouter();
 	const [refreshing, setRefreshing] = useState(false);
+	const [snackbarMessage, setSnackbarMessage] = useState('');
+
+	const [saveToken] = useSaveUserDeviceTokenMutation();
 
 	const theme = useTheme();
 
@@ -48,6 +64,45 @@ const Profile = () => {
 			router.replace('/(tabs)/(home)/home');
 		} catch (error) {
 			console.error(error);
+		}
+	};
+
+	const handleDeviceToken = async () => {
+		try {
+			if (!currentUser) return;
+
+			if (Platform.OS === 'ios') {
+				const authStatus = await messaging().requestPermission();
+
+				const enabled =
+					authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+					authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+				if (enabled) {
+					const deviceToken = await messaging().getToken();
+					if (deviceToken) {
+						await saveToken(deviceToken).unwrap();
+					}
+				}
+			} else if (Platform.OS === 'android') {
+				const authStatus = await PermissionsAndroid.request(
+					PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+				);
+
+				const enabled = authStatus === PermissionsAndroid.RESULTS.GRANTED;
+
+				if (enabled) {
+					const deviceToken = await messaging().getToken();
+					if (deviceToken) {
+						await saveToken(deviceToken).unwrap();
+					}
+				}
+			}
+			setSnackbarMessage('Notifications enabled');
+		} catch (error) {
+			console.error(error);
+		} finally {
+			closeMenu();
 		}
 	};
 
@@ -86,6 +141,7 @@ const Profile = () => {
 							onDismiss={closeMenu}
 							anchor={<IconButton onPress={openMenu} icon="dots-vertical" />}
 						>
+							<Menu.Item onPress={handleDeviceToken} title="Enable Notifications" />
 							<Menu.Item onPress={handleSignOut} title="Logout" />
 						</Menu>
 					),
@@ -134,6 +190,9 @@ const Profile = () => {
 					</View>
 				</ScrollView>
 			</SafeAreaView>
+			<Snackbar visible={!!snackbarMessage} onDismiss={() => setSnackbarMessage('')}>
+				{snackbarMessage}
+			</Snackbar>
 		</>
 	);
 };

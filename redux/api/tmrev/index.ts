@@ -312,6 +312,15 @@ export const tmrevApi = createApi({
 				url: `/movie/review/${body.reviewId}`,
 			}),
 		}),
+		saveUserDeviceToken: builder.mutation<void, string>({
+			query: (deviceToken) => ({
+				body: {
+					deviceToken,
+				},
+				method: 'POST',
+				url: '/user/deviceToken',
+			}),
+		}),
 		deleteWatchList: builder.mutation<void, string>({
 			invalidatesTags: ['WATCH_LIST'],
 			query: (listId) => ({
@@ -700,6 +709,7 @@ export const {
 	useGetCommentDetailsQuery,
 	useVoteCommentMutation,
 	useDeleteCommentMutation,
+	useSaveUserDeviceTokenMutation,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;
 
