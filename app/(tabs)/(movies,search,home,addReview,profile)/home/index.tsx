@@ -52,7 +52,7 @@ const HomeScreen = () => {
 					renderItem={({ item }) => (
 						<View>
 							<Divider />
-							<FeedCard review={item} />
+							<FeedCard contentType="reviews" review={item} />
 						</View>
 					)}
 					onEndReachedThreshold={0.5}

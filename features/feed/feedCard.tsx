@@ -1,16 +1,23 @@
 import { StyleSheet, View, Image, TouchableHighlight } from 'react-native';
-import { TouchableRipple, Text, IconButton, Chip, Snackbar } from 'react-native-paper';
+import { TouchableRipple, Text, Chip, Snackbar, Button } from 'react-native-paper';
 import dayjs from 'dayjs';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import auth from '@react-native-firebase/auth';
 import { FeedReviews } from '@/models/tmrev/feed';
 import MoviePoster from '@/components/MoviePoster';
-import { feedReviewRoute, profileRoute } from '@/constants/routes';
+import {
+	FeedReviewContentTypes,
+	feedReviewDetailsRoute,
+	feedReviewRoute,
+	profileRoute,
+} from '@/constants/routes';
 import { useVoteTmrevReviewMutation } from '@/redux/api/tmrev';
 
 type FeedCardProps = {
 	review: FeedReviews;
+	// eslint-disable-next-line react/no-unused-prop-types
+	contentType: FeedReviewContentTypes;
 };
 
 const FeedCard: React.FC<FeedCardProps> = ({ review }: FeedCardProps) => {
@@ -24,9 +31,11 @@ const FeedCard: React.FC<FeedCardProps> = ({ review }: FeedCardProps) => {
 	const [snackBarMessage, setSnackBarMessage] = useState<string | null>(null);
 
 	useEffect(() => {
-		setHasLiked(review.votes!.upVote.includes(currentUser!.uid));
-		setHasDisliked(review.votes!.downVote.includes(currentUser!.uid));
-	}, [review.votes]);
+		if (!currentUser || !review.votes) return;
+
+		setHasLiked(review.votes.upVote.includes(currentUser.uid));
+		setHasDisliked(review.votes.downVote.includes(currentUser.uid));
+	}, [review.votes, currentUser]);
 
 	const [voteReview] = useVoteTmrevReviewMutation();
 
@@ -95,18 +104,30 @@ const FeedCard: React.FC<FeedCardProps> = ({ review }: FeedCardProps) => {
 						</View>
 					</View>
 					<View style={[styles.flexRow, { justifyContent: 'space-evenly', padding: 0 }]}>
-						<IconButton
+						<Button
+							textColor="white"
 							onPress={handleUpVote}
-							size={12}
 							icon={hasLiked ? 'thumb-up' : 'thumb-up-outline'}
-						/>
-						<IconButton
+						>
+							{review.votes!.upVote.length}
+						</Button>
+						<Button
+							textColor="white"
 							onPress={handleDownVote}
-							size={12}
 							icon={hasDisliked ? 'thumb-down' : 'thumb-down-outline'}
-						/>
-						<IconButton onPress={() => console.log('comment')} size={12} icon="comment-outline" />
-						<IconButton onPress={() => console.log('share')} size={12} icon="share-outline" />
+						>
+							{review.votes!.downVote.length}
+						</Button>
+						<Button
+							textColor="white"
+							onPress={() => router.navigate(feedReviewDetailsRoute(review._id, 'reviews'))}
+							icon="comment-outline"
+						>
+							{review.replies}
+						</Button>
+						<Button textColor="white" onPress={() => console.log('share')} icon="share-outline">
+							Share
+						</Button>
 					</View>
 				</>
 			</TouchableRipple>
