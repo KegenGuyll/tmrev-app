@@ -8,6 +8,7 @@ import MoviePoster from '@/components/MoviePoster';
 import { ReviewResponse } from '@/models/tmrev/movie';
 import { useVoteTmrevReviewMutation } from '@/redux/api/tmrev';
 import { feedReviewDetailsRoute } from '@/constants/routes';
+import { formatDate } from '@/utils/common';
 
 type ReviewCardProps = {
 	reviewData: ReviewResponse | undefined;
@@ -80,7 +81,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 						{reviewData.body?.user.firstName} {reviewData.body?.user.lastName}
 					</Text>
 					<Text variant="labelSmall">
-						{dayjs(reviewData.body?.createdAt).format('hh:mm A · MMM DD, YYYY')}
+						{dayjs(formatDate(reviewData.body!.createdAt)).format('hh:mm A · MMM DD, YYYY')}
 					</Text>
 				</View>
 			</View>

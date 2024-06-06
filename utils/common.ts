@@ -1,4 +1,6 @@
+import dayjs from 'dayjs';
 import { Platform } from 'react-native';
+import { CreatedAt } from '@/models/tmrev';
 
 export function numberShortHand(number: number): string {
 	if (Platform.OS === 'ios') {
@@ -136,3 +138,9 @@ export function genreIdToName(genreId: number) {
 export function camelCaseToWords(str: string) {
 	return str.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase());
 }
+
+export const formatDate = (date: CreatedAt): string => {
+	if (typeof date === 'string') return date;
+
+	return dayjs(date.seconds * 1000).toString();
+};

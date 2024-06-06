@@ -13,6 +13,7 @@ import {
 	profileRoute,
 } from '@/constants/routes';
 import { useVoteTmrevReviewMutation } from '@/redux/api/tmrev';
+import { formatDate } from '@/utils/common';
 
 type FeedCardProps = {
 	review: FeedReviews;
@@ -80,11 +81,17 @@ const FeedCard: React.FC<FeedCardProps> = ({ review }: FeedCardProps) => {
 									{review.userDetails.firstName} {review.userDetails.lastName}
 								</Text>
 								<Text variant="labelSmall">
-									{dayjs(review.createdAt).format('hh:mm A · MMM DD, YYYY')}
+									{dayjs(formatDate(review.createdAt)).format('hh:mm A · MMM DD, YYYY')}
 								</Text>
 							</View>
 						</>
 					</TouchableHighlight>
+					<View style={[styles.flexRow, { flexWrap: 'wrap' }]}>
+						<View style={{ flexGrow: 1 }}>
+							<Text variant="titleMedium">{review.title}</Text>
+						</View>
+						<Chip icon="star">{review.averagedAdvancedScore}</Chip>
+					</View>
 					<View style={[styles.flexRow, { gap: 8, alignItems: 'stretch' }]}>
 						<MoviePoster
 							height={100}
@@ -94,13 +101,9 @@ const FeedCard: React.FC<FeedCardProps> = ({ review }: FeedCardProps) => {
 							location="home"
 						/>
 						<View style={[styles.flexColumn, { gap: 8 }]}>
-							<View style={[styles.flexRow, { flexWrap: 'wrap' }]}>
-								<View style={{ flexGrow: 1 }}>
-									<Text variant="titleMedium">{review.title}</Text>
-								</View>
-								<Chip icon="star">{review.averagedAdvancedScore}</Chip>
-							</View>
-							<Text style={{ flex: 1, flexWrap: 'wrap' }}>{review.notes}</Text>
+							<Text variant="bodyMedium" style={{ flex: 1, flexWrap: 'wrap' }}>
+								{review.notes}
+							</Text>
 						</View>
 					</View>
 					<View style={[styles.flexRow, { justifyContent: 'space-evenly', padding: 0 }]}>

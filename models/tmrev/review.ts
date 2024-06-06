@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { GetMovieReviewSortBy } from '.';
 // eslint-disable-next-line import/no-cycle
 import { Comment, Vote } from './comments';
@@ -109,9 +110,19 @@ interface AdvancedScore {
 	_id: number;
 }
 
-type CreatedAt = string;
+export type CreatedAt =
+	| string
+	| {
+			seconds: number;
+			nanoseconds: number;
+	  };
 
-type UpdatedAt = string;
+type UpdatedAt =
+	| string
+	| {
+			seconds: number;
+			nanoseconds: number;
+	  };
 
 interface MovieScore {
 	_id: ID;
@@ -153,7 +164,6 @@ type GetUserHighlightedReviewsResponse = {
 export type {
 	AdvancedScore,
 	AllReviewsResponse,
-	CreatedAt,
 	CreateTmrevReviewQuery,
 	CreateTmrevReviewResponse,
 	DeleteReviewQuery,
