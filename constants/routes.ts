@@ -12,8 +12,14 @@ export const allReviewsRoute = (from: FromLocation, profileId: string, advancedS
 	return `${baseUrl}?from=${from}`;
 };
 
-export const feedReviewRoute = (reviewId: string) => {
-	return `${baseTabUrl}/(home)/home/${reviewId}`;
+export type FeedReviewContentTypes = 'comments' | 'reviews';
+
+export const feedReviewRoute = (reviewId: string, contentType: FeedReviewContentTypes) => {
+	return `${baseTabUrl}/(home)/home/${reviewId}?contentType=${contentType}`;
+};
+
+export const feedReviewDetailsRoute = (postId: string, contentType: FeedReviewContentTypes) => {
+	return `${baseTabUrl}/(home)/home/reply/${postId}?contentType=${contentType}`;
 };
 
 export const allListsRoute = (from: FromLocation, profileId: string) => {
