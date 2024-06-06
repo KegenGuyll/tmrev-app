@@ -58,14 +58,21 @@ const ReviewPage: React.FC = () => {
 	);
 
 	const handleRefresh = async () => {
-		setIsRefreshing(true);
-		if (contentType === 'reviews') {
-			await refetchReview().unwrap();
-		}
+		try {
+			setIsRefreshing(true);
+			if (contentType === 'reviews') {
+				await refetchReview().unwrap();
+			}
+			if (contentType === 'comments') {
+				await refetchCommentDetails().unwrap();
+			}
 
-		await refetchComments().unwrap();
-		await refetchCommentDetails().unwrap();
-		setIsRefreshing(false);
+			await refetchComments().unwrap();
+
+			setIsRefreshing(false);
+		} catch (error) {
+			setIsRefreshing(false);
+		}
 	};
 
 	const handleNavigateToComment = () => {
