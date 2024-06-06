@@ -2,7 +2,7 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { View, Image, TextInput, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import { Button, Text, useTheme } from 'react-native-paper';
+import { ActivityIndicator, Button, Text, useTheme } from 'react-native-paper';
 import { useEffect, useRef, useState } from 'react';
 import {
 	useAddCommentMutation,
@@ -11,7 +11,7 @@ import {
 	useGetV2UserQuery,
 } from '@/redux/api/tmrev';
 import MultiLineInput from '@/components/Inputs/MultiLineInput';
-import { FeedReviewContentTypes } from '@/constants/routes';
+import { FeedReviewContentTypes, feedReviewRoute } from '@/constants/routes';
 import ReviewCard from '@/features/feed/reviewCard';
 import CommentCard from '@/features/feed/commentCard';
 
@@ -26,6 +26,7 @@ const ReplyPost: React.FC = () => {
 	const inputRef = useRef<TextInput>(null);
 	const commentAreaRef = useRef<View>(null);
 	const [reply, setReply] = useState<string>('');
+	const [isLoading, setIsLoading] = useState<boolean>(false);
 
 	const { currentUser } = auth();
 	const { data: commentData, isLoading: isCommentLoading } = useGetCommentDetailsQuery(postId!, {
@@ -46,13 +47,14 @@ const ReplyPost: React.FC = () => {
 
 	const handlePost = async () => {
 		if (!contentType) return;
-
+		setIsLoading(true);
 		await addComment({
 			comment: reply,
 			id: postId!,
 			contentType,
 		}).unwrap();
-		router.dismiss();
+		setIsLoading(false);
+		router.replace(feedReviewRoute(postId!, contentType));
 	};
 
 	const { data: currentUserData } = useGetV2UserQuery(
@@ -83,35 +85,13 @@ const ReplyPost: React.FC = () => {
 				keyboardVerticalOffset={113}
 			>
 				<ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
+					{isLoading && <ActivityIndicator />}
 					{reviewData && contentType === 'reviews' && (
 						<ReviewCard reviewData={reviewData} numberOfComments={0} displayMetaData={false} />
 					)}
 					{commentData && contentType === 'comments' && (
 						<CommentCard comment={commentData.body} displayMetaData={false} />
 					)}
-					{/* <View
-						style={{ display: 'flex', flexDirection: 'row', gap: 16, alignItems: 'flex-start' }}
-					>
-						<Image
-							source={{ uri: commentData.body.user.photoUrl }}
-							height={50}
-							width={50}
-							style={{ borderRadius: 100 }}
-						/>
-						<View style={{ gap: 16 }}>
-							<View>
-								<Text variant="labelLarge">
-									{commentData.body.user.firstName} {commentData.body.user.lastName}
-								</Text>
-								<Text variant="labelSmall">
-									{dayjs(commentData.body.createdAt).format('hh:mm A · MMM DD, YYYY')}
-								</Text>
-							</View>
-							<View>
-								<Text variant="bodyMedium">{commentData.body.comment}</Text>
-							</View>
-						</View>
-					</View> */}
 					<View
 						style={{
 							borderRightWidth: 3,
