@@ -134,7 +134,6 @@ interface ID {
 }
 
 interface SingleReview {
-	authToken: string;
 	reviewId: string;
 }
 

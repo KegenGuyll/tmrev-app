@@ -74,6 +74,7 @@ import {
 } from '@/models/tmrev/user';
 import { MovieGenreInsightResponse } from '@/models/tmrev/insights';
 import { FeedQuery, FeedResponse } from '@/models/tmrev/feed';
+import { GetCommentResponse, GetCommentsResponse } from '@/models/tmrev/comments';
 
 export const tmrevApi = createApi({
 	baseQuery: fetchBaseQuery({
@@ -91,17 +92,30 @@ export const tmrevApi = createApi({
 		},
 	}),
 	endpoints: (builder) => ({
-		addComment: builder.mutation<void, { id: string; comment: string; token: string }>({
+		addComment: builder.mutation<
+			void,
+			{ id: string; comment: string; contentType: 'comments' | 'reviews' }
+		>({
 			invalidatesTags: ['COMMENT', 'REVIEW', 'MOVIE'],
 			query: (data) => ({
 				body: {
 					comment: data.comment,
-				},
-				headers: {
-					authorization: data.token,
+					contentType: data.contentType,
 				},
 				method: 'POST',
-				url: `/movie/review/${data.id}/comment`,
+				url: `/comments/${data.id}`,
+			}),
+		}),
+		getComments: builder.query<GetCommentsResponse, string>({
+			providesTags: ['COMMENT'],
+			query: (postId) => ({
+				url: `/comments/${postId}`,
+			}),
+		}),
+		getCommentDetails: builder.query<GetCommentResponse, string>({
+			providesTags: ['COMMENT'],
+			query: (commentId) => ({
+				url: `/comments/${commentId}/details`,
 			}),
 		}),
 		addMovieToWatchList: builder.mutation<void, AddMovieToWatchList>({
@@ -349,10 +363,8 @@ export const tmrevApi = createApi({
 			}),
 		}),
 		getSingleReview: builder.query<ReviewResponse, SingleReview>({
+			providesTags: ['REVIEW', 'COMMENT'],
 			query: (data) => ({
-				headers: {
-					authorization: data.authToken,
-				},
 				url: `/movie/review/${data.reviewId}`,
 			}),
 		}),
@@ -666,6 +678,8 @@ export const {
 	useGetGenreInsightsQuery,
 	useGetSingleWatchedQuery,
 	useGetUserFeedQuery,
+	useGetCommentsQuery,
+	useGetCommentDetailsQuery,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;
 

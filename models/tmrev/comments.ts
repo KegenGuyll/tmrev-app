@@ -1,15 +1,40 @@
-import { Profile, TimeStamp } from './movie';
+/* eslint-disable import/no-cycle */
+import { TmrevReview } from './review';
 
-interface Comment {
+type Comment = {
 	_id: string;
-	author: string;
+	author?: string;
 	comment: string;
-	createdAt: TimeStamp;
-	updatedAt: TimeStamp | null;
+	createdAt: string;
+	updatedAt: string;
 	post: Post;
 	votes: Vote;
-	profile: Profile[];
-}
+};
+
+type CommentWithUser = Comment & {
+	user: {
+		firstName: string;
+		lastName: string;
+		photoUrl: string;
+		_id: string;
+		uuid: string;
+	};
+	replies: number;
+};
+
+type GetCommentsResponse = {
+	success: boolean;
+	body: CommentWithUser[];
+};
+
+type GetCommentResponse = {
+	success: boolean;
+	body: GetCommentBody;
+};
+
+type GetCommentBody = CommentWithUser & {
+	postDetails: TmrevReview;
+};
 
 type Post = {
 	author: string;
@@ -22,4 +47,4 @@ type Vote = {
 	downVote: string[];
 };
 
-export type { Comment, Post, Vote };
+export type { Comment, Post, Vote, GetCommentsResponse, CommentWithUser, GetCommentResponse };
