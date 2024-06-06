@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import auth from '@react-native-firebase/auth';
 import { FeedReviews } from '@/models/tmrev/feed';
-import { MoviePosterImage } from '@/components/MoviePoster';
+import MoviePoster from '@/components/MoviePoster';
 import { feedReviewRoute, profileRoute } from '@/constants/routes';
 import { useVoteTmrevReviewMutation } from '@/redux/api/tmrev';
 
@@ -53,7 +53,7 @@ const FeedCard: React.FC<FeedCardProps> = ({ review }: FeedCardProps) => {
 	return (
 		<>
 			<TouchableRipple
-				onPress={() => router.navigate(feedReviewRoute(review._id))}
+				onPress={() => router.navigate(feedReviewRoute(review._id, 'reviews'))}
 				style={[styles.container, styles.flexColumn, { gap: 8 }]}
 			>
 				<>
@@ -70,18 +70,25 @@ const FeedCard: React.FC<FeedCardProps> = ({ review }: FeedCardProps) => {
 								<Text variant="labelLarge">
 									{review.userDetails.firstName} {review.userDetails.lastName}
 								</Text>
-								<Text>{dayjs(review.createdAt).format('MMMM DD YYYY')}</Text>
+								<Text variant="labelSmall">
+									{dayjs(review.createdAt).format('hh:mm A · MMM DD, YYYY')}
+								</Text>
 							</View>
 						</>
 					</TouchableHighlight>
 					<View style={[styles.flexRow, { gap: 8, alignItems: 'stretch' }]}>
-						<MoviePosterImage
+						<MoviePoster
 							height={100}
 							width={75}
 							moviePoster={review.movieDetails.poster_path}
+							movieId={review.tmdbID}
+							location="home"
 						/>
 						<View style={[styles.flexColumn, { gap: 8 }]}>
-							<View style={styles.flexRow}>
+							<View style={[styles.flexRow, { flexWrap: 'wrap' }]}>
+								<View style={{ flexGrow: 1 }}>
+									<Text variant="titleMedium">{review.title}</Text>
+								</View>
 								<Chip icon="star">{review.averagedAdvancedScore}</Chip>
 							</View>
 							<Text style={{ flex: 1, flexWrap: 'wrap' }}>{review.notes}</Text>
@@ -98,8 +105,8 @@ const FeedCard: React.FC<FeedCardProps> = ({ review }: FeedCardProps) => {
 							size={12}
 							icon={hasDisliked ? 'thumb-down' : 'thumb-down-outline'}
 						/>
-						<IconButton onPress={() => console.log('comment')} size={12} icon="comment" />
-						<IconButton onPress={() => console.log('share')} size={12} icon="share" />
+						<IconButton onPress={() => console.log('comment')} size={12} icon="comment-outline" />
+						<IconButton onPress={() => console.log('share')} size={12} icon="share-outline" />
 					</View>
 				</>
 			</TouchableRipple>
