@@ -7,8 +7,8 @@ import {
 	ScrollView,
 	RefreshControl,
 } from 'react-native';
-import { Text, useTheme, MD3Theme, Divider } from 'react-native-paper';
-import { useState } from 'react';
+import { Text, useTheme, MD3Theme, Divider, ActivityIndicator } from 'react-native-paper';
+import { useMemo, useState } from 'react';
 import { FlatList } from 'react-native-gesture-handler';
 import {
 	useGetCommentDetailsQuery,
@@ -39,12 +39,22 @@ const ReviewPage: React.FC = () => {
 		{ reviewId: reviewId! },
 		{ skip: !reviewId && contentType !== 'reviews' }
 	);
-	const { data: commentData, refetch: refetchComments } = useGetCommentsQuery(reviewId!, {
+	const {
+		data: commentData,
+		isLoading: isCommentLoading,
+		refetch: refetchComments,
+	} = useGetCommentsQuery(reviewId!, {
 		skip: !reviewId,
 	});
-	const { data: commentDetails, refetch: refetchCommentDetails } = useGetCommentDetailsQuery(
-		reviewId!,
-		{ skip: !reviewId && contentType !== 'comments' }
+	const {
+		data: commentDetails,
+		isLoading: isCommentDetailsLoading,
+		refetch: refetchCommentDetails,
+	} = useGetCommentDetailsQuery(reviewId!, { skip: !reviewId && contentType !== 'comments' });
+
+	const isLoading = useMemo(
+		() => isReviewDataLoading || isCommentLoading || isCommentLoading,
+		[isCommentDetailsLoading, isCommentLoading, isReviewDataLoading]
 	);
 
 	const handleRefresh = async () => {
@@ -66,16 +76,6 @@ const ReviewPage: React.FC = () => {
 		}
 	};
 
-	if ((contentType === 'reviews' && !reviewData) || isReviewDataLoading)
-		return (
-			<>
-				<Stack.Screen options={{ headerShown: true, title: 'Review' }} />
-				<View>
-					<Text>Loading...</Text>
-				</View>
-			</>
-		);
-
 	return (
 		<>
 			<Stack.Screen
@@ -88,6 +88,9 @@ const ReviewPage: React.FC = () => {
 						<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor="white" />
 					}
 				>
+					{isLoading && (
+						<ActivityIndicator style={{ position: 'absolute', top: 10, right: 0, left: 0 }} />
+					)}
 					{contentType === 'reviews' && (
 						<ReviewCard numberOfComments={commentData?.body.length || 0} reviewData={reviewData} />
 					)}
