@@ -12,6 +12,8 @@ type FeedResponse = {
 };
 
 type FeedReviews = TmrevReview & {
+	replies: number;
+	seen: boolean;
 	userDetails: {
 		firstName: string;
 		lastName: string;
