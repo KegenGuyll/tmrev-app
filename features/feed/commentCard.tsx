@@ -15,15 +15,18 @@ import { CommentWithUser } from '@/models/tmrev/comments';
 import { feedReviewDetailsRoute, feedReviewRoute, profileRoute } from '@/constants/routes';
 import { numberShortHand } from '@/utils/common';
 import { useDeleteCommentMutation, useVoteCommentMutation } from '@/redux/api/tmrev';
+import { FromLocation } from '@/models';
 
 type CommentCardProps = {
 	comment: CommentWithUser;
 	displayMetaData?: boolean;
+	from: FromLocation;
 };
 
 const CommentCard: React.FC<CommentCardProps> = ({
 	comment,
 	displayMetaData = true,
+	from,
 }: CommentCardProps) => {
 	const styles = makeStyles();
 	const router = useRouter();
@@ -50,7 +53,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
 	}, [comment, currentUser]);
 
 	const handleComment = () => {
-		router.push(feedReviewDetailsRoute(comment._id, 'comments'));
+		router.push(feedReviewDetailsRoute(comment._id, 'comments', from));
 	};
 
 	const handleUpVote = async () => {
@@ -96,7 +99,9 @@ const CommentCard: React.FC<CommentCardProps> = ({
 
 	return (
 		<>
-			<TouchableHighlight onPress={() => router.push(feedReviewRoute(comment._id, 'comments'))}>
+			<TouchableHighlight
+				onPress={() => router.push(feedReviewRoute(comment._id, 'comments', from))}
+			>
 				<View style={[styles.flexColumn, { paddingHorizontal: 8, paddingVertical: 8 }]}>
 					<View style={[styles.flexRow, { alignItems: 'flex-start', gap: 8, paddingBottom: 16 }]}>
 						<Image

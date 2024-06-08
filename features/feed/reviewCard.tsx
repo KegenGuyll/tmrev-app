@@ -9,17 +9,20 @@ import { ReviewResponse } from '@/models/tmrev/movie';
 import { useVoteTmrevReviewMutation } from '@/redux/api/tmrev';
 import { feedReviewDetailsRoute } from '@/constants/routes';
 import { formatDate } from '@/utils/common';
+import { FromLocation } from '@/models';
 
 type ReviewCardProps = {
 	reviewData: ReviewResponse | undefined;
 	displayMetaData?: boolean;
 	numberOfComments?: number;
+	from: FromLocation;
 };
 
 const ReviewCard: React.FC<ReviewCardProps> = ({
 	reviewData,
 	displayMetaData = true,
 	numberOfComments = 0,
+	from,
 }: ReviewCardProps) => {
 	const styles = makeStyles(useTheme());
 	const router = useRouter();
@@ -62,7 +65,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 	const handleComment = () => {
 		if (!reviewData || !reviewData?.body) return;
 
-		router.navigate(feedReviewDetailsRoute(reviewData.body?._id, 'reviews'));
+		router.navigate(feedReviewDetailsRoute(reviewData.body?._id, 'reviews', from));
 	};
 
 	if (!reviewData) return null;

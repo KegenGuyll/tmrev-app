@@ -14,15 +14,17 @@ import MultiLineInput from '@/components/Inputs/MultiLineInput';
 import { FeedReviewContentTypes, feedReviewRoute } from '@/constants/routes';
 import ReviewCard from '@/features/feed/reviewCard';
 import CommentCard from '@/features/feed/commentCard';
+import { FromLocation } from '@/models';
 
 type ReplyPostSearchParams = {
 	postId: string;
 	contentType: FeedReviewContentTypes;
+	from: FromLocation;
 };
 
 const ReplyPost: React.FC = () => {
 	const theme = useTheme();
-	const { postId, contentType } = useLocalSearchParams<ReplyPostSearchParams>();
+	const { postId, contentType, from } = useLocalSearchParams<ReplyPostSearchParams>();
 	const inputRef = useRef<TextInput>(null);
 	const commentAreaRef = useRef<View>(null);
 	const [reply, setReply] = useState<string>('');
@@ -54,7 +56,7 @@ const ReplyPost: React.FC = () => {
 			contentType,
 		}).unwrap();
 		setIsLoading(false);
-		router.replace(feedReviewRoute(postId!, contentType));
+		router.replace(feedReviewRoute(postId!, contentType, from!));
 	};
 
 	const { data: currentUserData } = useGetV2UserQuery(
@@ -87,10 +89,10 @@ const ReplyPost: React.FC = () => {
 				<ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
 					{isLoading && <ActivityIndicator />}
 					{reviewData && contentType === 'reviews' && (
-						<ReviewCard reviewData={reviewData} numberOfComments={0} displayMetaData={false} />
+						<ReviewCard reviewData={reviewData} displayMetaData={false} from={from!} />
 					)}
 					{commentData && contentType === 'comments' && (
-						<CommentCard comment={commentData.body} displayMetaData={false} />
+						<CommentCard comment={commentData.body} displayMetaData={false} from={from!} />
 					)}
 					<View
 						style={{

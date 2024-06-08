@@ -14,12 +14,20 @@ export const allReviewsRoute = (from: FromLocation, profileId: string, advancedS
 
 export type FeedReviewContentTypes = 'comments' | 'reviews';
 
-export const feedReviewRoute = (reviewId: string, contentType: FeedReviewContentTypes) => {
-	return `${baseTabUrl}/(home)/home/${reviewId}?contentType=${contentType}`;
+export const feedReviewRoute = (
+	reviewId: string,
+	contentType: FeedReviewContentTypes,
+	from: FromLocation
+) => {
+	return `${baseTabUrl}/(${from})/home/${reviewId}?contentType=${contentType}&from=${from}`;
 };
 
-export const feedReviewDetailsRoute = (postId: string, contentType: FeedReviewContentTypes) => {
-	return `${baseTabUrl}/(home)/home/reply/${postId}?contentType=${contentType}`;
+export const feedReviewDetailsRoute = (
+	postId: string,
+	contentType: FeedReviewContentTypes,
+	from: FromLocation
+) => {
+	return `${baseTabUrl}/(${from})/home/reply/${postId}?contentType=${contentType}&from=${from}`;
 };
 
 export const allListsRoute = (from: FromLocation, profileId: string) => {
@@ -73,6 +81,9 @@ export const profileInsightNavigationRoute = (from: FromLocation, profileId: str
 export const profileInsightGenreRoute = (from: FromLocation, profileId: string) => {
 	return `${baseTabUrl}/(${from})/profile/${profileId}/insights/genre?from=${from}`;
 };
+
+export const notificationsRoute = (from: FromLocation) =>
+	`${baseTabUrl}/${from}/notifications?from=${from}`;
 
 export const loginRoute = () => '/login';
 

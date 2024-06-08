@@ -18,14 +18,16 @@ import {
 import CommentCard from '@/features/feed/commentCard';
 import { FeedReviewContentTypes, feedReviewDetailsRoute } from '@/constants/routes';
 import ReviewCard from '@/features/feed/reviewCard';
+import { FromLocation } from '@/models';
 
 type ReviewSearchProps = {
 	reviewId: string;
 	contentType: FeedReviewContentTypes;
+	from: FromLocation;
 };
 
 const ReviewPage: React.FC = () => {
-	const { reviewId, contentType } = useLocalSearchParams<ReviewSearchProps>();
+	const { reviewId, contentType, from } = useLocalSearchParams<ReviewSearchProps>();
 
 	const theme = useTheme();
 	const styles = makeStyles(theme);
@@ -77,9 +79,9 @@ const ReviewPage: React.FC = () => {
 
 	const handleNavigateToComment = () => {
 		if (contentType === 'reviews') {
-			router.navigate(feedReviewDetailsRoute(reviewId!, 'reviews'));
+			router.navigate(feedReviewDetailsRoute(reviewId!, 'reviews', from!));
 		} else if (contentType === 'comments') {
-			router.navigate(feedReviewDetailsRoute(reviewId!, 'comments'));
+			router.navigate(feedReviewDetailsRoute(reviewId!, 'comments', from!));
 		}
 	};
 
@@ -99,10 +101,14 @@ const ReviewPage: React.FC = () => {
 						<ActivityIndicator style={{ position: 'absolute', top: 10, right: 0, left: 0 }} />
 					)}
 					{contentType === 'reviews' && (
-						<ReviewCard numberOfComments={commentData?.body.length || 0} reviewData={reviewData} />
+						<ReviewCard
+							numberOfComments={commentData?.body.length || 0}
+							reviewData={reviewData}
+							from={from!}
+						/>
 					)}
 					{commentDetails && contentType === 'comments' && (
-						<CommentCard comment={commentDetails?.body} />
+						<CommentCard comment={commentDetails?.body} from={from!} />
 					)}
 					{contentType === 'comments' && (
 						<View style={[styles.flexRow, { paddingVertical: 16 }]}>
@@ -116,7 +122,7 @@ const ReviewPage: React.FC = () => {
 						data={commentData?.body}
 						renderItem={({ item }) => (
 							<>
-								<CommentCard comment={item} />
+								<CommentCard comment={item} from={from!} />
 								<Divider />
 							</>
 						)}

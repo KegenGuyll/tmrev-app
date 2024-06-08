@@ -14,14 +14,16 @@ import {
 } from '@/constants/routes';
 import { useVoteTmrevReviewMutation } from '@/redux/api/tmrev';
 import { formatDate } from '@/utils/common';
+import { FromLocation } from '@/models';
 
 type FeedCardProps = {
 	review: FeedReviews;
 	// eslint-disable-next-line react/no-unused-prop-types
 	contentType: FeedReviewContentTypes;
+	from: FromLocation;
 };
 
-const FeedCard: React.FC<FeedCardProps> = ({ review }: FeedCardProps) => {
+const FeedCard: React.FC<FeedCardProps> = ({ review, from }: FeedCardProps) => {
 	const styles = makeStyle();
 	const router = useRouter();
 
@@ -63,7 +65,7 @@ const FeedCard: React.FC<FeedCardProps> = ({ review }: FeedCardProps) => {
 	return (
 		<>
 			<TouchableRipple
-				onPress={() => router.navigate(feedReviewRoute(review._id, 'reviews'))}
+				onPress={() => router.navigate(feedReviewRoute(review._id, 'reviews', from))}
 				style={[styles.container, styles.flexColumn, { gap: 8 }]}
 			>
 				<>
@@ -123,7 +125,7 @@ const FeedCard: React.FC<FeedCardProps> = ({ review }: FeedCardProps) => {
 						</Button>
 						<Button
 							textColor="white"
-							onPress={() => router.navigate(feedReviewDetailsRoute(review._id, 'reviews'))}
+							onPress={() => router.navigate(feedReviewDetailsRoute(review._id, 'reviews', from))}
 							icon="comment-outline"
 						>
 							{review.replies}
