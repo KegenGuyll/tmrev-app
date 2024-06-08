@@ -1,13 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Tabs } from 'expo-router';
 import auth from '@react-native-firebase/auth';
-import { Image } from 'react-native';
+import { Image, Alert } from 'react-native';
+import messaging from '@react-native-firebase/messaging';
 
 const iconSize = 25;
 
 const TabLayout = () => {
 	const { currentUser } = auth();
+
+	useEffect(() => {
+		const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+			Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+		});
+
+		return unsubscribe;
+	}, []);
 
 	return (
 		<Tabs

@@ -4,6 +4,7 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { useEffect } from 'react';
+import messaging from '@react-native-firebase/messaging';
 
 import { MD3DarkTheme, PaperProvider } from 'react-native-paper';
 import { Provider } from 'react-redux';
@@ -54,6 +55,10 @@ const RootLayout = () => {
 };
 
 export default RootLayout;
+
+messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+	console.log('Message handled in the background!', remoteMessage);
+});
 
 const RootLayoutNav = () => {
 	return (
