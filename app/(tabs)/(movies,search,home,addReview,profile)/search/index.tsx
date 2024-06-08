@@ -1,4 +1,4 @@
-import { Link, Stack } from 'expo-router';
+import { Link } from 'expo-router';
 import React from 'react';
 import { StyleSheet, View, FlatList } from 'react-native';
 import { Chip, Divider, List, Searchbar, Text } from 'react-native-paper';
@@ -57,8 +57,7 @@ const Search: React.FC = () => {
 
 	return (
 		<>
-			<Stack.Screen options={{ headerShown: false, title: 'Search' }} />
-			<SafeAreaView style={{ marginTop: 16 }}>
+			<SafeAreaView>
 				<Searchbar
 					placeholder="Search..."
 					value={searchQuery}

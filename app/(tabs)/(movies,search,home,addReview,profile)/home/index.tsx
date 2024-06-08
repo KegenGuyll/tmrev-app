@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import { Stack } from 'expo-router';
 import { FlatList, RefreshControl, View } from 'react-native';
 import { ActivityIndicator, Divider, Text } from 'react-native-paper';
 import { useGetUserFeedQuery } from '@/redux/api/tmrev';
@@ -39,28 +38,25 @@ const HomeScreen = () => {
 	}
 
 	return (
-		<>
-			<Stack.Screen options={{ headerShown: true, title: 'Home' }} />
-			<View>
-				<FlatList
-					onEndReached={onEndReached}
-					refreshControl={
-						<RefreshControl tintColor="white" refreshing={isRefreshing} onRefresh={onRefresh} />
-					}
-					data={data.body.feed.reviews}
-					keyExtractor={(item) => item._id}
-					renderItem={({ item }) => (
-						<View>
-							<Divider />
-							<FeedCard contentType="reviews" review={item} />
-						</View>
-					)}
-					onEndReachedThreshold={0.5}
-					ListFooterComponentStyle={{ paddingTop: 16 }}
-					ListFooterComponent={hasReachedEnd ? null : <ActivityIndicator />}
-				/>
-			</View>
-		</>
+		<View>
+			<FlatList
+				onEndReached={onEndReached}
+				refreshControl={
+					<RefreshControl tintColor="white" refreshing={isRefreshing} onRefresh={onRefresh} />
+				}
+				data={data.body.feed.reviews}
+				keyExtractor={(item) => item._id}
+				renderItem={({ item }) => (
+					<View>
+						<Divider />
+						<FeedCard contentType="reviews" review={item} from="home" />
+					</View>
+				)}
+				onEndReachedThreshold={0.5}
+				ListFooterComponentStyle={{ paddingTop: 16 }}
+				ListFooterComponent={hasReachedEnd ? null : <ActivityIndicator />}
+			/>
+		</View>
 	);
 };
 
