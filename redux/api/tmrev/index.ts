@@ -96,7 +96,7 @@ export const tmrevApi = createApi({
 			void,
 			{ id: string; comment: string; contentType: 'comments' | 'reviews' }
 		>({
-			invalidatesTags: ['COMMENT', 'REVIEW', 'MOVIE'],
+			invalidatesTags: ['COMMENT', 'REVIEW'],
 			query: (data) => ({
 				body: {
 					comment: data.comment,
@@ -134,7 +134,7 @@ export const tmrevApi = createApi({
 			}),
 		}),
 		addTmrevReview: builder.mutation<CreateTmrevReviewResponse, CreateTmrevReviewQuery>({
-			invalidatesTags: ['TMREV_SCORE', 'REVIEW', 'MOVIE'],
+			invalidatesTags: ['TMREV_SCORE', 'REVIEW'],
 			query: (body) => {
 				return {
 					body,
@@ -303,7 +303,7 @@ export const tmrevApi = createApi({
 			}),
 		}),
 		deleteTmrevReview: builder.mutation<void, DeleteReviewQuery>({
-			invalidatesTags: ['MOVIE'],
+			invalidatesTags: ['REVIEW', 'MOVIE'],
 			query: (body) => ({
 				headers: {
 					authorization: body.authToken,
@@ -490,10 +490,7 @@ export const tmrevApi = createApi({
 		}),
 		retrieveNotifications: builder.query<INotificationResponse, IRetrieveNotificationQuery>({
 			providesTags: ['NOTIFICATIONS'],
-			query: ({ authToken, params }) => ({
-				headers: {
-					authorization: authToken,
-				},
+			query: ({ params }) => ({
 				method: 'GET',
 				params: {
 					...params,
@@ -559,7 +556,7 @@ export const tmrevApi = createApi({
 			}),
 		}),
 		voteTmrevReview: builder.mutation<void, { vote: boolean; reviewId: string }>({
-			invalidatesTags: ['COMMENT', 'REVIEW', 'MOVIE'],
+			invalidatesTags: ['REVIEW'],
 			query: (data) => ({
 				body: {
 					vote: data.vote,
@@ -605,7 +602,7 @@ export const tmrevApi = createApi({
 			}),
 		}),
 		getUserFeed: builder.query<FeedResponse, FeedQuery>({
-			providesTags: ['COMMENT'],
+			providesTags: ['FEED'],
 			query: (data) => ({
 				params: {
 					...data,
@@ -656,6 +653,7 @@ export const tmrevApi = createApi({
 		'NOTIFICATIONS',
 		'FOLLOW',
 		'PINNED',
+		'FEED',
 	],
 });
 
