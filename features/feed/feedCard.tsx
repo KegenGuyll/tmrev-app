@@ -69,25 +69,26 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from }: FeedCardProps) => {
 				style={[styles.container, styles.flexColumn, { gap: 8 }]}
 			>
 				<>
-					<TouchableHighlight
-						onPress={() => router.navigate(profileRoute('home', review.userDetails.uuid))}
-						style={[styles.flexRow, { gap: 8, alignItems: 'center' }]}
-					>
-						<>
+					<View style={[styles.flexRow, { gap: 8, alignItems: 'center' }]}>
+						<TouchableHighlight
+							onPress={() => router.navigate(profileRoute('home', review.userDetails.uuid))}
+							style={[styles.flexRow, { gap: 8, alignItems: 'center' }]}
+						>
 							<Image
 								source={{ uri: review.userDetails.photoUrl }}
 								style={{ width: 50, height: 50, borderRadius: 100 }}
 							/>
-							<View style={styles.flexColumn}>
-								<Text variant="labelLarge">
-									{review.userDetails.firstName} {review.userDetails.lastName}
-								</Text>
-								<Text variant="labelSmall">
-									{dayjs(formatDate(review.createdAt)).format('hh:mm A · MMM DD, YYYY')}
-								</Text>
-							</View>
-						</>
-					</TouchableHighlight>
+						</TouchableHighlight>
+						<View style={styles.flexColumn}>
+							<Text variant="labelLarge">
+								{review.userDetails.firstName} {review.userDetails.lastName}
+							</Text>
+							<Text variant="labelSmall">
+								{dayjs(formatDate(review.createdAt)).format('hh:mm A · MMM DD, YYYY')}
+							</Text>
+						</View>
+					</View>
+
 					<View style={[styles.flexRow, { flexWrap: 'wrap' }]}>
 						<View style={{ flexGrow: 1 }}>
 							<Text variant="titleMedium">{review.title}</Text>

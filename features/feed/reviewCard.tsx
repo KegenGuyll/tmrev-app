@@ -1,4 +1,12 @@
-import { MD3Theme, useTheme, Text, Chip, Divider, Button } from 'react-native-paper';
+import {
+	MD3Theme,
+	useTheme,
+	Text,
+	Chip,
+	Divider,
+	Button,
+	TouchableRipple,
+} from 'react-native-paper';
 import { StyleSheet, View, Image } from 'react-native';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
@@ -7,7 +15,7 @@ import { useRouter } from 'expo-router';
 import MoviePoster from '@/components/MoviePoster';
 import { ReviewResponse } from '@/models/tmrev/movie';
 import { useVoteTmrevReviewMutation } from '@/redux/api/tmrev';
-import { feedReviewDetailsRoute } from '@/constants/routes';
+import { feedReviewDetailsRoute, profileRoute } from '@/constants/routes';
 import { formatDate } from '@/utils/common';
 import { FromLocation } from '@/models';
 
@@ -73,12 +81,16 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 	return (
 		<View style={[styles.reviewContainer, styles.flexColumn, { gap: 16 }]}>
 			<View style={[styles.flexRow, { alignItems: 'center', gap: 8 }]}>
-				<Image
-					source={{ uri: reviewData.body?.user.photoUrl }}
-					height={50}
-					width={50}
-					style={{ borderRadius: 100 }}
-				/>
+				<TouchableRipple
+					onPress={() => router.push(profileRoute(from!, reviewData.body!.user.uuid))}
+				>
+					<Image
+						source={{ uri: reviewData.body?.user.photoUrl }}
+						height={50}
+						width={50}
+						style={{ borderRadius: 100 }}
+					/>
+				</TouchableRipple>
 				<View>
 					<Text variant="labelLarge">
 						{reviewData.body?.user.firstName} {reviewData.body?.user.lastName}

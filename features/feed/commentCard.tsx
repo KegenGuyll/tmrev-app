@@ -104,16 +104,18 @@ const CommentCard: React.FC<CommentCardProps> = ({
 			>
 				<View style={[styles.flexColumn, { paddingHorizontal: 8, paddingVertical: 8 }]}>
 					<View style={[styles.flexRow, { alignItems: 'flex-start', gap: 8, paddingBottom: 16 }]}>
-						<Image
-							source={{ uri: comment.user.photoUrl }}
-							height={50}
-							width={50}
-							style={{ borderRadius: 100 }}
-						/>
 						<View style={{ flex: 1, gap: 16 }}>
-							<TouchableWithoutFeedback
-								onPress={() => router.navigate(profileRoute('home', comment.user.uuid))}
-							>
+							<View style={[styles.flexRow, { gap: 8, alignItems: 'center' }]}>
+								<TouchableWithoutFeedback
+									onPress={() => router.navigate(profileRoute('home', comment.user.uuid))}
+								>
+									<Image
+										source={{ uri: comment.user.photoUrl }}
+										height={50}
+										width={50}
+										style={{ borderRadius: 100 }}
+									/>
+								</TouchableWithoutFeedback>
 								<View
 									style={[styles.flexRow, { alignItems: 'flex-start', flex: 1, width: '100%' }]}
 								>
@@ -146,7 +148,8 @@ const CommentCard: React.FC<CommentCardProps> = ({
 										)}
 									</View>
 								</View>
-							</TouchableWithoutFeedback>
+							</View>
+
 							<Text style={{ flex: 1, flexWrap: 'wrap', width: '90%' }} variant="bodyMedium">
 								{comment.comment}
 							</Text>
