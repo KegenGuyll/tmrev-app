@@ -1,8 +1,17 @@
 import { StyleSheet, View, Image, TouchableHighlight } from 'react-native';
-import { TouchableRipple, Text, Chip, Snackbar, Button } from 'react-native-paper';
+import {
+	TouchableRipple,
+	Text,
+	Chip,
+	Snackbar,
+	Button,
+	useTheme,
+	Menu,
+	IconButton,
+} from 'react-native-paper';
 import dayjs from 'dayjs';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import auth from '@react-native-firebase/auth';
 import { FeedReviews } from '@/models/tmrev/feed';
 import MoviePoster from '@/components/MoviePoster';
@@ -15,6 +24,7 @@ import {
 import { useVoteTmrevReviewMutation } from '@/redux/api/tmrev';
 import { formatDate } from '@/utils/common';
 import { FromLocation } from '@/models';
+import BarChart from '@/components/CustomCharts/BarChart';
 
 type FeedCardProps = {
 	review: FeedReviews;
@@ -32,6 +42,56 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from }: FeedCardProps) => {
 	const [hasLiked, setHasLiked] = useState<boolean>(false);
 	const [hasDisliked, setHasDisliked] = useState<boolean>(false);
 	const [snackBarMessage, setSnackBarMessage] = useState<string | null>(null);
+	const [showMenu, setShowMenu] = useState<boolean>(false);
+	const [showFullReview, setShowFullReview] = useState<boolean>(false);
+	const theme = useTheme();
+
+	const fullReviewData = useMemo(() => {
+		if (!review || !review.advancedScore) return [];
+
+		return [
+			{
+				label: 'Plot',
+				value: review.advancedScore.plot,
+			},
+			{
+				label: 'Theme',
+				value: review.advancedScore.theme,
+			},
+			{
+				label: 'Climax',
+				value: review.advancedScore.climax,
+			},
+			{
+				label: 'Ending',
+				value: review.advancedScore.ending,
+			},
+			{
+				label: 'Acting',
+				value: review.advancedScore.acting,
+			},
+			{
+				label: 'Characters',
+				value: review.advancedScore.characters,
+			},
+			{
+				label: 'Music',
+				value: review.advancedScore.music,
+			},
+			{
+				label: 'Cinematography',
+				value: review.advancedScore.cinematography,
+			},
+			{
+				label: 'Visuals',
+				value: review.advancedScore.visuals,
+			},
+			{
+				label: 'Personal Score',
+				value: review.advancedScore.personalScore,
+			},
+		];
+	}, [review]);
 
 	useEffect(() => {
 		if (!currentUser || !review.votes) return;
@@ -62,6 +122,11 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from }: FeedCardProps) => {
 		}
 	};
 
+	const handleShowFullReview = () => {
+		setShowFullReview(!showFullReview);
+		setShowMenu(false);
+	};
+
 	return (
 		<>
 			<TouchableRipple
@@ -87,8 +152,21 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from }: FeedCardProps) => {
 								{dayjs(formatDate(review.createdAt)).format('hh:mm A · MMM DD, YYYY')}
 							</Text>
 						</View>
+						<View>
+							<Menu
+								visible={showMenu}
+								onDismiss={() => setShowMenu(false)}
+								anchor={<IconButton icon="dots-vertical" onPress={() => setShowMenu(true)} />}
+							>
+								<Menu.Item
+									leadingIcon="chart-timeline-variant-shimmer"
+									dense
+									onPress={handleShowFullReview}
+									title="View Full Review"
+								/>
+							</Menu>
+						</View>
 					</View>
-
 					<View style={[styles.flexRow, { flexWrap: 'wrap' }]}>
 						<View style={{ flexGrow: 1 }}>
 							<Text variant="titleMedium">{review.title}</Text>
@@ -109,6 +187,16 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from }: FeedCardProps) => {
 							</Text>
 						</View>
 					</View>
+					{showFullReview && (
+						<View style={{ marginTop: 16 }}>
+							<BarChart
+								barWidth={300}
+								barColor={theme.colors.primary}
+								barLabelColor="black"
+								data={fullReviewData}
+							/>
+						</View>
+					)}
 					<View style={[styles.flexRow, { justifyContent: 'space-evenly', padding: 0 }]}>
 						<Button
 							textColor="white"
@@ -131,7 +219,12 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from }: FeedCardProps) => {
 						>
 							{review.replies}
 						</Button>
-						<Button textColor="white" onPress={() => console.log('share')} icon="share-outline">
+						<Button
+							disabled
+							textColor="white"
+							onPress={() => console.log('share')}
+							icon="share-outline"
+						>
 							Share
 						</Button>
 					</View>

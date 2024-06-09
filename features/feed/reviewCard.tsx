@@ -6,10 +6,12 @@ import {
 	Divider,
 	Button,
 	TouchableRipple,
+	Menu,
+	IconButton,
 } from 'react-native-paper';
 import { StyleSheet, View, Image } from 'react-native';
 import dayjs from 'dayjs';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import auth from '@react-native-firebase/auth';
 import { useRouter } from 'expo-router';
 import MoviePoster from '@/components/MoviePoster';
@@ -18,6 +20,7 @@ import { useVoteTmrevReviewMutation } from '@/redux/api/tmrev';
 import { feedReviewDetailsRoute, profileRoute } from '@/constants/routes';
 import { formatDate } from '@/utils/common';
 import { FromLocation } from '@/models';
+import BarChart from '@/components/CustomCharts/BarChart';
 
 type ReviewCardProps = {
 	reviewData: ReviewResponse | undefined;
@@ -36,6 +39,56 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 	const router = useRouter();
 	const [hasLiked, setHasLiked] = useState<boolean>(false);
 	const [hasDisliked, setHasDisliked] = useState<boolean>(false);
+	const [showMenu, setShowMenu] = useState<boolean>(false);
+	const [showFullReview, setShowFullReview] = useState<boolean>(true);
+	const theme = useTheme();
+
+	const fullReviewData = useMemo(() => {
+		if (!reviewData || !reviewData.body || !reviewData.body.advancedScore) return [];
+
+		return [
+			{
+				label: 'Plot',
+				value: reviewData.body.advancedScore.plot,
+			},
+			{
+				label: 'Theme',
+				value: reviewData.body.advancedScore.theme,
+			},
+			{
+				label: 'Climax',
+				value: reviewData.body.advancedScore.climax,
+			},
+			{
+				label: 'Ending',
+				value: reviewData.body.advancedScore.ending,
+			},
+			{
+				label: 'Acting',
+				value: reviewData.body.advancedScore.acting,
+			},
+			{
+				label: 'Characters',
+				value: reviewData.body.advancedScore.characters,
+			},
+			{
+				label: 'Music',
+				value: reviewData.body.advancedScore.music,
+			},
+			{
+				label: 'Cinematography',
+				value: reviewData.body.advancedScore.cinematography,
+			},
+			{
+				label: 'Visuals',
+				value: reviewData.body.advancedScore.visuals,
+			},
+			{
+				label: 'Personal Score',
+				value: reviewData.body.advancedScore.personalScore,
+			},
+		];
+	}, [reviewData]);
 
 	const [voteReview] = useVoteTmrevReviewMutation();
 
@@ -76,6 +129,11 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 		router.navigate(feedReviewDetailsRoute(reviewData.body?._id, 'reviews', from));
 	};
 
+	const handleShowFullReview = () => {
+		setShowFullReview(!showFullReview);
+		setShowMenu(false);
+	};
+
 	if (!reviewData) return null;
 
 	return (
@@ -91,13 +149,29 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 						style={{ borderRadius: 100 }}
 					/>
 				</TouchableRipple>
-				<View>
-					<Text variant="labelLarge">
-						{reviewData.body?.user.firstName} {reviewData.body?.user.lastName}
-					</Text>
-					<Text variant="labelSmall">
-						{dayjs(formatDate(reviewData.body!.createdAt)).format('hh:mm A · MMM DD, YYYY')}
-					</Text>
+				<View style={[styles.flexRow, { alignItems: 'flex-start', flex: 1, width: '100%' }]}>
+					<View style={{ flexGrow: 1 }}>
+						<Text variant="labelLarge">
+							{reviewData.body?.user.firstName} {reviewData.body?.user.lastName}
+						</Text>
+						<Text variant="labelSmall">
+							{dayjs(formatDate(reviewData.body!.createdAt)).format('hh:mm A · MMM DD, YYYY')}
+						</Text>
+					</View>
+					<View>
+						<Menu
+							visible={showMenu}
+							onDismiss={() => setShowMenu(false)}
+							anchor={<IconButton icon="dots-vertical" onPress={() => setShowMenu(true)} />}
+						>
+							<Menu.Item
+								leadingIcon="chart-timeline-variant-shimmer"
+								dense
+								onPress={handleShowFullReview}
+								title="View Full Review"
+							/>
+						</Menu>
+					</View>
 				</View>
 			</View>
 			<View style={[styles.flexColumn, { gap: 4 }]}>
@@ -120,6 +194,16 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 						{reviewData.body?.notes}
 					</Text>
 				</View>
+				{showFullReview && (
+					<View style={{ marginTop: 16 }}>
+						<BarChart
+							barWidth={300}
+							barColor={theme.colors.primary}
+							barLabelColor="black"
+							data={fullReviewData}
+						/>
+					</View>
+				)}
 			</View>
 			{displayMetaData && (
 				<View style={[styles.flexColumn, { gap: 4 }]}>
@@ -147,7 +231,12 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 						>
 							{numberOfComments}
 						</Button>
-						<Button textColor="white" onPress={() => console.log('share')} icon="share-outline">
+						<Button
+							disabled
+							textColor="white"
+							onPress={() => console.log('share')}
+							icon="share-outline"
+						>
 							Share
 						</Button>
 					</View>
