@@ -79,7 +79,9 @@ const Followers: React.FC = () => {
 
 	return (
 		<>
-			<Stack.Screen options={{ title: `${data?.body.length} Followers` }} />
+			<Stack.Screen
+				options={{ title: `${data?.body.length} Followers`, headerRight: () => null }}
+			/>
 			<View style={{ padding: 8, gap: 16 }}>
 				<Searchbar
 					value={search}

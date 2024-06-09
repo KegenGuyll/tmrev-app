@@ -96,7 +96,9 @@ const Following: React.FC = () => {
 
 	return (
 		<>
-			<Stack.Screen options={{ title: `${data?.body.length} Following` }} />
+			<Stack.Screen
+				options={{ title: `${data?.body.length} Following`, headerRight: () => null }}
+			/>
 			<View style={{ padding: 8, gap: 16 }}>
 				<Searchbar
 					value={search}
