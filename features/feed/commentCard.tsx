@@ -234,7 +234,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
 									{numberShortHand(comment.replies)}
 								</Button>
 
-								<Button textColor="white" icon="share-outline">
+								<Button disabled textColor="white" icon="share-outline">
 									Share
 								</Button>
 							</View>
