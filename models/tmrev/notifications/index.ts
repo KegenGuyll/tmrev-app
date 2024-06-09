@@ -54,6 +54,11 @@ type NotificationComment = Notification<Comment> & {
 	contentType: 'comments';
 };
 
+type NotificationCountResponse = {
+	success: boolean;
+	body: number;
+};
+
 interface IRetrieveNotificationQuery {
 	params?: {
 		read?: boolean;
@@ -61,7 +66,6 @@ interface IRetrieveNotificationQuery {
 }
 
 interface IUpdateNotificationQuery {
-	authToken: string;
 	notificationId: string;
 }
 
@@ -119,4 +123,6 @@ export type {
 	NotificationV2Response,
 	NotificationContent,
 	NotificationContentType,
+	NotificationType,
+	NotificationCountResponse,
 };

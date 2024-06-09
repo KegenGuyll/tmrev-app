@@ -14,6 +14,7 @@ import {
 	INotificationResponse,
 	IRetrieveNotificationQuery,
 	IUpdateNotificationQuery,
+	NotificationCountResponse,
 	NotificationQueryV2,
 	NotificationV2Response,
 } from '@/models/tmrev/notifications';
@@ -458,12 +459,16 @@ export const tmrevApi = createApi({
 		}),
 		readNotification: builder.mutation<void, IUpdateNotificationQuery>({
 			invalidatesTags: ['NOTIFICATIONS'],
-			query: ({ authToken, notificationId }) => ({
-				headers: {
-					authorization: authToken,
-				},
+			query: ({ notificationId }) => ({
 				method: 'POST',
 				url: `/notification/${notificationId}/read`,
+			}),
+		}),
+		readAllNotifications: builder.mutation<void, void>({
+			invalidatesTags: ['NOTIFICATIONS'],
+			query: () => ({
+				method: 'POST',
+				url: '/notification/read',
 			}),
 		}),
 		retrieveFollower: builder.query<RetrieveFollowerResponse, RetrieveFollowQuery>({
@@ -508,6 +513,12 @@ export const tmrevApi = createApi({
 					contentType,
 				},
 				url: `/notification/v2`,
+			}),
+		}),
+		getNotificationCount: builder.query<NotificationCountResponse, void>({
+			providesTags: ['NOTIFICATIONS'],
+			query: () => ({
+				url: '/notification/count',
 			}),
 		}),
 		search: builder.query<SearchResponse, string>({
@@ -721,6 +732,8 @@ export const {
 	useDeleteCommentMutation,
 	useSaveUserDeviceTokenMutation,
 	useGetNotificationsV2Query,
+	useGetNotificationCountQuery,
+	useReadAllNotificationsMutation,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;
 

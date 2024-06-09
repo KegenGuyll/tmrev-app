@@ -1,10 +1,14 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { ActivityIndicator, Text, TouchableRipple } from 'react-native-paper';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FlatList } from 'react-native-gesture-handler';
 import dayjs from 'dayjs';
-import { useGetNotificationsV2Query } from '@/redux/api/tmrev';
+import {
+	useGetNotificationsV2Query,
+	useReadAllNotificationsMutation,
+	useReadNotificationMutation,
+} from '@/redux/api/tmrev';
 import { feedReviewRoute, profileRoute } from '@/constants/routes';
 import { FromLocation } from '@/models';
 import { MoviePosterImage } from '@/components/MoviePoster';
@@ -26,11 +30,15 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 }: NotificationItemProps) => {
 	const router = useRouter();
 
+	const [readNotification] = useReadNotificationMutation();
+
+	const handleNavigation = async () => {
+		await readNotification({ notificationId: item._id }).unwrap();
+		router.navigate(feedReviewRoute(item.contentId, item.contentType, from));
+	};
+
 	return (
-		<TouchableRipple
-			style={{ padding: 8 }}
-			onPress={() => router.navigate(feedReviewRoute(item.contentId, item.contentType, from))}
-		>
+		<TouchableRipple style={{ padding: 8 }} onPress={handleNavigation}>
 			<View
 				style={{
 					flex: 1,
@@ -56,7 +64,6 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 						)}
 					</View>
 				</TouchableRipple>
-
 				<View style={{ flex: 1 }}>
 					<Text variant="labelLarge">
 						{item.sender.firstName} {item.sender.lastName}
@@ -93,6 +100,13 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 const Notifications: React.FC = () => {
 	const { from } = useLocalSearchParams<NotificationsSearchParams>();
 	const [isRefreshing, setIsRefreshing] = useState(false);
+	const [readAll] = useReadAllNotificationsMutation();
+
+	useEffect(() => {
+		if (from) {
+			readAll();
+		}
+	}, [from]);
 
 	const {
 		data: reviewNotificationData,
