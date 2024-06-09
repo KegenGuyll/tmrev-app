@@ -25,6 +25,7 @@ type NotificationV2Response = {
 };
 
 type Notification<T> = {
+	_id: string;
 	notificationType: NotificationType;
 	contentId: string;
 	recipient: string;

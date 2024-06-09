@@ -135,7 +135,7 @@ const Notifications: React.FC = () => {
 						<FlatList
 							scrollEnabled={false}
 							data={allNotifications}
-							keyExtractor={(item) => item.contentId}
+							keyExtractor={(item) => item._id}
 							renderItem={({ item }) => {
 								return <NotificationItem item={item} from={from!} />;
 							}}
