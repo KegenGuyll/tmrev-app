@@ -10,6 +10,8 @@ PODS:
     - DGCharts/Core (= 5.0.0)
   - DGCharts/Core (5.0.0)
   - DoubleConversion (1.1.6)
+  - EXApplication (5.8.4):
+    - ExpoModulesCore
   - EXConstants (15.4.6):
     - ExpoModulesCore
   - EXFont (11.10.3):
@@ -22,6 +24,8 @@ PODS:
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
+  - EXNotifications (0.27.7):
+    - ExpoModulesCore
   - Expo (50.0.19):
     - ExpoModulesCore
   - expo-dev-client (3.3.11):
@@ -1344,11 +1348,13 @@ PODS:
 DEPENDENCIES:
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
+  - EXApplication (from `../node_modules/expo-application/ios`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
   - EXFont (from `../node_modules/expo-font/ios`)
   - EXJSONUtils (from `../node_modules/expo-json-utils/ios`)
   - EXManifests (from `../node_modules/expo-manifests/ios`)
   - EXMediaLibrary (from `../node_modules/expo-media-library/ios`)
+  - EXNotifications (from `../node_modules/expo-notifications/ios`)
   - Expo (from `../node_modules/expo`)
   - expo-dev-client (from `../node_modules/expo-dev-client/ios`)
   - expo-dev-launcher (from `../node_modules/expo-dev-launcher`)
@@ -1464,6 +1470,8 @@ EXTERNAL SOURCES:
     :podspec: "../node_modules/react-native/third-party-podspecs/boost.podspec"
   DoubleConversion:
     :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
+  EXApplication:
+    :path: "../node_modules/expo-application/ios"
   EXConstants:
     :path: "../node_modules/expo-constants/ios"
   EXFont:
@@ -1474,6 +1482,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-manifests/ios"
   EXMediaLibrary:
     :path: "../node_modules/expo-media-library/ios"
+  EXNotifications:
+    :path: "../node_modules/expo-notifications/ios"
   Expo:
     :path: "../node_modules/expo"
   expo-dev-client:
@@ -1635,11 +1645,13 @@ SPEC CHECKSUMS:
   boost: d3f49c53809116a5d38da093a8aa78bf551aed09
   DGCharts: 6e0cf2644e8f81ad13f04caa8bc18502870a1c54
   DoubleConversion: fea03f2699887d960129cc54bba7e52542b6f953
+  EXApplication: 16bcea16789221bd566e64b5ea2608cf7756b005
   EXConstants: a5f6276e565d98f9eb4280f81241fc342d641590
   EXFont: f20669cb266ef48b004f1eb1f2b20db96cd1df9f
   EXJSONUtils: 5c42959e87be238b045ef37cc5268b16a6c0ad4a
   EXManifests: 5e8c29f36c716af768a4ea47ec05e1b89ab93091
   EXMediaLibrary: 70cf1fb7028fda2d682090c9fe57568674e4abab
+  EXNotifications: 1c117bf042bd05a5b1a1ffd06f4c36ff9921ed2b
   Expo: ad8bce0c0fc557cae703cc8dbce73d61a90ab5c5
   expo-dev-client: 29a32387346fe7b6d2a57918fae985bc48bfe9a2
   expo-dev-launcher: 957d62f7ec983d02091c97fca9ac73c115b54f77
