@@ -12,6 +12,23 @@ type DynamicLayoutProps = {
 	segment: string;
 };
 
+const segmentToTitle = (segment: string) => {
+	switch (segment) {
+		case '(movies)':
+			return 'Movies';
+		case '(search)':
+			return 'Search';
+		case '(home)':
+			return 'Home';
+		case '(addReview)':
+			return 'Add Review';
+		case '(profile)':
+			return 'Profile';
+		default:
+			return 'Movies';
+	}
+};
+
 const DynamicLayout = ({ segment }: DynamicLayoutProps) => {
 	const router = useRouter();
 
@@ -26,7 +43,7 @@ const DynamicLayout = ({ segment }: DynamicLayoutProps) => {
 			screenOptions={{
 				headerShown: true,
 				headerTintColor: 'white',
-				title: '',
+				title: segmentToTitle(segment),
 				headerRight: () => {
 					if (!currentUser) return null;
 
