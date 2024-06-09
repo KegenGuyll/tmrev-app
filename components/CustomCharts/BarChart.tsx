@@ -53,6 +53,14 @@ const BarChart: React.FC<BarChartProps> = ({
 	const barHeight = bW / data.length;
 	const maxValue = Math.max(...data.map((item) => item.value));
 
+	// Measure text width before rendering
+	const measureTextWidth = (text: string) => {
+		if (font) {
+			return font.measureText(text).width;
+		}
+		return 0; // Return 0 if font is not loaded yet
+	};
+
 	return (
 		<View style={styles.container}>
 			{chartTitle && <PaperText variant="labelLarge">{chartTitle}</PaperText>}
@@ -75,11 +83,15 @@ const BarChart: React.FC<BarChartProps> = ({
 										height={barHeight - 10}
 										color={barColor}
 									/>
-									{font && ( // <-- Conditional rendering based on font availability
+									{font && (
 										<Text
 											x={5}
 											y={y + translateY.value + barHeight / 2}
-											text={item.label}
+											text={
+												measureTextWidth(item.label) > barWidth
+													? `${item.label.slice(0, Math.floor(barWidth / fontSize) - 3)}...` // Truncate with ellipsis
+													: item.label
+											}
 											font={font}
 											color={barLabelColor}
 										/>
