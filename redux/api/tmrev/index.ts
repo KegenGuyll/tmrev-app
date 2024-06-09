@@ -14,6 +14,8 @@ import {
 	INotificationResponse,
 	IRetrieveNotificationQuery,
 	IUpdateNotificationQuery,
+	NotificationQueryV2,
+	NotificationV2Response,
 } from '@/models/tmrev/notifications';
 
 import {
@@ -498,6 +500,16 @@ export const tmrevApi = createApi({
 				url: `/notification`,
 			}),
 		}),
+		getNotificationsV2: builder.query<NotificationV2Response, NotificationQueryV2>({
+			providesTags: ['NOTIFICATIONS'],
+			query: ({ contentType }) => ({
+				method: 'GET',
+				params: {
+					contentType,
+				},
+				url: `/notification/v2`,
+			}),
+		}),
 		search: builder.query<SearchResponse, string>({
 			query: (data) => ({
 				url: `/search?q=${data}`,
@@ -708,6 +720,7 @@ export const {
 	useVoteCommentMutation,
 	useDeleteCommentMutation,
 	useSaveUserDeviceTokenMutation,
+	useGetNotificationsV2Query,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;
 

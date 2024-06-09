@@ -83,7 +83,7 @@ export const profileInsightGenreRoute = (from: FromLocation, profileId: string) 
 };
 
 export const notificationsRoute = (from: FromLocation) =>
-	`${baseTabUrl}/${from}/notifications?from=${from}`;
+	`${baseTabUrl}/${from}/notifications?from=${from.replace('(', '').replace(')', '')}`;
 
 export const loginRoute = () => '/login';
 
