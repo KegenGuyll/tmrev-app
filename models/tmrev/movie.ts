@@ -185,7 +185,15 @@ export interface ID {
 }
 
 export interface ReviewResponse {
-	body?: TmrevReview;
+	body?: TmrevReview & {
+		user: {
+			_id: string;
+			firstName: string;
+			lastName: string;
+			photoUrl: string;
+			uuid: string;
+		};
+	};
 	success: boolean;
 	error?: any;
 }

@@ -108,8 +108,7 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 				setLastReview(selectedMovie);
 
 				handleBottomSheetDismiss();
-				setNote('');
-				handleClearRatings();
+				resetAllValues();
 
 				setReviewedSuccess(true);
 			}

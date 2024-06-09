@@ -1,5 +1,5 @@
-import React from 'react';
-import { Platform, View, TextInput } from 'react-native';
+import React, { forwardRef } from 'react';
+import { Platform, View, TextInput, StyleProp, TextStyle } from 'react-native';
 import { useTheme, Text, TextInput as PaperTextInput } from 'react-native-paper';
 
 type MultiLineInputProps = {
@@ -9,53 +9,67 @@ type MultiLineInputProps = {
 	value: string;
 	onChangeText: (text: string) => void;
 	onFocus?: () => void;
+	height?: number;
+	inputStyle?: StyleProp<TextStyle>;
 };
 
-const MultiLineInput: React.FC<MultiLineInputProps> = ({
-	numberOfLines,
-	label,
-	value,
-	onChangeText,
-	onFocus,
-	placeholder,
-}: MultiLineInputProps) => {
-	const theme = useTheme();
+const MultiLineInput = forwardRef(
+	(
+		{
+			numberOfLines,
+			label,
+			value,
+			onChangeText,
+			onFocus,
+			placeholder,
+			height = 100,
+			inputStyle,
+		}: MultiLineInputProps,
+		ref: React.LegacyRef<TextInput>
+	) => {
+		const theme = useTheme();
 
-	if (Platform.OS === 'ios') {
+		if (Platform.OS === 'ios') {
+			return (
+				<View style={{ gap: 4 }}>
+					{label && <Text variant="labelLarge">{label}</Text>}
+					<TextInput
+						ref={ref}
+						style={[
+							{
+								height,
+								padding: 8,
+								backgroundColor: theme.colors.surfaceVariant,
+								borderRadius: 4,
+								color: theme.colors.onSurfaceVariant,
+							},
+							inputStyle,
+						]}
+						placeholder={placeholder}
+						editable
+						defaultValue={value}
+						onFocus={onFocus}
+						onChange={(e) => onChangeText(e.nativeEvent.text)}
+						multiline
+						numberOfLines={numberOfLines}
+					/>
+				</View>
+			);
+		}
+
 		return (
-			<View style={{ gap: 4 }}>
-				<Text variant="labelLarge">{label}</Text>
-				<TextInput
-					style={{
-						height: 100,
-						padding: 8,
-						backgroundColor: theme.colors.surfaceVariant,
-						borderRadius: 4,
-						color: theme.colors.onSurfaceVariant,
-					}}
-					placeholder={placeholder}
-					editable
-					defaultValue={value}
-					onFocus={onFocus}
-					onChange={(e) => onChangeText(e.nativeEvent.text)}
-					multiline
-					numberOfLines={numberOfLines}
-				/>
-			</View>
+			<PaperTextInput
+				ref={ref}
+				placeholder={placeholder}
+				onFocus={onFocus}
+				value={value}
+				onChange={(e) => onChangeText(e.nativeEvent.text)}
+				label={label}
+				multiline
+				numberOfLines={numberOfLines}
+			/>
 		);
 	}
-
-	return (
-		<PaperTextInput
-			placeholder={placeholder}
-			onFocus={onFocus}
-			value={value}
-			onChange={(e) => onChangeText(e.nativeEvent.text)}
-			label={label}
-			multiline
-			numberOfLines={numberOfLines}
-		/>
-	);
-};
+);
 
 export default MultiLineInput;

@@ -426,7 +426,6 @@ const ListDetailsPage: React.FC = () => {
 								display: 'flex',
 								flexDirection: 'row',
 								alignItems: 'center',
-								paddingBottom: 100,
 							}}
 						>
 							{isCurrentUser && (

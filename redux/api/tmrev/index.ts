@@ -14,6 +14,9 @@ import {
 	INotificationResponse,
 	IRetrieveNotificationQuery,
 	IUpdateNotificationQuery,
+	NotificationCountResponse,
+	NotificationQueryV2,
+	NotificationV2Response,
 } from '@/models/tmrev/notifications';
 
 import {
@@ -73,6 +76,8 @@ import {
 	UpdateUserQuery,
 } from '@/models/tmrev/user';
 import { MovieGenreInsightResponse } from '@/models/tmrev/insights';
+import { FeedQuery, FeedResponse } from '@/models/tmrev/feed';
+import { GetCommentResponse, GetCommentsResponse } from '@/models/tmrev/comments';
 
 export const tmrevApi = createApi({
 	baseQuery: fetchBaseQuery({
@@ -90,17 +95,37 @@ export const tmrevApi = createApi({
 		},
 	}),
 	endpoints: (builder) => ({
-		addComment: builder.mutation<void, { id: string; comment: string; token: string }>({
-			invalidatesTags: ['COMMENT', 'REVIEW', 'MOVIE'],
+		addComment: builder.mutation<
+			void,
+			{ id: string; comment: string; contentType: 'comments' | 'reviews' }
+		>({
+			invalidatesTags: ['COMMENT', 'REVIEW'],
 			query: (data) => ({
 				body: {
 					comment: data.comment,
-				},
-				headers: {
-					authorization: data.token,
+					contentType: data.contentType,
 				},
 				method: 'POST',
-				url: `/movie/review/${data.id}/comment`,
+				url: `/comments/${data.id}`,
+			}),
+		}),
+		getComments: builder.query<GetCommentsResponse, string>({
+			providesTags: ['COMMENT'],
+			query: (postId) => ({
+				url: `/comments/${postId}`,
+			}),
+		}),
+		getCommentDetails: builder.query<GetCommentResponse, string>({
+			providesTags: ['COMMENT'],
+			query: (commentId) => ({
+				url: `/comments/${commentId}/details`,
+			}),
+		}),
+		deleteComment: builder.mutation<void, string>({
+			invalidatesTags: ['COMMENT'],
+			query: (commentId) => ({
+				method: 'DELETE',
+				url: `/comments/${commentId}`,
 			}),
 		}),
 		addMovieToWatchList: builder.mutation<void, AddMovieToWatchList>({
@@ -112,7 +137,7 @@ export const tmrevApi = createApi({
 			}),
 		}),
 		addTmrevReview: builder.mutation<CreateTmrevReviewResponse, CreateTmrevReviewQuery>({
-			invalidatesTags: ['TMREV_SCORE', 'REVIEW', 'MOVIE'],
+			invalidatesTags: ['TMREV_SCORE', 'REVIEW'],
 			query: (body) => {
 				return {
 					body,
@@ -281,13 +306,22 @@ export const tmrevApi = createApi({
 			}),
 		}),
 		deleteTmrevReview: builder.mutation<void, DeleteReviewQuery>({
-			invalidatesTags: ['MOVIE'],
+			invalidatesTags: ['REVIEW', 'MOVIE'],
 			query: (body) => ({
 				headers: {
 					authorization: body.authToken,
 				},
 				method: 'DELETE',
 				url: `/movie/review/${body.reviewId}`,
+			}),
+		}),
+		saveUserDeviceToken: builder.mutation<void, string>({
+			query: (deviceToken) => ({
+				body: {
+					deviceToken,
+				},
+				method: 'POST',
+				url: '/user/deviceToken',
 			}),
 		}),
 		deleteWatchList: builder.mutation<void, string>({
@@ -348,10 +382,8 @@ export const tmrevApi = createApi({
 			}),
 		}),
 		getSingleReview: builder.query<ReviewResponse, SingleReview>({
+			providesTags: ['REVIEW', 'COMMENT'],
 			query: (data) => ({
-				headers: {
-					authorization: data.authToken,
-				},
 				url: `/movie/review/${data.reviewId}`,
 			}),
 		}),
@@ -427,12 +459,16 @@ export const tmrevApi = createApi({
 		}),
 		readNotification: builder.mutation<void, IUpdateNotificationQuery>({
 			invalidatesTags: ['NOTIFICATIONS'],
-			query: ({ authToken, notificationId }) => ({
-				headers: {
-					authorization: authToken,
-				},
+			query: ({ notificationId }) => ({
 				method: 'POST',
 				url: `/notification/${notificationId}/read`,
+			}),
+		}),
+		readAllNotifications: builder.mutation<void, void>({
+			invalidatesTags: ['NOTIFICATIONS'],
+			query: () => ({
+				method: 'POST',
+				url: '/notification/read',
 			}),
 		}),
 		retrieveFollower: builder.query<RetrieveFollowerResponse, RetrieveFollowQuery>({
@@ -461,15 +497,28 @@ export const tmrevApi = createApi({
 		}),
 		retrieveNotifications: builder.query<INotificationResponse, IRetrieveNotificationQuery>({
 			providesTags: ['NOTIFICATIONS'],
-			query: ({ authToken, params }) => ({
-				headers: {
-					authorization: authToken,
-				},
+			query: ({ params }) => ({
 				method: 'GET',
 				params: {
 					...params,
 				},
 				url: `/notification`,
+			}),
+		}),
+		getNotificationsV2: builder.query<NotificationV2Response, NotificationQueryV2>({
+			providesTags: ['NOTIFICATIONS'],
+			query: ({ contentType }) => ({
+				method: 'GET',
+				params: {
+					contentType,
+				},
+				url: `/notification/v2`,
+			}),
+		}),
+		getNotificationCount: builder.query<NotificationCountResponse, void>({
+			providesTags: ['NOTIFICATIONS'],
+			query: () => ({
+				url: '/notification/count',
 			}),
 		}),
 		search: builder.query<SearchResponse, string>({
@@ -529,17 +578,24 @@ export const tmrevApi = createApi({
 				url: `/user`,
 			}),
 		}),
-		voteTmrevReview: builder.mutation<void, { vote: boolean; token: string; reviewId: string }>({
-			invalidatesTags: ['COMMENT', 'REVIEW', 'MOVIE'],
+		voteTmrevReview: builder.mutation<void, { vote: boolean; reviewId: string }>({
+			invalidatesTags: ['REVIEW'],
 			query: (data) => ({
 				body: {
 					vote: data.vote,
 				},
-				headers: {
-					authorization: data.token,
-				},
 				method: 'POST',
 				url: `/movie/review/vote/${data.reviewId}`,
+			}),
+		}),
+		voteComment: builder.mutation<void, { vote: boolean; commentId: string }>({
+			invalidatesTags: ['COMMENT'],
+			query: (data) => ({
+				body: {
+					vote: data.vote,
+				},
+				method: 'POST',
+				url: `/comments/vote/${data.commentId}`,
 			}),
 		}),
 		getPinnedMovies: builder.query<GetPinnedMoviesResponse, string>({
@@ -568,6 +624,45 @@ export const tmrevApi = createApi({
 				url: '/movie/v2/pinned',
 			}),
 		}),
+		getUserFeed: builder.query<FeedResponse, FeedQuery>({
+			providesTags: ['FEED'],
+			query: (data) => ({
+				params: {
+					...data,
+				},
+				url: '/user/v2/feed',
+			}),
+			serializeQueryArgs: ({ queryArgs }) => {
+				const refetchQueries = { ...queryArgs };
+
+				// @ts-expect-error
+				delete refetchQueries.pageNumber;
+
+				return {
+					...refetchQueries,
+				};
+			},
+			merge: (currentCache, newItems) => {
+				if (newItems.body.pageNumber >= 1) {
+					// make sure there isn't duplicate data being added
+					const newData = [...currentCache.body.feed.reviews, ...newItems.body.feed.reviews];
+
+					// remove duplicates
+					const uniqueData = newData.filter((v, i, a) => a.findIndex((t) => t._id === v._id) === i);
+
+					// Merge the new items into the cache
+					currentCache.body.feed.reviews = uniqueData;
+
+					return currentCache;
+				}
+
+				return newItems;
+			},
+			// Refetch when the page arg changes
+			forceRefetch({ currentArg, previousArg }) {
+				return currentArg?.pageNumber !== previousArg?.pageNumber;
+			},
+		}),
 	}),
 	reducerPath: 'tmrevApi',
 	tagTypes: [
@@ -581,6 +676,7 @@ export const tmrevApi = createApi({
 		'NOTIFICATIONS',
 		'FOLLOW',
 		'PINNED',
+		'FEED',
 	],
 });
 
@@ -629,6 +725,15 @@ export const {
 	useGetWatchListDetailsQuery,
 	useGetGenreInsightsQuery,
 	useGetSingleWatchedQuery,
+	useGetUserFeedQuery,
+	useGetCommentsQuery,
+	useGetCommentDetailsQuery,
+	useVoteCommentMutation,
+	useDeleteCommentMutation,
+	useSaveUserDeviceTokenMutation,
+	useGetNotificationsV2Query,
+	useGetNotificationCountQuery,
+	useReadAllNotificationsMutation,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;
 

@@ -1,9 +1,11 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { useEffect } from 'react';
+import messaging from '@react-native-firebase/messaging';
+import * as Notifications from 'expo-notifications';
 
 import { MD3DarkTheme, PaperProvider } from 'react-native-paper';
 import { Provider } from 'react-redux';
@@ -55,7 +57,42 @@ const RootLayout = () => {
 
 export default RootLayout;
 
+messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+	console.log('Message handled in the background!', remoteMessage);
+});
+
+function useNotificationObserver() {
+	useEffect(() => {
+		let isMounted = true;
+
+		function redirect(notification: Notifications.Notification) {
+			const { url } = (notification.request.trigger as any).payload;
+			if (url) {
+				router.push(url);
+			}
+		}
+
+		Notifications.getLastNotificationResponseAsync().then((response) => {
+			if (!isMounted || !response?.notification) {
+				return;
+			}
+			redirect(response?.notification);
+		});
+
+		const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
+			redirect(response.notification);
+		});
+
+		return () => {
+			isMounted = false;
+			subscription.remove();
+		};
+	}, []);
+}
+
 const RootLayoutNav = () => {
+	useNotificationObserver();
+
 	return (
 		<GestureHandlerRootView style={{ flex: 1 }}>
 			<StatusBar barStyle="light-content" />

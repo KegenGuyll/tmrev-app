@@ -44,7 +44,7 @@ const InsightsNavigation = () => {
 
 	return (
 		<>
-			<Stack.Screen options={{ title: 'Insights' }} />
+			<Stack.Screen options={{ title: 'Insights', headerRight: () => null }} />
 			<View>
 				<List.Section style={{ backgroundColor: theme.colors.background, marginTop: 0 }}>
 					{ListItems.map((item) => (

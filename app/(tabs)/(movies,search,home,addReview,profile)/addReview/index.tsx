@@ -1,4 +1,4 @@
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Divider, Searchbar, Snackbar } from 'react-native-paper';
@@ -36,8 +36,7 @@ const AddReviewPage = () => {
 
 	return (
 		<>
-			<Stack.Screen />
-			<SafeAreaView style={{ marginTop: 16 }}>
+			<SafeAreaView>
 				<View style={{ gap: 8 }}>
 					<Searchbar
 						placeholder="Search..."

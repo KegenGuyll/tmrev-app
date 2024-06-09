@@ -1,4 +1,3 @@
-import { Stack } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RefreshControl, ScrollView, View } from 'react-native';
@@ -139,7 +138,6 @@ const Movies = () => {
 
 	return (
 		<>
-			<Stack.Screen options={{ headerShown: false, title: 'Movies' }} />
 			<SafeAreaView>
 				<ScrollView
 					contentContainerStyle={{ gap: 16, padding: 8 }}

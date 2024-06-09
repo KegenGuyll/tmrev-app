@@ -94,7 +94,9 @@ const MovieDetails = () => {
 
 	return (
 		<>
-			<Stack.Screen options={{ headerShown: true, title: movieData.title }} />
+			<Stack.Screen
+				options={{ headerShown: true, title: movieData.title, headerRight: () => null }}
+			/>
 			<ScrollView>
 				<View style={styles.backgroundImageContainer}>
 					<Image

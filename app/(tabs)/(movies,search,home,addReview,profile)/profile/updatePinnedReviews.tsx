@@ -80,7 +80,7 @@ const UpdatePinnedReviews = () => {
 
 	return (
 		<>
-			<Stack.Screen options={{ title: 'Update Pinned Reviews' }} />
+			<Stack.Screen options={{ title: 'Update Pinned Reviews', headerRight: () => null }} />
 			<View style={{ marginTop: 8, position: 'relative', gap: 8 }}>
 				<Searchbar
 					value={search}

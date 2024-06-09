@@ -56,7 +56,9 @@ const EditProfile = () => {
 
 	return (
 		<>
-			<Stack.Screen options={{ headerShown: true, title: `Edit Profile` }} />
+			<Stack.Screen
+				options={{ headerShown: true, title: `Edit Profile`, headerRight: () => null }}
+			/>
 			<View style={styles.container}>
 				<TextInput
 					mode="outlined"

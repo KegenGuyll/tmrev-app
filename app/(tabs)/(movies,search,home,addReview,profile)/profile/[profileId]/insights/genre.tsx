@@ -28,7 +28,7 @@ const GenreInsights: React.FC = () => {
 
 	return (
 		<>
-			<Stack.Screen options={{ title: 'Genre Insights' }} />
+			<Stack.Screen options={{ title: 'Genre Insights', headerRight: () => null }} />
 			<ScrollView
 				contentContainerStyle={{ paddingBottom: 100, paddingTop: 16 }}
 				refreshControl={
