@@ -191,6 +191,7 @@ export interface ReviewResponse {
 			firstName: string;
 			lastName: string;
 			photoUrl: string;
+			uuid: string;
 		};
 	};
 	success: boolean;
