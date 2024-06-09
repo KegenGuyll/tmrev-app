@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-color-literals */
 import {
 	StyleSheet,
 	View,
@@ -14,19 +15,27 @@ import auth from '@react-native-firebase/auth';
 import { CommentWithUser } from '@/models/tmrev/comments';
 import { feedReviewDetailsRoute, feedReviewRoute, profileRoute } from '@/constants/routes';
 import { numberShortHand } from '@/utils/common';
-import { useDeleteCommentMutation, useVoteCommentMutation } from '@/redux/api/tmrev';
+import {
+	useDeleteCommentMutation,
+	useGetCommentDetailsQuery,
+	useGetSingleReviewQuery,
+	useVoteCommentMutation,
+} from '@/redux/api/tmrev';
 import { FromLocation } from '@/models';
+import ReviewCard from './reviewCard';
 
 type CommentCardProps = {
 	comment: CommentWithUser;
 	displayMetaData?: boolean;
 	from: FromLocation;
+	isSubject?: boolean;
 };
 
 const CommentCard: React.FC<CommentCardProps> = ({
 	comment,
 	displayMetaData = true,
 	from,
+	isSubject,
 }: CommentCardProps) => {
 	const styles = makeStyles();
 	const router = useRouter();
@@ -35,6 +44,15 @@ const CommentCard: React.FC<CommentCardProps> = ({
 	const [voteComment] = useVoteCommentMutation();
 	const [deleteComment] = useDeleteCommentMutation();
 	const { currentUser } = auth();
+
+	const { data: reviewData } = useGetSingleReviewQuery(
+		{ reviewId: comment.post.id },
+		{ skip: !comment.post.id || comment.post.type !== 'reviews' }
+	);
+
+	const { data: commentDetails } = useGetCommentDetailsQuery(comment.post.id!, {
+		skip: !comment.post.id || comment.post.type !== 'comments',
+	});
 
 	const isCurrentUsersComment = useMemo(
 		() => currentUser?.uid === comment.user.uuid,
@@ -98,7 +116,38 @@ const CommentCard: React.FC<CommentCardProps> = ({
 	};
 
 	return (
-		<>
+		<View style={{ gap: 16 }}>
+			{isSubject && reviewData && (
+				<View>
+					<ReviewCard reviewData={reviewData} displayMetaData={false} from={from} />
+					<View
+						style={{
+							borderRightWidth: 3,
+							borderColor: 'gray',
+							width: 20,
+							height: 32,
+						}}
+					/>
+				</View>
+			)}
+			{isSubject && commentDetails && (
+				<View>
+					<CommentCard
+						comment={commentDetails.body}
+						displayMetaData={false}
+						from={from}
+						isSubject
+					/>
+					<View
+						style={{
+							borderRightWidth: 3,
+							borderColor: 'gray',
+							width: 20,
+							height: 32,
+						}}
+					/>
+				</View>
+			)}
 			<TouchableHighlight
 				onPress={() => router.push(feedReviewRoute(comment._id, 'comments', from))}
 			>
@@ -155,45 +204,48 @@ const CommentCard: React.FC<CommentCardProps> = ({
 							</Text>
 						</View>
 					</View>
-					<Divider />
-					{displayMetaData && (
-						<View
-							style={[styles.flexRow, { justifyContent: 'space-evenly', alignItems: 'center' }]}
-						>
-							<Button
-								onPress={handleUpVote}
-								textColor="white"
-								icon={hasLiked ? 'thumb-up' : 'thumb-up-outline'}
-							>
-								{comment.votes.upVote.length}
-							</Button>
-							<Button
-								onPress={handleDownVote}
-								textColor="white"
-								icon={hasDisliked ? 'thumb-down' : 'thumb-down-outline'}
-							>
-								{comment.votes.downVote.length}
-							</Button>
-							<Button
-								onPress={handleComment}
-								textColor="white"
-								icon="comment-outline"
-								style={[styles.flexRow, { alignItems: 'center' }]}
-							>
-								{numberShortHand(comment.replies)}
-							</Button>
 
-							<Button textColor="white" icon="share-outline">
-								Share
-							</Button>
-						</View>
+					{displayMetaData && (
+						<>
+							<Divider />
+							<View
+								style={[styles.flexRow, { justifyContent: 'space-evenly', alignItems: 'center' }]}
+							>
+								<Button
+									onPress={handleUpVote}
+									textColor="white"
+									icon={hasLiked ? 'thumb-up' : 'thumb-up-outline'}
+								>
+									{comment.votes.upVote.length}
+								</Button>
+								<Button
+									onPress={handleDownVote}
+									textColor="white"
+									icon={hasDisliked ? 'thumb-down' : 'thumb-down-outline'}
+								>
+									{comment.votes.downVote.length}
+								</Button>
+								<Button
+									onPress={handleComment}
+									textColor="white"
+									icon="comment-outline"
+									style={[styles.flexRow, { alignItems: 'center' }]}
+								>
+									{numberShortHand(comment.replies)}
+								</Button>
+
+								<Button textColor="white" icon="share-outline">
+									Share
+								</Button>
+							</View>
+						</>
 					)}
 				</View>
 			</TouchableHighlight>
 			<Snackbar visible={!!snackBarMessage} onDismiss={() => setSnackBarMessage(null)}>
 				{snackBarMessage}
 			</Snackbar>
-		</>
+		</View>
 	);
 };
 

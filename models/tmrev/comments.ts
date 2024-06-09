@@ -19,6 +19,7 @@ type CommentWithUser = Comment & {
 		_id: string;
 		uuid: string;
 	};
+	postDetails: TmrevReview;
 	replies: number;
 };
 

@@ -39,7 +39,7 @@ const ReviewPage: React.FC = () => {
 		refetch: refetchReview,
 	} = useGetSingleReviewQuery(
 		{ reviewId: reviewId! },
-		{ skip: !reviewId && contentType !== 'reviews' }
+		{ skip: !reviewId || contentType !== 'reviews' }
 	);
 	const {
 		data: commentData,
@@ -52,7 +52,7 @@ const ReviewPage: React.FC = () => {
 		data: commentDetails,
 		isLoading: isCommentDetailsLoading,
 		refetch: refetchCommentDetails,
-	} = useGetCommentDetailsQuery(reviewId!, { skip: !reviewId && contentType !== 'comments' });
+	} = useGetCommentDetailsQuery(reviewId!, { skip: !reviewId || contentType !== 'comments' });
 
 	const isLoading = useMemo(
 		() => isReviewDataLoading || isCommentLoading || isCommentLoading,
@@ -108,7 +108,7 @@ const ReviewPage: React.FC = () => {
 						/>
 					)}
 					{commentDetails && contentType === 'comments' && (
-						<CommentCard comment={commentDetails?.body} from={from!} />
+						<CommentCard isSubject comment={commentDetails?.body} from={from!} />
 					)}
 					{contentType === 'comments' && (
 						<View style={[styles.flexRow, { paddingVertical: 16 }]}>
