@@ -62,6 +62,10 @@ export const personDetailsRoute = (from: FromLocation, personId: string) => {
 	return `${baseTabUrl}/(${from})/person/${personId}?from=${from}`;
 };
 
+export const loggedInProfileRoute = (from: FromLocation) => {
+	return `${baseTabUrl}/(${from})/profile?from=${from}`;
+};
+
 export const profileRoute = (from: FromLocation, profileId: string) => {
 	return `${baseTabUrl}/(${from})/profile/${profileId}?from=${from}`;
 };
