@@ -172,7 +172,7 @@ const Profile = () => {
 						<View
 							style={{ paddingHorizontal: 8, display: 'flex', flexDirection: 'column', gap: 16 }}
 						>
-							{insightData && insightData.data.mostReviewedGenres.length && (
+							{insightData && !!insightData.data.mostReviewedGenres.length && (
 								<BarChart
 									chartTitle="Most Reviewed Genres"
 									barLabelColor="black"
