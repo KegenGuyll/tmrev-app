@@ -1,4 +1,4 @@
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { Text, Button, TextInput, Divider, Snackbar } from 'react-native-paper';
 import { GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import { AppleButton } from '@invertase/react-native-apple-authentication';
@@ -74,15 +74,17 @@ const Login: React.FC = () => {
 						color={GoogleSigninButton.Color.Light}
 						onPress={onGoogleSignInButtonPress}
 					/>
-					<AppleButton
-						buttonStyle={AppleButton.Style.WHITE}
-						buttonType={AppleButton.Type.SIGN_IN}
-						style={{
-							width: '100%',
-							height: 45,
-						}}
-						onPress={onAppleSignInButtonPress}
-					/>
+					{Platform.OS === 'ios' && (
+						<AppleButton
+							buttonStyle={AppleButton.Style.WHITE}
+							buttonType={AppleButton.Type.SIGN_IN}
+							style={{
+								width: '100%',
+								height: 45,
+							}}
+							onPress={onAppleSignInButtonPress}
+						/>
+					)}
 				</View>
 			</View>
 			<Snackbar visible={!!errorMessage} onDismiss={() => setErrorMessage(null)}>
