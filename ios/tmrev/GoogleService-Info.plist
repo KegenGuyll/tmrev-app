@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>637447196415-66vk7pjqb820uels0ggn8l3eija2s9vf.apps.googleusercontent.com</string>
+	<string>637447196415-h05ftv8rufme8cb11clsqp164rjcnri0.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.637447196415-66vk7pjqb820uels0ggn8l3eija2s9vf</string>
+	<string>com.googleusercontent.apps.637447196415-h05ftv8rufme8cb11clsqp164rjcnri0</string>
 	<key>ANDROID_CLIENT_ID</key>
 	<string>637447196415-klfntebq3ru5o7qie5574vqlf4oia831.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
@@ -15,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>org.reactjs.native.example.tmrev</string>
+	<string>com.tmrev</string>
 	<key>PROJECT_ID</key>
 	<string>movie-tracker-a3544</string>
 	<key>STORAGE_BUCKET</key>
@@ -31,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:637447196415:ios:1705f8437dc8181e4806ca</string>
+	<string>1:637447196415:ios:efec7e1c1435b8594806ca</string>
 </dict>
 </plist>
