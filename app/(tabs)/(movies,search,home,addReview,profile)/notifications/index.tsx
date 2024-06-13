@@ -65,9 +65,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 					</View>
 				</TouchableRipple>
 				<View style={{ flex: 1 }}>
-					<Text variant="labelLarge">
-						{item.sender.firstName} {item.sender.lastName}
-					</Text>
+					<Text variant="labelLarge">{item.sender.username}</Text>
 					<View>
 						<Text numberOfLines={3} textBreakStrategy="simple">
 							{item.notificationType === 'like' || item.notificationType === 'dislike'

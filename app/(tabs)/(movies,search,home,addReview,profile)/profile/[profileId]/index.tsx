@@ -1,6 +1,6 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { IconButton, Menu, Text, useTheme } from 'react-native-paper';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { View, SafeAreaView, ScrollView, RefreshControl } from 'react-native';
 import ProfileHeader from '@/components/Profile/ProfileHeader';
 import { useGetGenreInsightsQuery, useGetV2UserQuery } from '@/redux/api/tmrev';
@@ -44,14 +44,6 @@ const Profile = () => {
 	const openMenu = () => setVisible(true);
 	const closeMenu = () => setVisible(false);
 
-	const name = useMemo(() => {
-		if (profileData) {
-			return `${profileData.body.firstName} ${profileData.body.lastName}`;
-		}
-
-		return '';
-	}, [profileData]);
-
 	if (isProfileLoading || !profileData) {
 		return <Text>Loading...</Text>;
 	}
@@ -60,7 +52,7 @@ const Profile = () => {
 		<>
 			<Stack.Screen
 				options={{
-					title: name,
+					title: profileData.body.username,
 					headerRight: () => (
 						<Menu
 							visible={visible}

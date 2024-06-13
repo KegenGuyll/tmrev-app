@@ -14,8 +14,7 @@ interface TmrevUser {
 	following: string[];
 	reviews: TmrevReview[];
 	watchLists: WatchList[];
-	firstName: string;
-	lastName: string;
+	username: string;
 	link?: Link;
 	bio: string;
 	location: string;
@@ -30,8 +29,7 @@ interface UserQuery {
 
 type UpdateUserQuery = {
 	authToken?: string;
-	firstName?: string;
-	lastName?: string;
+	username?: string;
 	bio?: string;
 	location?: string;
 };
@@ -39,8 +37,7 @@ type UpdateUserQuery = {
 type UserV2 = {
 	_id: string;
 	uuid: string;
-	firstName: string;
-	lastName: string;
+	username: string;
 	bio: string;
 	location: string;
 	photoUrl: string;
@@ -55,8 +52,7 @@ type UserV2 = {
 type BasicUserV2 = {
 	_id: string;
 	uuid: string;
-	firstName: string;
-	lastName: string;
+	username: string;
 	bio: string;
 	location: string;
 	photoUrl: string;

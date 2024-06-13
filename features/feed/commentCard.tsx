@@ -169,9 +169,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
 									style={[styles.flexRow, { alignItems: 'flex-start', flex: 1, width: '100%' }]}
 								>
 									<View style={[styles.flexColumn, { flexGrow: 1 }]}>
-										<Text variant="labelLarge">
-											{comment.user.firstName} {comment.user.lastName}
-										</Text>
+										<Text variant="labelLarge">{comment.user.username}</Text>
 										<Text variant="labelSmall">
 											{dayjs(comment.createdAt).format('hh:mm A · MMM DD, YYYY')}
 										</Text>

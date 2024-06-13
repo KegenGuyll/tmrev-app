@@ -9,7 +9,7 @@ type MovieReviewProps = {
 };
 
 const MovieReview: React.FC<MovieReviewProps> = ({ review, from }: MovieReviewProps) => {
-	const name = `${review.profile.firstName} ${review.profile.lastName}`;
+	if (!review.profile) return null;
 
 	return (
 		<>
@@ -36,11 +36,11 @@ const MovieReview: React.FC<MovieReviewProps> = ({ review, from }: MovieReviewPr
 						>
 							{review.profile.photoUrl && (
 								<Image
-									source={{ uri: review.profile.photoUrl }}
+									source={{ uri: review.profile?.photoUrl }}
 									style={{ width: 40, height: 40, borderRadius: 50 }}
 								/>
 							)}
-							<Text variant="labelLarge">{name}</Text>
+							<Text variant="labelLarge">{review.profile?.username}</Text>
 						</View>
 					</Link>
 					<Chip icon="star">

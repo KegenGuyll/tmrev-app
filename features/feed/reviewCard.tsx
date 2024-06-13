@@ -151,9 +151,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 				</TouchableRipple>
 				<View style={[styles.flexRow, { alignItems: 'flex-start', flex: 1, width: '100%' }]}>
 					<View style={{ flexGrow: 1 }}>
-						<Text variant="labelLarge">
-							{reviewData.body?.user.firstName} {reviewData.body?.user.lastName}
-						</Text>
+						<Text variant="labelLarge">{reviewData.body?.user.username}</Text>
 						<Text variant="labelSmall">
 							{dayjs(formatDate(reviewData.body!.createdAt)).format('hh:mm A · MMM DD, YYYY')}
 						</Text>

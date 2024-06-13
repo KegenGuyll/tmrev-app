@@ -11,7 +11,7 @@ import auth from '@react-native-firebase/auth';
 import messaging from '@react-native-firebase/messaging';
 import { Button, Divider, IconButton, Menu, Snackbar, Text, useTheme } from 'react-native-paper';
 import { Stack, useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import ProfileHeader from '@/components/Profile/ProfileHeader';
 import {
 	useGetGenreInsightsQuery,
@@ -54,8 +54,6 @@ const Profile = () => {
 
 	const openMenu = () => setVisible(true);
 	const closeMenu = () => setVisible(false);
-
-	const name = useMemo(() => `${data?.body.firstName} ${data?.body.lastName}`, [data]);
 
 	const handleSignOut = async () => {
 		try {
@@ -134,7 +132,7 @@ const Profile = () => {
 		<>
 			<Stack.Screen
 				options={{
-					title: name,
+					title: data.body.username,
 					headerRight: () => (
 						<Menu
 							visible={visible}

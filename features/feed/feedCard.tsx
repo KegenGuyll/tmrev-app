@@ -145,9 +145,7 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from }: FeedCardProps) => {
 							/>
 						</TouchableHighlight>
 						<View style={styles.flexColumn}>
-							<Text variant="labelLarge">
-								{review.userDetails.firstName} {review.userDetails.lastName}
-							</Text>
+							<Text variant="labelLarge">{review.userDetails.username}</Text>
 							<Text variant="labelSmall">
 								{dayjs(formatDate(review.createdAt)).format('hh:mm A · MMM DD, YYYY')}
 							</Text>

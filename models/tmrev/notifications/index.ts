@@ -31,8 +31,7 @@ type Notification<T> = {
 	recipient: string;
 	sender: {
 		_id: string;
-		firstName: string;
-		lastName: string;
+		username: string;
 		uuid: string;
 		photoUrl: string;
 	};

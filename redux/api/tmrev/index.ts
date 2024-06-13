@@ -570,8 +570,7 @@ export const tmrevApi = createApi({
 				},
 				body: {
 					bio: data.bio,
-					firstName: data.firstName,
-					lastName: data.lastName,
+					username: data.username,
 					location: data.location,
 				},
 				method: 'PUT',

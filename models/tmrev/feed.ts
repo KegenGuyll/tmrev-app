@@ -15,8 +15,7 @@ type FeedReviews = TmrevReview & {
 	replies: number;
 	seen: boolean;
 	userDetails: {
-		firstName: string;
-		lastName: string;
+		username: string;
 		photoUrl: string;
 		uuid: string;
 		_id: string;

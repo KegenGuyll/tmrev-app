@@ -15,16 +15,14 @@ const EditProfile = () => {
 	const [updateUser] = useUpdateUserMutation();
 
 	const [form, setForm] = useState({
-		firstName: data?.firstName,
-		lastName: data?.lastName,
+		username: data?.username,
 		location: data?.location,
 		bio: data?.bio,
 	});
 
 	useEffect(() => {
 		setForm({
-			firstName: data?.firstName,
-			lastName: data?.lastName,
+			username: data?.username,
 			location: data?.location,
 			bio: data?.bio,
 		});
@@ -35,15 +33,14 @@ const EditProfile = () => {
 	};
 
 	const handleUpdateUser = async () => {
-		if (!currentUser || !form.firstName || !form.lastName) return;
+		if (!currentUser || !form.username) return;
 
 		try {
 			const token = await currentUser.getIdToken();
 
 			await updateUser({
 				authToken: token,
-				firstName: form.firstName,
-				lastName: form.lastName,
+				username: form.username,
 				location: form.location,
 				bio: form.bio,
 			});
@@ -62,17 +59,10 @@ const EditProfile = () => {
 			<View style={styles.container}>
 				<TextInput
 					mode="outlined"
-					label="First Name"
-					onChange={(e) => handleFormChange('firstName', e.nativeEvent.text)}
-					value={form.firstName}
-					error={form.firstName === ''}
-				/>
-				<TextInput
-					mode="outlined"
-					label="Last Name"
-					onChange={(e) => handleFormChange('lastName', e.nativeEvent.text)}
-					value={form.lastName}
-					error={form.lastName === ''}
+					label="Username"
+					onChange={(e) => handleFormChange('username', e.nativeEvent.text)}
+					value={form.username}
+					error={form.username === ''}
 				/>
 				<TextInput
 					mode="outlined"
@@ -90,11 +80,7 @@ const EditProfile = () => {
 				/>
 				<Divider />
 				<View style={{ gap: 8 }}>
-					<Button
-						disabled={!form.firstName || !form.lastName}
-						onPress={handleUpdateUser}
-						mode="contained"
-					>
+					<Button disabled={!form.username} onPress={handleUpdateUser} mode="contained">
 						Save
 					</Button>
 					<Button onPress={() => router.back()} mode="outlined">
