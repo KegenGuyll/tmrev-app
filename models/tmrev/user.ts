@@ -49,6 +49,11 @@ type UserV2 = {
 	isFollowing: boolean;
 };
 
+type IsUsernameAvailableResponse = {
+	success: boolean;
+	isAvailable: boolean;
+};
+
 type BasicUserV2 = {
 	_id: string;
 	uuid: string;
@@ -109,4 +114,5 @@ export type {
 	BasicUserV2,
 	GetFollowResponse,
 	GetFollowPayload,
+	IsUsernameAvailableResponse,
 };
