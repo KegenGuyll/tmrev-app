@@ -41,6 +41,8 @@ const WatchedMovie: React.FC<WatchedMovieProps> = ({
 	}, [singleWatched]);
 
 	const handleOnPress = async (liked: boolean) => {
+		if (!currentUser) return;
+
 		if (hasWatched && singleWatched?.body) {
 			await updateWatched({
 				tmdbID: Number(movieId),
