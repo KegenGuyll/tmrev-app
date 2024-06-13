@@ -89,6 +89,7 @@ const AllReviews = () => {
 
 	const {
 		data: userMovieReviewResponse,
+		refetch,
 		isLoading,
 		isFetching,
 	} = useGetUserMovieReviewsQuery({ userId: profileId!, query }, { skip: !profileId });
@@ -96,9 +97,10 @@ const AllReviews = () => {
 	const theme = useTheme();
 	const styles = makeStyles(theme);
 
-	const onRefresh = useCallback(() => {
+	const onRefresh = useCallback(async () => {
 		setRefreshing(true);
 		setPage(0);
+		await refetch().unwrap();
 		setRefreshing(false);
 	}, []);
 
