@@ -1,7 +1,7 @@
 import { Button, Divider, Snackbar, Text, TextInput } from 'react-native-paper';
 import { GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import { AppleButton } from '@invertase/react-native-apple-authentication';
-import { Stack, useRouter } from 'expo-router';
+import { Link, Stack, useRouter } from 'expo-router';
 import { Platform, View } from 'react-native';
 import { useState } from 'react';
 import { loggedInProfileRoute } from '@/constants/routes';
@@ -87,6 +87,11 @@ const Signup: React.FC = () => {
 							/>
 						}
 					/>
+					<Link href="/login">
+						<Text variant="labelMedium" style={{ textAlign: 'right' }}>
+							Already have an account? Log in
+						</Text>
+					</Link>
 				</View>
 				<Button onPress={onEmailSignUp} mode="contained">
 					Sign Up
