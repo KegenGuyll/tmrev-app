@@ -6,8 +6,7 @@ import { GOOGLE_WEB_CLIENT_ID, TMREV_API_URL } from '@env';
 type CreateTMREVUser = {
 	bio: string;
 	email: string;
-	firstName: string;
-	lastName: string;
+	username: string;
 	link: string | null;
 	location: string;
 	photoUrl: string | null;
@@ -25,7 +24,6 @@ const findUserByUid = async (uid?: string) => {
 
 		return data;
 	} catch (error) {
-		console.error(error);
 		return undefined;
 	}
 };
@@ -46,9 +44,11 @@ const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) =>
 		return true;
 	};
 
-	const createTMREVUser = async (currentUser: FirebaseAuthTypes.User) => {
+	const createTMREVUser = async (currentUser: FirebaseAuthTypes.User, username?: string) => {
+		const createdUsername = currentUser.displayName || username;
+
 		const token = await currentUser.getIdToken();
-		await fetch(`${TMREV_API_URL}/user`, {
+		const response = await fetch(`${TMREV_API_URL}/user`, {
 			method: 'POST',
 			headers: {
 				authorization: token,
@@ -57,8 +57,7 @@ const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) =>
 			body: JSON.stringify({
 				uuid: currentUser.uid,
 				email: currentUser.email,
-				firstName: auth().currentUser?.displayName?.split(' ')[0] || 'First Name',
-				lastName: auth().currentUser?.displayName?.split(' ')[1] || 'Last Name',
+				username: createdUsername,
 				photoUrl:
 					currentUser.photoURL || `https://api.dicebear.com/8.x/thumbs/png?seed=${currentUser.uid}`,
 				bio: '',
@@ -67,6 +66,10 @@ const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) =>
 				public: true,
 			} as CreateTMREVUser),
 		});
+
+		const data = await response.json();
+
+		return data;
 	};
 
 	const onGoogleSignInButtonPress = async () => {
@@ -93,17 +96,23 @@ const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) =>
 			const doesUserExist = await checkIfUserExists(currentUser?.uid);
 
 			if (!doesUserExist) {
-				await createTMREVUser(currentUser);
-			}
+				const result = await createTMREVUser(currentUser);
 
-			onSuccessfulSignIn();
+				if (!result.success) {
+					onError('Failed to create user');
+					currentUser.delete();
+				} else {
+					onSuccessfulSignIn();
+				}
+			} else {
+				onSuccessfulSignIn();
+			}
 		} catch (error: any) {
 			if (error.message && typeof error.message === 'string') {
 				const message = error.message.split(']')[1];
 
 				onError(message);
 			}
-			console.error(error.message);
 		}
 	};
 
@@ -136,13 +145,25 @@ const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) =>
 				return;
 			}
 
+			if (!currentUser.displayName) {
+				currentUser.updateProfile({
+					photoURL: `https://api.dicebear.com/8.x/thumbs/png?seed=${currentUser.uid}`,
+				});
+			}
+
 			const doesUserExist = await checkIfUserExists(currentUser?.uid);
 
 			if (!doesUserExist) {
-				await createTMREVUser(currentUser);
+				const result = await createTMREVUser(currentUser);
+				if (!result.success) {
+					onError('Failed to create user');
+					currentUser.delete();
+				} else {
+					onSuccessfulSignIn();
+				}
+			} else {
+				onSuccessfulSignIn();
 			}
-
-			onSuccessfulSignIn();
 		} catch (error: any) {
 			if (error.message && typeof error.message === 'string') {
 				onError(error.message);
@@ -161,7 +182,38 @@ const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) =>
 
 				onError(message);
 			}
-			console.error(error);
+		}
+	};
+
+	const emailSignUp = async (username: string, email: string, password: string) => {
+		try {
+			await auth().createUserWithEmailAndPassword(email, password);
+
+			const { currentUser } = auth();
+
+			if (!currentUser) {
+				return;
+			}
+
+			currentUser.updateProfile({
+				displayName: username,
+				photoURL: `https://api.dicebear.com/8.x/thumbs/png?seed=${currentUser.uid}`,
+			});
+
+			const result = await createTMREVUser(currentUser, username);
+
+			if (!result.success) {
+				onError('Failed to create user');
+				currentUser.delete();
+			} else {
+				onSuccessfulSignIn();
+			}
+		} catch (error: any) {
+			if (error.message && typeof error.message === 'string') {
+				const message = error.message.split(']')[1];
+
+				onError(message);
+			}
 		}
 	};
 
@@ -169,6 +221,7 @@ const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) =>
 		onGoogleSignInButtonPress,
 		onAppleSignInButtonPress,
 		emailSignIn,
+		emailSignUp,
 	};
 };
 
