@@ -8,7 +8,7 @@ import {
 	RefreshControl,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import { Text, useTheme, MD3Theme, Divider, ActivityIndicator } from 'react-native-paper';
+import { Text, useTheme, MD3Theme, Divider, ActivityIndicator, Snackbar } from 'react-native-paper';
 import { useMemo, useState } from 'react';
 import { FlatList } from 'react-native-gesture-handler';
 import {
@@ -17,9 +17,10 @@ import {
 	useGetSingleReviewQuery,
 } from '@/redux/api/tmrev';
 import CommentCard from '@/features/feed/commentCard';
-import { FeedReviewContentTypes, feedReviewDetailsRoute } from '@/constants/routes';
+import { FeedReviewContentTypes, feedReviewDetailsRoute, loginRoute } from '@/constants/routes';
 import ReviewCard from '@/features/feed/reviewCard';
 import { FromLocation } from '@/models';
+import { commentLoginPrompt } from '@/constants/messages';
 
 type ReviewSearchProps = {
 	reviewId: string;
@@ -29,6 +30,7 @@ type ReviewSearchProps = {
 
 const ReviewPage: React.FC = () => {
 	const { reviewId, contentType, from } = useLocalSearchParams<ReviewSearchProps>();
+	const [loginMessage, setLoginMessage] = useState<string | null>(null);
 
 	const { currentUser } = auth();
 
@@ -82,7 +84,10 @@ const ReviewPage: React.FC = () => {
 	};
 
 	const handleNavigateToComment = () => {
-		if (!currentUser) return;
+		if (!currentUser) {
+			setLoginMessage(commentLoginPrompt);
+			return;
+		}
 
 		if (contentType === 'reviews') {
 			router.navigate(feedReviewDetailsRoute(reviewId!, 'reviews', from!));
@@ -108,13 +113,19 @@ const ReviewPage: React.FC = () => {
 					)}
 					{contentType === 'reviews' && (
 						<ReviewCard
+							setLoginMessage={setLoginMessage}
 							numberOfComments={commentData?.body.length || 0}
 							reviewData={reviewData}
 							from={from!}
 						/>
 					)}
 					{commentDetails && contentType === 'comments' && (
-						<CommentCard isSubject comment={commentDetails?.body} from={from!} />
+						<CommentCard
+							setLoginMessage={setLoginMessage}
+							isSubject
+							comment={commentDetails?.body}
+							from={from!}
+						/>
 					)}
 					{contentType === 'comments' && (
 						<View style={[styles.flexRow, { paddingVertical: 16 }]}>
@@ -128,7 +139,7 @@ const ReviewPage: React.FC = () => {
 						data={commentData?.body}
 						renderItem={({ item }) => (
 							<>
-								<CommentCard comment={item} from={from!} />
+								<CommentCard setLoginMessage={setLoginMessage} comment={item} from={from!} />
 								<Divider />
 							</>
 						)}
@@ -154,6 +165,16 @@ const ReviewPage: React.FC = () => {
 					</View>
 				</TouchableWithoutFeedback>
 			</View>
+			<Snackbar
+				action={{
+					label: 'Login',
+					onPress: () => router.navigate(loginRoute()),
+				}}
+				visible={!!loginMessage}
+				onDismiss={() => setLoginMessage(null)}
+			>
+				{loginMessage}
+			</Snackbar>
 		</>
 	);
 };

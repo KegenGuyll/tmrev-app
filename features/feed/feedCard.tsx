@@ -25,15 +25,22 @@ import { useVoteTmrevReviewMutation } from '@/redux/api/tmrev';
 import { formatDate } from '@/utils/common';
 import { FromLocation } from '@/models';
 import BarChart from '@/components/CustomCharts/BarChart';
+import {
+	commentLoginPrompt,
+	dislikeLoginPrompt,
+	errorPrompt,
+	likeLoginPrompt,
+} from '@/constants/messages';
 
 type FeedCardProps = {
 	review: FeedReviews;
 	// eslint-disable-next-line react/no-unused-prop-types
 	contentType: FeedReviewContentTypes;
 	from: FromLocation;
+	setLoginMessage?: (message: string | null) => void;
 };
 
-const FeedCard: React.FC<FeedCardProps> = ({ review, from }: FeedCardProps) => {
+const FeedCard: React.FC<FeedCardProps> = ({ review, from, setLoginMessage }: FeedCardProps) => {
 	const styles = makeStyle();
 	const router = useRouter();
 
@@ -103,30 +110,45 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from }: FeedCardProps) => {
 	const [voteReview] = useVoteTmrevReviewMutation();
 
 	const handleComment = () => {
-		if (!currentUser) return;
+		if (!currentUser) {
+			if (setLoginMessage) {
+				setLoginMessage(commentLoginPrompt);
+			}
+			return;
+		}
 
 		router.navigate(feedReviewDetailsRoute(review._id, 'reviews', from));
 	};
 
 	const handleUpVote = async () => {
-		if (!currentUser) return;
+		if (!currentUser) {
+			if (setLoginMessage) {
+				setLoginMessage(likeLoginPrompt);
+			}
+			return;
+		}
 		try {
 			await voteReview({ reviewId: review._id, vote: true }).unwrap();
 			setHasLiked(true);
 			setHasDisliked(false);
 		} catch (error) {
-			setSnackBarMessage('Error has occurred');
+			setSnackBarMessage(errorPrompt);
 		}
 	};
 
 	const handleDownVote = async () => {
-		if (!currentUser) return;
+		if (!currentUser) {
+			if (setLoginMessage) {
+				setLoginMessage(dislikeLoginPrompt);
+			}
+			return;
+		}
 		try {
 			await voteReview({ reviewId: review._id, vote: false }).unwrap();
 			setHasDisliked(true);
 			setHasLiked(false);
 		} catch (error) {
-			setSnackBarMessage('Error has occurred');
+			setSnackBarMessage(errorPrompt);
 		}
 	};
 

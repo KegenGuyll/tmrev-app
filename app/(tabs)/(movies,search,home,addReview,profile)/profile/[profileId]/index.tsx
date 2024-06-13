@@ -1,5 +1,5 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
-import { IconButton, Menu, Text, useTheme } from 'react-native-paper';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { IconButton, Menu, Snackbar, Text, useTheme } from 'react-native-paper';
 import { useState } from 'react';
 import { View, SafeAreaView, ScrollView, RefreshControl } from 'react-native';
 import ProfileHeader from '@/components/Profile/ProfileHeader';
@@ -8,6 +8,7 @@ import { FromLocation } from '@/models';
 import ProfileNavigation from '@/components/Profile/ProfileListNavigationt';
 import ProfilePinnedMovies from '@/components/Profile/ProfilePinnedMovies';
 import BarChart from '@/components/CustomCharts/BarChart';
+import { loginRoute } from '@/constants/routes';
 
 export type ProfileSearchParams = {
 	profileId: string;
@@ -15,8 +16,10 @@ export type ProfileSearchParams = {
 };
 
 const Profile = () => {
+	const router = useRouter();
 	const { profileId, from } = useLocalSearchParams<ProfileSearchParams>();
 	const [refreshing, setRefreshing] = useState(false);
+	const [loginMessage, setLoginMessage] = useState<string | null>(null);
 
 	const theme = useTheme();
 
@@ -73,7 +76,11 @@ const Profile = () => {
 				>
 					<View style={{ gap: 16 }}>
 						<View>
-							<ProfileHeader user={profileData.body} from={from} />
+							<ProfileHeader
+								setLoginMessage={setLoginMessage}
+								user={profileData.body}
+								from={from}
+							/>
 							<ProfileNavigation
 								from={from || 'home'}
 								profileId={profileId}
@@ -103,6 +110,16 @@ const Profile = () => {
 					</View>
 				</ScrollView>
 			</SafeAreaView>
+			<Snackbar
+				action={{
+					label: 'Login',
+					onPress: () => router.navigate(loginRoute()),
+				}}
+				visible={!!loginMessage}
+				onDismiss={() => setLoginMessage(null)}
+			>
+				{loginMessage}
+			</Snackbar>
 		</>
 	);
 };

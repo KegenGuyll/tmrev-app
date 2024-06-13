@@ -22,9 +22,10 @@ import { useGetAllReviewsQuery } from '@/redux/api/tmrev';
 import MovieRadarChart from '@/components/MovieRadarChart';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import CreateMovieReviewModal from '@/components/CreateMovieReviewModal';
-import { movieReviewsRoute, personDetailsRoute } from '@/constants/routes';
+import { loginRoute, movieReviewsRoute, personDetailsRoute } from '@/constants/routes';
 import WatchedMovie from '@/features/movieDetails/WatchedMovie';
 import AddMovieToList from '@/features/movieDetails/addMovieToList';
+import { addToListLoginPrompt, reviewLoginPrompt } from '@/constants/messages';
 
 type MovieDetailsParams = {
 	movieId: string;
@@ -40,6 +41,7 @@ const MovieDetails = () => {
 	const [showAddMovieToListModal, setShowAddMovieToListModal] = useState(false);
 	const [showCreateReviewModal, setShowCreateReviewModal] = useState(false);
 	const [snackBarMessage, setSnackBarMessage] = useState<string | null>(null);
+	const [loginMessage, setLoginMessage] = useState<string | null>(null);
 
 	const { currentUser } = auth();
 
@@ -85,13 +87,19 @@ const MovieDetails = () => {
 	};
 
 	const handleReviewMovie = () => {
-		if (!currentUser) return;
+		if (!currentUser) {
+			setLoginMessage(reviewLoginPrompt);
+			return;
+		}
 
 		setShowCreateReviewModal(true);
 	};
 
 	const handleAddToList = () => {
-		if (!currentUser) return;
+		if (!currentUser) {
+			setLoginMessage(addToListLoginPrompt);
+			return;
+		}
 
 		setShowAddMovieToListModal(true);
 	};
@@ -161,6 +169,7 @@ const MovieDetails = () => {
 							movieId={Number(movieId!)}
 							likes={movieReviews?.body.likes}
 							dislikes={movieReviews?.body.dislikes}
+							setLoginMessage={setLoginMessage}
 						/>
 					)}
 					<Surface
@@ -305,6 +314,16 @@ const MovieDetails = () => {
 					{snackBarMessage}
 				</Snackbar>
 			)}
+			<Snackbar
+				action={{
+					label: 'Login',
+					onPress: () => router.navigate(loginRoute()),
+				}}
+				visible={!!loginMessage}
+				onDismiss={() => setLoginMessage(null)}
+			>
+				{loginMessage}
+			</Snackbar>
 		</>
 	);
 };

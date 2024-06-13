@@ -21,12 +21,14 @@ import { feedReviewDetailsRoute, profileRoute } from '@/constants/routes';
 import { formatDate } from '@/utils/common';
 import { FromLocation } from '@/models';
 import BarChart from '@/components/CustomCharts/BarChart';
+import { commentLoginPrompt, dislikeLoginPrompt, likeLoginPrompt } from '@/constants/messages';
 
 type ReviewCardProps = {
 	reviewData: ReviewResponse | undefined;
 	displayMetaData?: boolean;
 	numberOfComments?: number;
 	from: FromLocation;
+	setLoginMessage?: (message: string | null) => void;
 };
 
 const ReviewCard: React.FC<ReviewCardProps> = ({
@@ -34,6 +36,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 	displayMetaData = true,
 	numberOfComments = 0,
 	from,
+	setLoginMessage,
 }: ReviewCardProps) => {
 	const styles = makeStyles(useTheme());
 	const router = useRouter();
@@ -102,7 +105,12 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 	}, [reviewData]);
 
 	const handleUpVote = async () => {
-		if (!reviewData || !reviewData?.body || !currentUser) return;
+		if (!reviewData || !reviewData?.body || !currentUser) {
+			if (setLoginMessage) {
+				setLoginMessage(likeLoginPrompt);
+			}
+			return;
+		}
 		try {
 			await voteReview({ reviewId: reviewData?.body._id, vote: true }).unwrap();
 			setHasLiked(true);
@@ -113,7 +121,12 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 	};
 
 	const handleDownVote = async () => {
-		if (!reviewData || !reviewData?.body || !currentUser) return;
+		if (!reviewData || !reviewData?.body || !currentUser) {
+			if (setLoginMessage) {
+				setLoginMessage(dislikeLoginPrompt);
+			}
+			return;
+		}
 		try {
 			await voteReview({ reviewId: reviewData?.body._id, vote: false }).unwrap();
 			setHasDisliked(true);
@@ -124,7 +137,12 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 	};
 
 	const handleComment = () => {
-		if (!reviewData || !reviewData?.body || !currentUser) return;
+		if (!reviewData || !reviewData?.body || !currentUser) {
+			if (setLoginMessage) {
+				setLoginMessage(commentLoginPrompt);
+			}
+			return;
+		}
 
 		router.navigate(feedReviewDetailsRoute(reviewData.body?._id, 'reviews', from));
 	};

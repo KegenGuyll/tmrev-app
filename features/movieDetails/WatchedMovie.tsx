@@ -7,17 +7,20 @@ import {
 	useGetSingleWatchedQuery,
 	useUpdateWatchedMutation,
 } from '@/redux/api/tmrev';
+import { likeMovieLoginPrompt } from '@/constants/messages';
 
 type WatchedMovieProps = {
 	likes: number;
 	dislikes: number;
 	movieId: number;
+	setLoginMessage?: (message: string | null) => void;
 };
 
 const WatchedMovie: React.FC<WatchedMovieProps> = ({
 	likes,
 	dislikes,
 	movieId,
+	setLoginMessage,
 }: WatchedMovieProps) => {
 	const { currentUser } = auth();
 	const [hasWatched, setHasWatched] = useState(false);
@@ -41,7 +44,12 @@ const WatchedMovie: React.FC<WatchedMovieProps> = ({
 	}, [singleWatched]);
 
 	const handleOnPress = async (liked: boolean) => {
-		if (!currentUser) return;
+		if (!currentUser) {
+			if (setLoginMessage) {
+				setLoginMessage(likeMovieLoginPrompt);
+			}
+			return;
+		}
 
 		if (hasWatched && singleWatched?.body) {
 			await updateWatched({
