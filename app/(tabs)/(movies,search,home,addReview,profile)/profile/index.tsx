@@ -20,7 +20,7 @@ import {
 } from '@/redux/api/tmrev';
 import ProfileNavigation from '@/components/Profile/ProfileListNavigationt';
 import ProfilePinnedMovies from '@/components/Profile/ProfilePinnedMovies';
-import { loginRoute, signupRoute } from '@/constants/routes';
+import { loginRoute, profileSettingsRoute, signupRoute } from '@/constants/routes';
 import BarChart from '@/components/CustomCharts/BarChart';
 
 const Profile = () => {
@@ -67,16 +67,6 @@ const Profile = () => {
 
 	const openMenu = () => setVisible(true);
 	const closeMenu = () => setVisible(false);
-
-	const handleSignOut = async () => {
-		try {
-			closeMenu();
-			await auth().signOut();
-			router.replace('/(tabs)/(home)/home');
-		} catch (error) {
-			console.error(error);
-		}
-	};
 
 	const handleDeviceToken = async () => {
 		try {
@@ -147,14 +137,18 @@ const Profile = () => {
 				options={{
 					title: data.body.username,
 					headerRight: () => (
-						<Menu
-							visible={visible}
-							onDismiss={closeMenu}
-							anchor={<IconButton onPress={openMenu} icon="dots-vertical" />}
-						>
-							<Menu.Item onPress={handleDeviceToken} title="Enable Notifications" />
-							<Menu.Item onPress={handleSignOut} title="Logout" />
-						</Menu>
+						<IconButton
+							onPress={() => router.navigate(profileSettingsRoute('profile', currentUser.uid))}
+							icon="menu"
+						/>
+						// <Menu
+						// 	visible={visible}
+						// 	onDismiss={closeMenu}
+						// 	anchor={<IconButton onPress={openMenu} icon="dots-vertical" />}
+						// >
+						// 	<Menu.Item onPress={handleDeviceToken} title="Enable Notifications" />
+						// 	<Menu.Item onPress={handleSignOut} title="Logout" />
+						// </Menu>
 					),
 				}}
 			/>

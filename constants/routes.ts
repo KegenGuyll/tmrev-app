@@ -30,6 +30,10 @@ export const feedReviewDetailsRoute = (
 	return `${baseTabUrl}/(${from})/home/reply/${postId}?contentType=${contentType}&from=${from}`;
 };
 
+export const homeRoute = (from: FromLocation) => {
+	return `${baseTabUrl}/(${from})/home?from=${from}`;
+};
+
 export const allListsRoute = (from: FromLocation, profileId: string) => {
 	return `${baseTabUrl}/(${from})/profile/${profileId}/allLists?from=${from}`;
 };
@@ -52,6 +56,10 @@ export const editProfileRoute = (from: FromLocation) => {
 
 export const updatePinnedReviewsRoute = (from: FromLocation) => {
 	return `${baseTabUrl}/(${from})/profile/updatePinnedReviews?from=${from}`;
+};
+
+export const profileSettingsRoute = (from: FromLocation, userId: string) => {
+	return `${baseTabUrl}/(${from})/profile/${userId}/settings?from=${from}`;
 };
 
 export const watchedMoviesRoute = (from: FromLocation, profileId: string) => {
