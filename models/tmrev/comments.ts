@@ -13,8 +13,7 @@ type Comment = {
 
 type CommentWithUser = Comment & {
 	user: {
-		firstName: string;
-		lastName: string;
+		username: string;
 		photoUrl: string;
 		_id: string;
 		uuid: string;

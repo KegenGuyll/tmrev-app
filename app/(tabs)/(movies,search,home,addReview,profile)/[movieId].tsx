@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useBottomSheetModal } from '@gorhom/bottom-sheet';
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
+import auth from '@react-native-firebase/auth';
 import {
 	useGetMovieCreditsQuery,
 	useGetMovieDetailsQuery,
@@ -39,6 +40,8 @@ const MovieDetails = () => {
 	const [showAddMovieToListModal, setShowAddMovieToListModal] = useState(false);
 	const [showCreateReviewModal, setShowCreateReviewModal] = useState(false);
 	const [snackBarMessage, setSnackBarMessage] = useState<string | null>(null);
+
+	const { currentUser } = auth();
 
 	useEffect(() => {
 		dismissAll();
@@ -79,6 +82,18 @@ const MovieDetails = () => {
 		} catch (error) {
 			console.error(error);
 		}
+	};
+
+	const handleReviewMovie = () => {
+		if (!currentUser) return;
+
+		setShowCreateReviewModal(true);
+	};
+
+	const handleAddToList = () => {
+		if (!currentUser) return;
+
+		setShowAddMovieToListModal(true);
 	};
 
 	if (movieDataIsFetching || movieDataIsLoading || !movieData) {
@@ -131,17 +146,13 @@ const MovieDetails = () => {
 							gap: 8,
 						}}
 					>
-						<Button
-							onPress={() => setShowCreateReviewModal(true)}
-							icon="message-draw"
-							mode="outlined"
-						>
+						<Button onPress={handleReviewMovie} icon="message-draw" mode="outlined">
 							Review
 						</Button>
 						<Button onPress={shareMovie} icon="share" mode="outlined">
 							Share
 						</Button>
-						<Button onPress={() => setShowAddMovieToListModal(true)} icon="plus" mode="outlined">
+						<Button onPress={handleAddToList} icon="plus" mode="outlined">
 							WatchList
 						</Button>
 					</View>
@@ -204,14 +215,10 @@ const MovieDetails = () => {
 						<Text variant="bodyMedium">{movieData.overview}</Text>
 					</Surface>
 					<View style={{ marginBottom: 8 }}>
-						<Button
-							onPress={() => setShowCreateReviewModal(true)}
-							style={{ marginBottom: 8 }}
-							mode="contained"
-						>
+						<Button onPress={handleReviewMovie} style={{ marginBottom: 8 }} mode="contained">
 							REVIEW MOVIE
 						</Button>
-						<Button onPress={() => setShowAddMovieToListModal(true)} mode="outlined">
+						<Button onPress={handleAddToList} mode="outlined">
 							ADD TO LIST
 						</Button>
 					</View>

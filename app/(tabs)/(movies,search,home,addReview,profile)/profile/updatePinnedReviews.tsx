@@ -40,10 +40,12 @@ const UpdatePinnedReviews = () => {
 	}, [sort, page, debouncedSearchTerm]);
 
 	const { data: movieReviews } = useGetUserMovieReviewsQuery(
-		{ userId: currentUser!.uid, query },
+		{ userId: currentUser?.uid || '', query },
 		{ skip: !currentUser }
 	);
-	const { data: pinnedData } = useGetPinnedMoviesQuery(currentUser!.uid, { skip: !currentUser });
+	const { data: pinnedData } = useGetPinnedMoviesQuery(currentUser?.uid || '', {
+		skip: !currentUser,
+	});
 
 	useEffect(() => {
 		if (pinnedData?.body) {
@@ -63,6 +65,7 @@ const UpdatePinnedReviews = () => {
 	};
 
 	const handleUpdatePinnedReviews = async () => {
+		if (!currentUser) return;
 		try {
 			const pinnedReviewsIds = pinnedReviews.map((r) => r._id);
 
@@ -71,7 +74,7 @@ const UpdatePinnedReviews = () => {
 			if (router.canDismiss()) {
 				router.dismiss();
 			} else {
-				router.replace(profileRoute('profile', currentUser!.uid));
+				router.replace(profileRoute('profile', currentUser.uid));
 			}
 		} catch (error) {
 			console.error(error);

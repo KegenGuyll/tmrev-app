@@ -1,11 +1,126 @@
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text } from 'react-native-paper';
+import { Button, Divider, Snackbar, Text, TextInput } from 'react-native-paper';
+import { GoogleSigninButton } from '@react-native-google-signin/google-signin';
+import { AppleButton } from '@invertase/react-native-apple-authentication';
+import { Link, Stack, useRouter } from 'expo-router';
+import { Platform, View } from 'react-native';
+import { useState } from 'react';
+import { loggedInProfileRoute } from '@/constants/routes';
+import useAuth from '@/hooks/useAuth';
+import { useIsUsernameAvailableQuery } from '@/redux/api/tmrev';
+import useDebounce from '@/hooks/useDebounce';
 
 const Signup: React.FC = () => {
+	const router = useRouter();
+
+	const [username, setUsername] = useState('');
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
+	const [showPassword, setShowPassword] = useState(false);
+	const [errorMessage, setErrorMessage] = useState<string | null>('');
+
+	const debouncedUsername = useDebounce(username, 200);
+
+	const { data: isUsernameAvailable } = useIsUsernameAvailableQuery(debouncedUsername, {
+		skip: !debouncedUsername,
+	});
+
+	const doesUsernameMeetRequirements = username.length >= 5 && username.length <= 15;
+
+	const { emailSignUp, onGoogleSignInButtonPress } = useAuth({
+		onSuccessfulSignIn: () => {
+			router.replace(loggedInProfileRoute('profile'));
+		},
+		onError: setErrorMessage,
+	});
+
+	const onEmailSignUp = async () => {
+		if (!email || !password || !username) {
+			setErrorMessage('Please enter your email, password, and username');
+			return;
+		}
+
+		await emailSignUp(username, email, password);
+	};
+
 	return (
-		<SafeAreaView>
-			<Text>Signup</Text>
-		</SafeAreaView>
+		<>
+			<Stack.Screen options={{ title: 'Sign Up' }} />
+			<View style={{ gap: 16, padding: 16 }}>
+				<View>
+					<Text variant="headlineLarge">Create an Account</Text>
+					<Text variant="titleSmall">Create an account to get started.</Text>
+				</View>
+				<View style={{ gap: 8 }}>
+					<View>
+						<TextInput
+							error={!isUsernameAvailable?.isAvailable || !doesUsernameMeetRequirements}
+							value={username}
+							onChangeText={setUsername}
+							label="Username"
+							mode="outlined"
+						/>
+						{isUsernameAvailable?.success && !isUsernameAvailable?.isAvailable && (
+							<Text variant="labelMedium">Username is already taken</Text>
+						)}
+						{!doesUsernameMeetRequirements && (
+							<Text variant="labelMedium">Username must be between 5 and 15 characters</Text>
+						)}
+					</View>
+
+					<TextInput
+						value={email}
+						onChangeText={setEmail}
+						label="Email"
+						inputMode="email"
+						mode="outlined"
+					/>
+					<TextInput
+						value={password}
+						onChangeText={setPassword}
+						secureTextEntry={!showPassword}
+						label="Password"
+						mode="outlined"
+						right={
+							<TextInput.Icon
+								onPress={() => setShowPassword(!showPassword)}
+								icon={!showPassword ? 'eye' : 'eye-off'}
+							/>
+						}
+					/>
+					<Link href="/login">
+						<Text variant="labelMedium" style={{ textAlign: 'right' }}>
+							Already have an account? Log in
+						</Text>
+					</Link>
+				</View>
+				<Button onPress={onEmailSignUp} mode="contained">
+					Sign Up
+				</Button>
+				<Divider />
+				<View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
+					<GoogleSigninButton
+						style={{ width: '100%', height: 45 }}
+						size={GoogleSigninButton.Size.Wide}
+						color={GoogleSigninButton.Color.Light}
+						onPress={onGoogleSignInButtonPress}
+					/>
+					{Platform.OS === 'ios' && (
+						<AppleButton
+							buttonStyle={AppleButton.Style.WHITE}
+							buttonType={AppleButton.Type.SIGN_UP}
+							style={{
+								width: '100%',
+								height: 45,
+							}}
+							onPress={() => {}}
+						/>
+					)}
+				</View>
+			</View>
+			<Snackbar visible={!!errorMessage} onDismiss={() => setErrorMessage(null)}>
+				{errorMessage}
+			</Snackbar>
+		</>
 	);
 };
 

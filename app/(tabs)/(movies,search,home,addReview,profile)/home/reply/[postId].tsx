@@ -60,7 +60,7 @@ const ReplyPost: React.FC = () => {
 	};
 
 	const { data: currentUserData } = useGetV2UserQuery(
-		{ uid: currentUser!.uid! },
+		{ uid: currentUser?.uid || '' },
 		{ skip: !currentUser }
 	);
 
@@ -114,9 +114,7 @@ const ReplyPost: React.FC = () => {
 						/>
 						<View style={{ gap: 16, width: '100%', flex: 1 }}>
 							<View>
-								<Text variant="labelLarge">
-									{currentUserData?.body.firstName} {currentUserData?.body.lastName}
-								</Text>
+								<Text variant="labelLarge">{currentUserData?.body.username}</Text>
 							</View>
 							<View>
 								<MultiLineInput

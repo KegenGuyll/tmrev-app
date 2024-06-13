@@ -9,7 +9,7 @@ import {
 	Snackbar,
 	Chip,
 } from 'react-native-paper';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import auth from '@react-native-firebase/auth';
 import { Link, useRouter } from 'expo-router';
 import { numberShortHand } from '@/utils/common';
@@ -78,10 +78,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 		setSnackbarVisible(true);
 	};
 
-	const name = useMemo(() => {
-		return `${user.firstName} ${user.lastName}`;
-	}, [user]);
-
 	return (
 		<>
 			<View style={styles.container}>
@@ -115,7 +111,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 					) : null}
 				</View>
 				<View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-					<Text variant="labelLarge">{name}</Text>
+					<Text variant="labelLarge">{user.username}</Text>
 				</View>
 				{user.bio && <Text>{user.bio}</Text>}
 				{user.location && (
@@ -169,7 +165,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 					label: 'Dismiss',
 				}}
 			>
-				{`${!isFollowing ? 'Unfollowed' : 'Followed'} ${name}`}
+				{`${!isFollowing ? 'Unfollowed' : 'Followed'} ${user.username}`}
 			</Snackbar>
 		</>
 	);

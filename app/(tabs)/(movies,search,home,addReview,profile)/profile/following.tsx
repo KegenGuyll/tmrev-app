@@ -63,7 +63,7 @@ const FollowingItem: React.FC<FollowerItemProps> = ({
 						width={52}
 					/>
 					<Text ellipsizeMode="tail" numberOfLines={1} style={{ width: 175 }} variant="labelLarge">
-						{item.firstName} {item.lastName}
+						{item.username}
 					</Text>
 				</View>
 			</Link>

@@ -73,6 +73,7 @@ import {
 	GetFollowResponse,
 	GetUserV2Payload,
 	GetUserV2Response,
+	IsUsernameAvailableResponse,
 	UpdateUserQuery,
 } from '@/models/tmrev/user';
 import { MovieGenreInsightResponse } from '@/models/tmrev/insights';
@@ -570,12 +571,16 @@ export const tmrevApi = createApi({
 				},
 				body: {
 					bio: data.bio,
-					firstName: data.firstName,
-					lastName: data.lastName,
+					username: data.username,
 					location: data.location,
 				},
 				method: 'PUT',
 				url: `/user`,
+			}),
+		}),
+		isUsernameAvailable: builder.query<IsUsernameAvailableResponse, string>({
+			query: (username) => ({
+				url: `/user/usernameAvailable?username=${username}`,
 			}),
 		}),
 		voteTmrevReview: builder.mutation<void, { vote: boolean; reviewId: string }>({
@@ -734,6 +739,7 @@ export const {
 	useGetNotificationsV2Query,
 	useGetNotificationCountQuery,
 	useReadAllNotificationsMutation,
+	useIsUsernameAvailableQuery,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;
 

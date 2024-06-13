@@ -27,7 +27,7 @@ const WatchedMovie: React.FC<WatchedMovieProps> = ({
 	const [createWatched] = useCreateWatchedMutation();
 
 	const { data: singleWatched } = useGetSingleWatchedQuery(
-		{ userId: currentUser!.uid, tmdbID: Number(movieId!) },
+		{ userId: currentUser?.uid || '', tmdbID: Number(movieId!) },
 		{ skip: !currentUser || !movieId }
 	);
 
@@ -41,6 +41,8 @@ const WatchedMovie: React.FC<WatchedMovieProps> = ({
 	}, [singleWatched]);
 
 	const handleOnPress = async (liked: boolean) => {
+		if (!currentUser) return;
+
 		if (hasWatched && singleWatched?.body) {
 			await updateWatched({
 				tmdbID: Number(movieId),

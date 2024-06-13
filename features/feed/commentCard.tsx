@@ -71,10 +71,13 @@ const CommentCard: React.FC<CommentCardProps> = ({
 	}, [comment, currentUser]);
 
 	const handleComment = () => {
+		if (!currentUser) return;
+
 		router.push(feedReviewDetailsRoute(comment._id, 'comments', from));
 	};
 
 	const handleUpVote = async () => {
+		if (!currentUser) return;
 		try {
 			await voteComment({ commentId: comment._id, vote: true }).unwrap();
 			setHasLiked(true);
@@ -85,6 +88,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
 	};
 
 	const handleDownVote = async () => {
+		if (!currentUser) return;
 		try {
 			await voteComment({ commentId: comment._id, vote: false }).unwrap();
 			setHasDisliked(true);
@@ -169,9 +173,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
 									style={[styles.flexRow, { alignItems: 'flex-start', flex: 1, width: '100%' }]}
 								>
 									<View style={[styles.flexColumn, { flexGrow: 1 }]}>
-										<Text variant="labelLarge">
-											{comment.user.firstName} {comment.user.lastName}
-										</Text>
+										<Text variant="labelLarge">{comment.user.username}</Text>
 										<Text variant="labelSmall">
 											{dayjs(comment.createdAt).format('hh:mm A · MMM DD, YYYY')}
 										</Text>

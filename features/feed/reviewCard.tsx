@@ -95,14 +95,14 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 	const { currentUser } = auth();
 
 	useEffect(() => {
-		if (!reviewData || !reviewData?.body) return;
+		if (!reviewData || !reviewData?.body || !currentUser) return;
 
-		setHasLiked(reviewData?.body.votes!.upVote.includes(currentUser!.uid));
-		setHasDisliked(reviewData?.body.votes!.downVote.includes(currentUser!.uid));
+		setHasLiked(reviewData?.body.votes!.upVote.includes(currentUser.uid));
+		setHasDisliked(reviewData?.body.votes!.downVote.includes(currentUser.uid));
 	}, [reviewData]);
 
 	const handleUpVote = async () => {
-		if (!reviewData || !reviewData?.body) return;
+		if (!reviewData || !reviewData?.body || !currentUser) return;
 		try {
 			await voteReview({ reviewId: reviewData?.body._id, vote: true }).unwrap();
 			setHasLiked(true);
@@ -113,7 +113,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 	};
 
 	const handleDownVote = async () => {
-		if (!reviewData || !reviewData?.body) return;
+		if (!reviewData || !reviewData?.body || !currentUser) return;
 		try {
 			await voteReview({ reviewId: reviewData?.body._id, vote: false }).unwrap();
 			setHasDisliked(true);
@@ -124,7 +124,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 	};
 
 	const handleComment = () => {
-		if (!reviewData || !reviewData?.body) return;
+		if (!reviewData || !reviewData?.body || !currentUser) return;
 
 		router.navigate(feedReviewDetailsRoute(reviewData.body?._id, 'reviews', from));
 	};
@@ -151,9 +151,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 				</TouchableRipple>
 				<View style={[styles.flexRow, { alignItems: 'flex-start', flex: 1, width: '100%' }]}>
 					<View style={{ flexGrow: 1 }}>
-						<Text variant="labelLarge">
-							{reviewData.body?.user.firstName} {reviewData.body?.user.lastName}
-						</Text>
+						<Text variant="labelLarge">{reviewData.body?.user.username}</Text>
 						<Text variant="labelSmall">
 							{dayjs(formatDate(reviewData.body!.createdAt)).format('hh:mm A · MMM DD, YYYY')}
 						</Text>

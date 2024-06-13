@@ -188,8 +188,7 @@ export interface ReviewResponse {
 	body?: TmrevReview & {
 		user: {
 			_id: string;
-			firstName: string;
-			lastName: string;
+			username: string;
 			photoUrl: string;
 			uuid: string;
 		};
@@ -226,8 +225,7 @@ export interface Profile {
 	uuid: string;
 	backdropPath?: string;
 	following?: string[];
-	firstName: string;
-	lastName: string;
+	username: string;
 	photoUrl?: string;
 }
 

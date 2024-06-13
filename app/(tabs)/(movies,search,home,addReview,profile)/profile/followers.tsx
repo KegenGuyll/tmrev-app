@@ -44,9 +44,7 @@ const FollowerItem: React.FC<FollowerItemProps> = ({
 						height={52}
 						width={52}
 					/>
-					<Text variant="labelLarge">
-						{item.firstName} {item.lastName}
-					</Text>
+					<Text variant="labelLarge">{item.username}</Text>
 				</View>
 			</Link>
 			{isCurrentUser && (

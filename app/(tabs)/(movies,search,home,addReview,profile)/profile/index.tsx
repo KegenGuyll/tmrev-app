@@ -11,7 +11,7 @@ import auth from '@react-native-firebase/auth';
 import messaging from '@react-native-firebase/messaging';
 import { Button, Divider, IconButton, Menu, Snackbar, Text, useTheme } from 'react-native-paper';
 import { Stack, useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import ProfileHeader from '@/components/Profile/ProfileHeader';
 import {
 	useGetGenreInsightsQuery,
@@ -33,7 +33,12 @@ const Profile = () => {
 
 	const theme = useTheme();
 
-	const { data, isLoading, refetch } = useGetV2UserQuery(
+	const {
+		data,
+		isLoading,
+		refetch,
+		error: userError,
+	} = useGetV2UserQuery(
 		{ uid: currentUser?.uid as string },
 		{ skip: !currentUser || !currentUser.uid }
 	);
@@ -45,6 +50,14 @@ const Profile = () => {
 	);
 	const [visible, setVisible] = useState(false);
 
+	useEffect(() => {
+		if (!userError || !currentUser) return;
+
+		if (userError && (userError as any).data && (userError as any).data === 'unable to find user') {
+			auth().signOut();
+		}
+	}, [userError]);
+
 	const handleRefresh = async () => {
 		setRefreshing(true);
 		await refetchInsights().unwrap();
@@ -54,8 +67,6 @@ const Profile = () => {
 
 	const openMenu = () => setVisible(true);
 	const closeMenu = () => setVisible(false);
-
-	const name = useMemo(() => `${data?.body.firstName} ${data?.body.lastName}`, [data]);
 
 	const handleSignOut = async () => {
 		try {
@@ -134,7 +145,7 @@ const Profile = () => {
 		<>
 			<Stack.Screen
 				options={{
-					title: name,
+					title: data.body.username,
 					headerRight: () => (
 						<Menu
 							visible={visible}

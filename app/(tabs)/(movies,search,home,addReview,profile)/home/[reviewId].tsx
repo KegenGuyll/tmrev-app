@@ -7,6 +7,7 @@ import {
 	ScrollView,
 	RefreshControl,
 } from 'react-native';
+import auth from '@react-native-firebase/auth';
 import { Text, useTheme, MD3Theme, Divider, ActivityIndicator } from 'react-native-paper';
 import { useMemo, useState } from 'react';
 import { FlatList } from 'react-native-gesture-handler';
@@ -29,6 +30,8 @@ type ReviewSearchProps = {
 const ReviewPage: React.FC = () => {
 	const { reviewId, contentType, from } = useLocalSearchParams<ReviewSearchProps>();
 
+	const { currentUser } = auth();
+
 	const theme = useTheme();
 	const styles = makeStyles(theme);
 	const [isRefreshing, setIsRefreshing] = useState(false);
@@ -41,6 +44,7 @@ const ReviewPage: React.FC = () => {
 		{ reviewId: reviewId! },
 		{ skip: !reviewId || contentType !== 'reviews' }
 	);
+
 	const {
 		data: commentData,
 		isLoading: isCommentLoading,
@@ -78,6 +82,8 @@ const ReviewPage: React.FC = () => {
 	};
 
 	const handleNavigateToComment = () => {
+		if (!currentUser) return;
+
 		if (contentType === 'reviews') {
 			router.navigate(feedReviewDetailsRoute(reviewId!, 'reviews', from!));
 		} else if (contentType === 'comments') {

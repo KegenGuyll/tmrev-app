@@ -38,7 +38,9 @@ const AddMovieToList: React.FC<AddMovieToListProps> = ({
 	const { currentUser } = auth();
 
 	const query = useMemo(() => {
-		return { pageNumber: page, userId: currentUser!.uid, pageSize };
+		if (!currentUser) return { pageNumber: page, pageSize };
+
+		return { pageNumber: page, userId: currentUser?.uid, pageSize };
 	}, [page, currentUser]);
 
 	const { data, isLoading, refetch, isFetching } = useGetUserWatchListsQuery(query, {

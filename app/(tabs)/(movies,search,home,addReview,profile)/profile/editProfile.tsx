@@ -1,9 +1,14 @@
 import { Stack, useRouter } from 'expo-router';
 import { View, StyleSheet } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import { Button, Divider, TextInput } from 'react-native-paper';
-import { useEffect, useState } from 'react';
-import { useGetUserQuery, useUpdateUserMutation } from '@/redux/api/tmrev';
+import { Button, Divider, TextInput, Text } from 'react-native-paper';
+import { useEffect, useMemo, useState } from 'react';
+import {
+	useGetUserQuery,
+	useIsUsernameAvailableQuery,
+	useUpdateUserMutation,
+} from '@/redux/api/tmrev';
+import useDebounce from '@/hooks/useDebounce';
 
 const EditProfile = () => {
 	const { currentUser } = auth();
@@ -11,39 +16,48 @@ const EditProfile = () => {
 		{ uid: currentUser?.uid as string },
 		{ skip: !currentUser || !currentUser.uid }
 	);
+
 	const router = useRouter();
 	const [updateUser] = useUpdateUserMutation();
 
 	const [form, setForm] = useState({
-		firstName: data?.firstName,
-		lastName: data?.lastName,
-		location: data?.location,
-		bio: data?.bio,
+		username: data?.username || '',
+		location: data?.location || '',
+		bio: data?.bio || '',
 	});
+
+	const debouncedUsername = useDebounce(form.username, 200);
+
+	const { data: isUsernameAvailableData } = useIsUsernameAvailableQuery(debouncedUsername, {
+		skip: !debouncedUsername,
+	});
+
+	const doesUsernameMeetRequirements = useMemo(
+		() => form.username.length >= 5 && form.username.length <= 15,
+		[form.username]
+	);
 
 	useEffect(() => {
 		setForm({
-			firstName: data?.firstName,
-			lastName: data?.lastName,
-			location: data?.location,
-			bio: data?.bio,
+			username: data?.username || '',
+			location: data?.location || '',
+			bio: data?.bio || '',
 		});
-	}, []);
+	}, [data]);
 
 	const handleFormChange = (key: string, value: string) => {
 		setForm({ ...form, [key]: value });
 	};
 
 	const handleUpdateUser = async () => {
-		if (!currentUser || !form.firstName || !form.lastName) return;
+		if (!currentUser || !form.username) return;
 
 		try {
 			const token = await currentUser.getIdToken();
 
 			await updateUser({
 				authToken: token,
-				firstName: form.firstName,
-				lastName: form.lastName,
+				username: form.username,
 				location: form.location,
 				bio: form.bio,
 			});
@@ -60,20 +74,22 @@ const EditProfile = () => {
 				options={{ headerShown: true, title: `Edit Profile`, headerRight: () => null }}
 			/>
 			<View style={styles.container}>
-				<TextInput
-					mode="outlined"
-					label="First Name"
-					onChange={(e) => handleFormChange('firstName', e.nativeEvent.text)}
-					value={form.firstName}
-					error={form.firstName === ''}
-				/>
-				<TextInput
-					mode="outlined"
-					label="Last Name"
-					onChange={(e) => handleFormChange('lastName', e.nativeEvent.text)}
-					value={form.lastName}
-					error={form.lastName === ''}
-				/>
+				<View>
+					<TextInput
+						error={!isUsernameAvailableData?.isAvailable || !doesUsernameMeetRequirements}
+						mode="outlined"
+						label="Username"
+						onChange={(e) => handleFormChange('username', e.nativeEvent.text)}
+						value={form.username}
+					/>
+					{isUsernameAvailableData?.success && !isUsernameAvailableData?.isAvailable && (
+						<Text variant="labelMedium">Username is already taken</Text>
+					)}
+					{!doesUsernameMeetRequirements && (
+						<Text variant="labelMedium">Username must be between 5 and 15 characters</Text>
+					)}
+				</View>
+
 				<TextInput
 					mode="outlined"
 					label="Location"
@@ -90,11 +106,7 @@ const EditProfile = () => {
 				/>
 				<Divider />
 				<View style={{ gap: 8 }}>
-					<Button
-						disabled={!form.firstName || !form.lastName}
-						onPress={handleUpdateUser}
-						mode="contained"
-					>
+					<Button disabled={!form.username} onPress={handleUpdateUser} mode="contained">
 						Save
 					</Button>
 					<Button onPress={() => router.back()} mode="outlined">
