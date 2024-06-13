@@ -26,7 +26,7 @@ const Signup: React.FC = () => {
 
 	const doesUsernameMeetRequirements = username.length >= 5 && username.length <= 15;
 
-	const { emailSignUp, onGoogleSignInButtonPress } = useAuth({
+	const { emailSignUp, onGoogleSignInButtonPress, onAppleSignInButtonPress } = useAuth({
 		onSuccessfulSignIn: () => {
 			router.replace(loggedInProfileRoute('profile'));
 		},
@@ -112,7 +112,7 @@ const Signup: React.FC = () => {
 								width: '100%',
 								height: 45,
 							}}
-							onPress={() => {}}
+							onPress={onAppleSignInButtonPress}
 						/>
 					)}
 				</View>
