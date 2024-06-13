@@ -68,7 +68,7 @@ const Login: React.FC = () => {
 				</View>
 				<Divider />
 				<Link href="/signup">
-					<Text style={{ textAlign: 'center', padding: 16 }}>
+					<Text variant="labelMedium" style={{ textAlign: 'center', padding: 16 }}>
 						Don&apos;t have an account? Sign up
 					</Text>
 				</Link>
