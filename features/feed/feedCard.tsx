@@ -102,7 +102,14 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from }: FeedCardProps) => {
 
 	const [voteReview] = useVoteTmrevReviewMutation();
 
+	const handleComment = () => {
+		if (!currentUser) return;
+
+		router.navigate(feedReviewDetailsRoute(review._id, 'reviews', from));
+	};
+
 	const handleUpVote = async () => {
+		if (!currentUser) return;
 		try {
 			await voteReview({ reviewId: review._id, vote: true }).unwrap();
 			setHasLiked(true);
@@ -113,6 +120,7 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from }: FeedCardProps) => {
 	};
 
 	const handleDownVote = async () => {
+		if (!currentUser) return;
 		try {
 			await voteReview({ reviewId: review._id, vote: false }).unwrap();
 			setHasDisliked(true);
@@ -210,11 +218,7 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from }: FeedCardProps) => {
 						>
 							{review.votes!.downVote.length}
 						</Button>
-						<Button
-							textColor="white"
-							onPress={() => router.navigate(feedReviewDetailsRoute(review._id, 'reviews', from))}
-							icon="comment-outline"
-						>
+						<Button textColor="white" onPress={handleComment} icon="comment-outline">
 							{review.replies}
 						</Button>
 						<Button
