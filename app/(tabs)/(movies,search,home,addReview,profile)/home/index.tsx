@@ -16,7 +16,7 @@ const HomeScreen = () => {
 		pageNumber: page,
 		pageSize,
 	});
-	const [loginMessage, setLoginMessage] = useState<string | null>('ss');
+	const [loginMessage, setLoginMessage] = useState<string | null>(null);
 
 	const hasReachedEnd = useMemo(() => data?.body.totalNumberOfPages === page, [data, page]);
 
