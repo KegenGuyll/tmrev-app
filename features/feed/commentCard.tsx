@@ -23,12 +23,19 @@ import {
 } from '@/redux/api/tmrev';
 import { FromLocation } from '@/models';
 import ReviewCard from './reviewCard';
+import {
+	commentLoginPrompt,
+	dislikeLoginPrompt,
+	errorPrompt,
+	likeLoginPrompt,
+} from '@/constants/messages';
 
 type CommentCardProps = {
 	comment: CommentWithUser;
 	displayMetaData?: boolean;
 	from: FromLocation;
 	isSubject?: boolean;
+	setLoginMessage?: (message: string | null) => void;
 };
 
 const CommentCard: React.FC<CommentCardProps> = ({
@@ -36,6 +43,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
 	displayMetaData = true,
 	from,
 	isSubject,
+	setLoginMessage,
 }: CommentCardProps) => {
 	const styles = makeStyles();
 	const router = useRouter();
@@ -71,30 +79,45 @@ const CommentCard: React.FC<CommentCardProps> = ({
 	}, [comment, currentUser]);
 
 	const handleComment = () => {
-		if (!currentUser) return;
+		if (!currentUser) {
+			if (setLoginMessage) {
+				setLoginMessage(commentLoginPrompt);
+			}
+			return;
+		}
 
 		router.push(feedReviewDetailsRoute(comment._id, 'comments', from));
 	};
 
 	const handleUpVote = async () => {
-		if (!currentUser) return;
+		if (!currentUser) {
+			if (setLoginMessage) {
+				setLoginMessage(likeLoginPrompt);
+			}
+			return;
+		}
 		try {
 			await voteComment({ commentId: comment._id, vote: true }).unwrap();
 			setHasLiked(true);
 			setHasDisliked(false);
 		} catch (error) {
-			setSnackBarMessage('Error has occurred');
+			setSnackBarMessage(errorPrompt);
 		}
 	};
 
 	const handleDownVote = async () => {
-		if (!currentUser) return;
+		if (!currentUser) {
+			if (setLoginMessage) {
+				setLoginMessage(dislikeLoginPrompt);
+			}
+			return;
+		}
 		try {
 			await voteComment({ commentId: comment._id, vote: false }).unwrap();
 			setHasDisliked(true);
 			setHasLiked(false);
 		} catch (error) {
-			setSnackBarMessage('Error has occurred');
+			setSnackBarMessage(errorPrompt);
 		}
 	};
 
@@ -115,7 +138,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
 				},
 			]);
 		} catch (error) {
-			setSnackBarMessage('Error has occurred');
+			setSnackBarMessage(errorPrompt);
 		}
 	};
 
