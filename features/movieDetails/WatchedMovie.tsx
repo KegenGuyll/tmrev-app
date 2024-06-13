@@ -27,7 +27,7 @@ const WatchedMovie: React.FC<WatchedMovieProps> = ({
 	const [createWatched] = useCreateWatchedMutation();
 
 	const { data: singleWatched } = useGetSingleWatchedQuery(
-		{ userId: currentUser!.uid, tmdbID: Number(movieId!) },
+		{ userId: currentUser?.uid || '', tmdbID: Number(movieId!) },
 		{ skip: !currentUser || !movieId }
 	);
 

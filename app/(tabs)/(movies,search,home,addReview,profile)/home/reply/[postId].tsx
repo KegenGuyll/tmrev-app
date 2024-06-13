@@ -60,7 +60,7 @@ const ReplyPost: React.FC = () => {
 	};
 
 	const { data: currentUserData } = useGetV2UserQuery(
-		{ uid: currentUser!.uid! },
+		{ uid: currentUser?.uid || '' },
 		{ skip: !currentUser }
 	);
 

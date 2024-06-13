@@ -71,10 +71,13 @@ const CommentCard: React.FC<CommentCardProps> = ({
 	}, [comment, currentUser]);
 
 	const handleComment = () => {
+		if (!currentUser) return;
+
 		router.push(feedReviewDetailsRoute(comment._id, 'comments', from));
 	};
 
 	const handleUpVote = async () => {
+		if (!currentUser) return;
 		try {
 			await voteComment({ commentId: comment._id, vote: true }).unwrap();
 			setHasLiked(true);
@@ -85,6 +88,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
 	};
 
 	const handleDownVote = async () => {
+		if (!currentUser) return;
 		try {
 			await voteComment({ commentId: comment._id, vote: false }).unwrap();
 			setHasDisliked(true);
