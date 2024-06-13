@@ -44,7 +44,7 @@ const Signup: React.FC = () => {
 
 	return (
 		<>
-			<Stack.Screen options={{ title: '' }} />
+			<Stack.Screen options={{ title: 'Sign Up' }} />
 			<View style={{ gap: 16, padding: 16 }}>
 				<View>
 					<Text variant="headlineLarge">Create an Account</Text>
