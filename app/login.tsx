@@ -61,7 +61,9 @@ const Login: React.FC = () => {
 							/>
 						}
 					/>
-					<Text style={{ textAlign: 'right' }}>Forgot Password?</Text>
+					<Link href="/forgotPassword">
+						<Text style={{ textAlign: 'right' }}>Forgot Password?</Text>
+					</Link>
 					<Button mode="contained" onPress={onEmailSignIn}>
 						Login
 					</Button>

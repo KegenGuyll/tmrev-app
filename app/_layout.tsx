@@ -107,6 +107,8 @@ const RootLayoutNav = () => {
 							>
 								<Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'Home' }} />
 								<Stack.Screen name="login" />
+								<Stack.Screen name="signup" />
+								<Stack.Screen name="forgotPassword" />
 							</Stack>
 						</View>
 					</ThemeProvider>
