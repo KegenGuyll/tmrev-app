@@ -3,6 +3,7 @@ const dislikeLoginPrompt = 'Please login to dislike this post';
 const commentLoginPrompt = 'Please login to comment';
 const errorPrompt = 'Error has occurred';
 const reviewLoginPrompt = 'Please login to review';
+const likeMovieLoginPrompt = 'Please login to like movie';
 const addToListLoginPrompt = 'Please login to add to list';
 
 export {
@@ -12,4 +13,5 @@ export {
 	errorPrompt,
 	reviewLoginPrompt,
 	addToListLoginPrompt,
+	likeMovieLoginPrompt,
 };

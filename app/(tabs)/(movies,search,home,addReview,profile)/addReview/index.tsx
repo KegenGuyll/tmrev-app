@@ -13,6 +13,7 @@ import CreateMovieReviewModal from '@/components/CreateMovieReviewModal';
 import MovieDiscoverGrid from '@/components/MovieDiscoverGrid';
 import { loginRoute } from '@/constants/routes';
 import useDebounce from '@/hooks/useDebounce';
+import { reviewLoginPrompt } from '@/constants/messages';
 
 const AddReviewPage = () => {
 	const [searchQuery, setSearchQuery] = useState('');
@@ -78,7 +79,7 @@ const AddReviewPage = () => {
 				}}
 				visible={!currentUser && !!selectedMovie}
 			>
-				You must login to review a movie
+				{reviewLoginPrompt}
 			</Snackbar>
 		</>
 	);

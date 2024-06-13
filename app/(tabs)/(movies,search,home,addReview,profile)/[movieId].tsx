@@ -169,6 +169,7 @@ const MovieDetails = () => {
 							movieId={Number(movieId!)}
 							likes={movieReviews?.body.likes}
 							dislikes={movieReviews?.body.dislikes}
+							setLoginMessage={setLoginMessage}
 						/>
 					)}
 					<Surface
