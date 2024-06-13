@@ -5,6 +5,7 @@ const errorPrompt = 'Error has occurred';
 const reviewLoginPrompt = 'Please login to review';
 const likeMovieLoginPrompt = 'Please login to like movie';
 const addToListLoginPrompt = 'Please login to add to list';
+const followUserLoginPrompt = 'Please login to follow users';
 
 export {
 	likeLoginPrompt,
@@ -14,4 +15,5 @@ export {
 	reviewLoginPrompt,
 	addToListLoginPrompt,
 	likeMovieLoginPrompt,
+	followUserLoginPrompt,
 };

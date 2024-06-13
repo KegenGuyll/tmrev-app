@@ -23,17 +23,20 @@ import {
 	profileFollowerRoute,
 	profileFollowingRoute,
 } from '@/constants/routes';
+import { followUserLoginPrompt } from '@/constants/messages';
 
 type ProfileHeaderProps = {
 	user: UserV2;
 	from?: FromLocation;
 	favoriteGenres?: string[];
+	setLoginMessage?: (message: string | null) => void;
 };
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 	user,
 	from,
 	favoriteGenres,
+	setLoginMessage,
 }: ProfileHeaderProps) => {
 	const theme = useTheme();
 	const styles = makeStyles(theme);
@@ -70,6 +73,13 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 	};
 
 	const handleFollowButton = async () => {
+		if (!currentUser) {
+			if (setLoginMessage) {
+				setLoginMessage(followUserLoginPrompt);
+			}
+			return;
+		}
+
 		if (isFollowing) {
 			await handleUnFollowUser();
 		} else {
