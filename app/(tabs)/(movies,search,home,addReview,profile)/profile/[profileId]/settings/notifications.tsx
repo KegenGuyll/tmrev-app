@@ -13,7 +13,7 @@ import {
 import { errorPrompt } from '@/constants/messages';
 
 const notifications = () => {
-	const [deviceToken, setDeviceToken] = useState<string | null>(null);
+	const [deviceToken, setDeviceToken] = useState<string | null | undefined>(null);
 	const [isEnabled, setIsEnabled] = useState(false);
 	const [snackbarMessage, setSnackbarMessage] = useState('');
 	const [saveToken] = useSaveUserDeviceTokenMutation();
@@ -32,7 +32,7 @@ const notifications = () => {
 	}, [data]);
 
 	const fetchDeviceToken = async () => {
-		const dt = await messaging().getToken();
+		const dt = await requestAccess();
 
 		setDeviceToken(dt);
 	};
@@ -43,8 +43,11 @@ const notifications = () => {
 
 	const onToggleSwitch = async (value: boolean) => {
 		if (value) {
-			await requestAccess();
+			const token = await requestAccess();
+			if (!token) return;
+			await saveToken(token).unwrap();
 			await refetch().unwrap();
+			setSnackbarMessage('Notifications enabled');
 		} else if (deviceToken) {
 			await deleteToken({ deviceToken }).unwrap();
 			await refetch().unwrap();
@@ -55,9 +58,9 @@ const notifications = () => {
 
 	const { currentUser } = auth();
 
-	const requestAccess = async () => {
+	const requestAccess = async (): Promise<string | undefined> => {
 		try {
-			if (!currentUser) return;
+			if (!currentUser) return undefined;
 			if (Platform.OS === 'ios') {
 				const authStatus = await messaging().requestPermission();
 
@@ -65,11 +68,14 @@ const notifications = () => {
 					authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
 					authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
+				if (!enabled) {
+					setSnackbarMessage('Please enable notifications in your device settings');
+				}
+
 				if (enabled) {
 					const dt = await messaging().getToken();
-					if (dt) {
-						await saveToken(dt).unwrap();
-					}
+
+					if (dt) return dt;
 				}
 			} else if (Platform.OS === 'android') {
 				const authStatus = await PermissionsAndroid.request(
@@ -80,14 +86,12 @@ const notifications = () => {
 
 				if (enabled) {
 					const dt = await messaging().getToken();
-					if (dt) {
-						await saveToken(dt).unwrap();
-					}
+					if (dt) return dt;
 				}
 			}
-			setSnackbarMessage('Notifications enabled');
+			return undefined;
 		} catch {
-			setSnackbarMessage(errorPrompt);
+			return undefined;
 		}
 	};
 
