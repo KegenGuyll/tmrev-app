@@ -62,6 +62,10 @@ export const profileSettingsRoute = (from: FromLocation, userId: string) => {
 	return `${baseTabUrl}/(${from})/profile/${userId}/settings?from=${from}`;
 };
 
+export const profileSettingsNotificationsRoute = (from: FromLocation, userId: string) => {
+	return `${baseTabUrl}/(${from})/profile/${userId}/settings/notifications?from=${from}`;
+};
+
 export const watchedMoviesRoute = (from: FromLocation, profileId: string) => {
 	return `${baseTabUrl}/(${from})/profile/${profileId}/watchedMovies?from=${from}`;
 };
