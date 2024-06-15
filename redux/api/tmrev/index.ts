@@ -67,12 +67,15 @@ import {
 } from '@/models/tmrev/watchList';
 import { IMovieQueryGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import {
+	DeleteDeviceTokenResponse,
+	DeviceTokenPayload,
 	FollowUserV2Payload,
 	FollowUserV2Response,
 	GetFollowPayload,
 	GetFollowResponse,
 	GetUserV2Payload,
 	GetUserV2Response,
+	IsDeviceTokenSavedResponse,
 	IsUsernameAvailableResponse,
 	UpdateUserQuery,
 } from '@/models/tmrev/user';
@@ -163,6 +166,30 @@ export const tmrevApi = createApi({
 				},
 				method: 'POST',
 				url: '/movie/batch',
+			}),
+		}),
+		deleteUser: builder.mutation<void, void>({
+			query: () => ({
+				method: 'DELETE',
+				url: '/user',
+			}),
+		}),
+		deleteDeviceToken: builder.mutation<DeleteDeviceTokenResponse, DeviceTokenPayload>({
+			query: ({ deviceToken }) => ({
+				method: 'DELETE',
+				url: '/user/deviceToken',
+				body: {
+					deviceToken,
+				},
+			}),
+		}),
+		isDeviceTokenSaved: builder.query<IsDeviceTokenSavedResponse, DeviceTokenPayload>({
+			query: ({ deviceToken }) => ({
+				url: '/user/deviceToken/saved',
+				method: 'POST',
+				body: {
+					deviceToken,
+				},
 			}),
 		}),
 		getUserMovieReviews: builder.query<GetUserMovieReviewsResponse, GetUserMovieReviewsPayload>({
@@ -740,6 +767,9 @@ export const {
 	useGetNotificationCountQuery,
 	useReadAllNotificationsMutation,
 	useIsUsernameAvailableQuery,
+	useDeleteUserMutation,
+	useDeleteDeviceTokenMutation,
+	useIsDeviceTokenSavedQuery,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;
 
