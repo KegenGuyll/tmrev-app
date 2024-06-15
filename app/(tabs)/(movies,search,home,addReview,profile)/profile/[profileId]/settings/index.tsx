@@ -1,94 +1,63 @@
-import { router as nonHookRouter, Stack, useRouter } from 'expo-router';
+import { router as nonHookRouter, Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Alert, View } from 'react-native';
-import { List, useTheme, Icon, Text } from 'react-native-paper';
+import { List, useTheme, Icon } from 'react-native-paper';
 import { appleAuth } from '@invertase/react-native-apple-authentication';
 import auth from '@react-native-firebase/auth';
-import { homeRoute } from '@/constants/routes';
+import { homeRoute, profileSettingsNotificationsRoute } from '@/constants/routes';
+import { useDeleteUserMutation } from '@/redux/api/tmrev';
 
-type SettingsListItem = {
-	title: string;
-	description: string;
-	icon: string;
-	enabled: boolean;
-	action?: () => void;
-	route?: string;
+type ProfileSettingsParams = {
+	profileId: string;
 };
 
-const SettingsListItems: SettingsListItem[] = [
-	{
-		title: 'Notifications',
-		description: 'Manage your notifications',
-		icon: 'bell',
-		enabled: false,
-		route: 'Notifications',
-	},
-	{
-		title: 'Log Out',
-		description: 'Log out of your account',
-		icon: 'logout',
-		enabled: true,
-		action: async () => {
-			await auth().signOut();
-
-			nonHookRouter.dismissAll();
-
-			await auth().onAuthStateChanged(() => {
-				nonHookRouter.navigate(homeRoute('home'));
-			});
-		},
-	},
-	{
-		title: 'Delete Account',
-		description: 'Delete your account',
-		icon: 'delete',
-		enabled: true,
-		action: () => {
-			Alert.alert('Delete Account', 'Are you sure you want to delete your account?', [
-				{
-					text: 'Cancel',
-					style: 'cancel',
-				},
-				{
-					style: 'destructive',
-					text: 'Delete',
-					onPress: async () => {
-						const { currentUser } = auth();
-
-						if (currentUser?.providerData[0].providerId === 'apple.com') {
-							const { authorizationCode } = await appleAuth.performRequest({
-								requestedOperation: appleAuth.Operation.REFRESH,
-							});
-
-							if (authorizationCode) {
-								await auth().revokeToken(authorizationCode);
-							}
-						}
-
-						// console.log(authorizationCode);
-
-						// const user = auth().currentUser;
-						// if (user) {
-						// 	await user.delete();
-						// }
-					},
-				},
-			]);
-		},
-	},
-];
-
 const ProfileSettings = () => {
+	const { profileId } = useLocalSearchParams<ProfileSettingsParams>();
 	const router = useRouter();
 	const theme = useTheme();
+	const [deleteUser] = useDeleteUserMutation();
 
-	const handleOnPress = (item: SettingsListItem) => {
-		if (item.action) {
-			item.action();
+	const handleDeleteAlert = () => {
+		Alert.alert('Delete Account', 'Are you sure you want to delete your account?', [
+			{
+				text: 'Cancel',
+				style: 'cancel',
+			},
+			{
+				style: 'destructive',
+				text: 'Delete',
+				onPress: handleDeleteAccount,
+			},
+		]);
+	};
+
+	const handleLogout = async () => {
+		await auth().signOut();
+
+		router.dismissAll();
+
+		await auth().onAuthStateChanged(() => {
+			router.navigate(homeRoute('home'));
+		});
+	};
+
+	const handleDeleteAccount = async () => {
+		const { currentUser } = auth();
+
+		if (currentUser?.providerData[0].providerId === 'apple.com') {
+			const { authorizationCode } = await appleAuth.performRequest({
+				requestedOperation: appleAuth.Operation.REFRESH,
+			});
+
+			if (authorizationCode) {
+				await auth().revokeToken(authorizationCode);
+			}
 		}
 
-		if (item.route) {
-			router.navigate(item.route);
-		}
+		await deleteUser();
+
+		await auth().signOut();
+
+		nonHookRouter.dismissAll();
 	};
 
 	return (
@@ -96,28 +65,38 @@ const ProfileSettings = () => {
 			<Stack.Screen options={{ title: 'Settings', headerRight: () => null }} />
 			<View>
 				<List.Section style={{ backgroundColor: theme.colors.background, marginTop: 0 }}>
-					{SettingsListItems.map((item) => (
-						<List.Item
-							onPress={() => handleOnPress(item)}
-							disabled={!item.enabled}
-							key={item.title}
-							title={item.title}
-							description={item.description}
-							left={(props) => <List.Icon {...props} icon={item.icon} />}
-							right={() => (
-								<View
-									style={{
-										display: 'flex',
-										flexDirection: 'row',
-										alignItems: 'center',
-										gap: 4,
-									}}
-								>
-									{item.route && <Icon source="chevron-right" color="gray" size={24} />}
-								</View>
-							)}
-						/>
-					))}
+					<List.Item
+						onPress={() => {
+							router.navigate(profileSettingsNotificationsRoute('profile', profileId!));
+						}}
+						title="Notifications"
+						description="Manage your notifications"
+						left={(props) => <List.Icon {...props} icon="bell" />}
+						right={() => (
+							<View
+								style={{
+									display: 'flex',
+									flexDirection: 'row',
+									alignItems: 'center',
+									gap: 4,
+								}}
+							>
+								<Icon source="chevron-right" color="gray" size={24} />
+							</View>
+						)}
+					/>
+					<List.Item
+						onPress={handleLogout}
+						title="Log out"
+						description="Log out of your account"
+						left={(props) => <List.Icon {...props} icon="logout" />}
+					/>
+					<List.Item
+						onPress={handleDeleteAlert}
+						title="Delete Account"
+						description="Delete your account"
+						left={(props) => <List.Icon {...props} icon="delete" />}
+					/>
 				</List.Section>
 			</View>
 		</>
