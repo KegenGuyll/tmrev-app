@@ -1,23 +1,10 @@
-import {
-	RefreshControl,
-	View,
-	SafeAreaView,
-	ScrollView,
-	Platform,
-	// eslint-disable-next-line react-native/split-platform-components
-	PermissionsAndroid,
-} from 'react-native';
+import { RefreshControl, View, SafeAreaView, ScrollView } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import messaging from '@react-native-firebase/messaging';
-import { Button, Divider, IconButton, Menu, Snackbar, Text, useTheme } from 'react-native-paper';
+import { Button, Divider, IconButton, Snackbar, Text, useTheme } from 'react-native-paper';
 import { Stack, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import ProfileHeader from '@/components/Profile/ProfileHeader';
-import {
-	useGetGenreInsightsQuery,
-	useGetV2UserQuery,
-	useSaveUserDeviceTokenMutation,
-} from '@/redux/api/tmrev';
+import { useGetGenreInsightsQuery, useGetV2UserQuery } from '@/redux/api/tmrev';
 import ProfileNavigation from '@/components/Profile/ProfileListNavigationt';
 import ProfilePinnedMovies from '@/components/Profile/ProfilePinnedMovies';
 import { loginRoute, profileSettingsRoute, signupRoute } from '@/constants/routes';
@@ -28,8 +15,6 @@ const Profile = () => {
 	const router = useRouter();
 	const [refreshing, setRefreshing] = useState(false);
 	const [snackbarMessage, setSnackbarMessage] = useState('');
-
-	const [saveToken] = useSaveUserDeviceTokenMutation();
 
 	const theme = useTheme();
 
@@ -48,7 +33,6 @@ const Profile = () => {
 			skip: !currentUser || !currentUser.uid,
 		}
 	);
-	const [visible, setVisible] = useState(false);
 
 	useEffect(() => {
 		if (!userError || !currentUser) return;
@@ -63,48 +47,6 @@ const Profile = () => {
 		await refetchInsights().unwrap();
 		await refetch().unwrap();
 		setRefreshing(false);
-	};
-
-	const openMenu = () => setVisible(true);
-	const closeMenu = () => setVisible(false);
-
-	const handleDeviceToken = async () => {
-		try {
-			if (!currentUser) return;
-
-			if (Platform.OS === 'ios') {
-				const authStatus = await messaging().requestPermission();
-
-				const enabled =
-					authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-					authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-				if (enabled) {
-					const deviceToken = await messaging().getToken();
-					if (deviceToken) {
-						await saveToken(deviceToken).unwrap();
-					}
-				}
-			} else if (Platform.OS === 'android') {
-				const authStatus = await PermissionsAndroid.request(
-					PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
-				);
-
-				const enabled = authStatus === PermissionsAndroid.RESULTS.GRANTED;
-
-				if (enabled) {
-					const deviceToken = await messaging().getToken();
-					if (deviceToken) {
-						await saveToken(deviceToken).unwrap();
-					}
-				}
-			}
-			setSnackbarMessage('Notifications enabled');
-		} catch (error) {
-			console.error(error);
-		} finally {
-			closeMenu();
-		}
 	};
 
 	if (isLoading || (!data && currentUser)) {
@@ -141,14 +83,6 @@ const Profile = () => {
 							onPress={() => router.navigate(profileSettingsRoute('profile', currentUser.uid))}
 							icon="menu"
 						/>
-						// <Menu
-						// 	visible={visible}
-						// 	onDismiss={closeMenu}
-						// 	anchor={<IconButton onPress={openMenu} icon="dots-vertical" />}
-						// >
-						// 	<Menu.Item onPress={handleDeviceToken} title="Enable Notifications" />
-						// 	<Menu.Item onPress={handleSignOut} title="Logout" />
-						// </Menu>
 					),
 				}}
 			/>
