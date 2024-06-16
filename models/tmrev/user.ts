@@ -100,6 +100,19 @@ type FollowUserV2Response = {
 	success: boolean;
 };
 
+type DeviceTokenPayload = {
+	deviceToken: string;
+};
+
+type IsDeviceTokenSavedResponse = {
+	success: boolean;
+	saved: boolean;
+};
+
+type DeleteDeviceTokenResponse = {
+	success: boolean;
+};
+
 export type {
 	Link,
 	TmrevUser,
@@ -115,4 +128,7 @@ export type {
 	GetFollowResponse,
 	GetFollowPayload,
 	IsUsernameAvailableResponse,
+	DeviceTokenPayload,
+	IsDeviceTokenSavedResponse,
+	DeleteDeviceTokenResponse,
 };
