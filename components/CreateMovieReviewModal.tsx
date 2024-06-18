@@ -53,6 +53,7 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 	const [ratings, setRatings] = useState<Ratings>(defaultRatings);
 	const [note, setNote] = useState('');
 	const styles = makeStyles();
+	const [touchingNotes, setTouchingNotes] = useState(false);
 
 	const handleSetRatings = (key: string, value: number) => {
 		setRatings({ ...ratings, [key]: value });
@@ -145,7 +146,7 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 			>
 				<BottomSheetScrollView style={styles.bottomSheetContainer}>
 					{selectedMovie && (
-						<View style={{ gap: 16, marginBottom: 32 }}>
+						<View style={{ gap: 16, marginBottom: touchingNotes ? 300 : 32 }}>
 							<View style={{ display: 'flex', flexDirection: 'row', gap: 8, alignItems: 'center' }}>
 								<MoviePosterImage moviePoster={selectedMovie.poster_path} height={100} width={50} />
 								<View
@@ -186,7 +187,13 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 								onChangeText={setTitle}
 							/>
 							<MultiLineInput
-								onFocus={() => setExpanded(false)}
+								onFocus={() => {
+									setTouchingNotes(true);
+									setExpanded(false);
+								}}
+								onBlur={() => {
+									setTouchingNotes(false);
+								}}
 								value={note}
 								onChangeText={setNote}
 								numberOfLines={6}
