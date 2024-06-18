@@ -9,6 +9,7 @@ type MultiLineInputProps = {
 	value: string;
 	onChangeText: (text: string) => void;
 	onFocus?: () => void;
+	onBlur?: () => void;
 	height?: number;
 	inputStyle?: StyleProp<TextStyle>;
 };
@@ -24,6 +25,7 @@ const MultiLineInput = forwardRef(
 			placeholder,
 			height = 100,
 			inputStyle,
+			onBlur,
 		}: MultiLineInputProps,
 		ref: React.LegacyRef<TextInput>
 	) => {
@@ -48,6 +50,7 @@ const MultiLineInput = forwardRef(
 						placeholder={placeholder}
 						editable
 						defaultValue={value}
+						onBlur={onBlur}
 						onFocus={onFocus}
 						onChange={(e) => onChangeText(e.nativeEvent.text)}
 						multiline
