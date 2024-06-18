@@ -99,7 +99,11 @@ const ReviewPage: React.FC = () => {
 	return (
 		<>
 			<Stack.Screen
-				options={{ headerShown: true, title: contentType === 'reviews' ? 'Review' : 'Replies' }}
+				options={{
+					headerShown: true,
+					title: contentType === 'reviews' ? 'Review' : 'Replies',
+					headerRight: () => null,
+				}}
 			/>
 			<TouchableWithoutFeedback onPress={Keyboard.dismiss} style={styles.container}>
 				<ScrollView
