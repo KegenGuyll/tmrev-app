@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { List, TouchableRipple } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -19,20 +19,23 @@ const MovieReviewsPage = () => {
 	const { data: movieReviews } = useGetAllReviewsQuery({ movie_id: Number(movieId) });
 
 	return (
-		<SafeAreaView>
-			<ScrollView>
-				<List.Section>
-					{movieReviews?.body.reviews.map((review) => (
-						<TouchableRipple
-							onPress={() => router.navigate(feedReviewRoute(review._id, 'reviews', from!))}
-							key={review._id}
-						>
-							<MovieReview from={from || 'home'} review={review} />
-						</TouchableRipple>
-					))}
-				</List.Section>
-			</ScrollView>
-		</SafeAreaView>
+		<>
+			<Stack.Screen options={{ title: 'Reviews', headerRight: () => null }} />
+			<SafeAreaView>
+				<ScrollView>
+					<List.Section>
+						{movieReviews?.body.reviews.map((review) => (
+							<TouchableRipple
+								onPress={() => router.navigate(feedReviewRoute(review._id, 'reviews', from!))}
+								key={review._id}
+							>
+								<MovieReview from={from || 'home'} review={review} />
+							</TouchableRipple>
+						))}
+					</List.Section>
+				</ScrollView>
+			</SafeAreaView>
+		</>
 	);
 };
 
