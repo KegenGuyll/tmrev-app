@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { Divider, Snackbar, Switch, Text } from 'react-native-paper';
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import dayjs from 'dayjs';
@@ -53,7 +53,6 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 	const [ratings, setRatings] = useState<Ratings>(defaultRatings);
 	const [note, setNote] = useState('');
 	const styles = makeStyles();
-	const [touchingNotes, setTouchingNotes] = useState(false);
 
 	const handleSetRatings = (key: string, value: number) => {
 		setRatings({ ...ratings, [key]: value });
@@ -144,65 +143,72 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 					if (index === -1) onDismiss();
 				}}
 			>
-				<BottomSheetScrollView style={styles.bottomSheetContainer}>
-					{selectedMovie && (
-						<View style={{ gap: 16, marginBottom: touchingNotes ? 300 : 32 }}>
-							<View style={{ display: 'flex', flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-								<MoviePosterImage moviePoster={selectedMovie.poster_path} height={100} width={50} />
+				<KeyboardAvoidingView
+					style={{ flex: 1 }}
+					behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+					keyboardVerticalOffset={113}
+				>
+					<BottomSheetScrollView style={styles.bottomSheetContainer}>
+						{selectedMovie && (
+							<View style={{ gap: 16, marginBottom: 32 }}>
+								<View
+									style={{ display: 'flex', flexDirection: 'row', gap: 8, alignItems: 'center' }}
+								>
+									<MoviePosterImage
+										moviePoster={selectedMovie.poster_path}
+										height={100}
+										width={50}
+									/>
+									<View
+										style={{
+											display: 'flex',
+											flexDirection: 'row',
+											alignItems: 'center',
+											flexWrap: 'wrap',
+										}}
+									>
+										<Text variant="titleMedium">{selectedMovie.title}</Text>
+										<Text variant="bodyMedium"> {formatDateYear(selectedMovie.release_date)}</Text>
+									</View>
+								</View>
+								<Divider />
 								<View
 									style={{
 										display: 'flex',
-										flexDirection: 'row',
-										alignItems: 'center',
-										flexWrap: 'wrap',
+										flexDirection: 'column',
+										alignItems: 'flex-start',
+										gap: 4,
 									}}
 								>
-									<Text variant="titleMedium">{selectedMovie.title}</Text>
-									<Text variant="bodyMedium"> {formatDateYear(selectedMovie.release_date)}</Text>
+									<Text variant="labelLarge">Public Review</Text>
+									<Switch value={isPublic} onValueChange={() => setIsPublic(!isPublic)} />
 								</View>
+								<RatingSliderList
+									expanded={expanded}
+									setExpanded={setExpanded}
+									resetRatings={handleClearRatings}
+									ratings={ratings}
+									setRatings={handleSetRatings}
+								/>
+								<TextInput
+									label="Title"
+									placeholder="Review Title"
+									value={selectedMovie.title || title}
+									onChangeText={setTitle}
+								/>
+
+								<MultiLineInput
+									value={note}
+									onChangeText={setNote}
+									numberOfLines={6}
+									label="Review Notes"
+								/>
+
+								<Divider />
 							</View>
-							<Divider />
-							<View
-								style={{
-									display: 'flex',
-									flexDirection: 'column',
-									alignItems: 'flex-start',
-									gap: 4,
-								}}
-							>
-								<Text variant="labelLarge">Public Review</Text>
-								<Switch value={isPublic} onValueChange={() => setIsPublic(!isPublic)} />
-							</View>
-							<RatingSliderList
-								expanded={expanded}
-								setExpanded={setExpanded}
-								resetRatings={handleClearRatings}
-								ratings={ratings}
-								setRatings={handleSetRatings}
-							/>
-							<TextInput
-								label="Title"
-								placeholder="Review Title"
-								value={selectedMovie.title || title}
-								onChangeText={setTitle}
-							/>
-							<MultiLineInput
-								onFocus={() => {
-									setTouchingNotes(true);
-									setExpanded(false);
-								}}
-								onBlur={() => {
-									setTouchingNotes(false);
-								}}
-								value={note}
-								onChangeText={setNote}
-								numberOfLines={6}
-								label="Review Notes"
-							/>
-							<Divider />
-						</View>
-					)}
-				</BottomSheetScrollView>
+						)}
+					</BottomSheetScrollView>
+				</KeyboardAvoidingView>
 			</BottomSheetModal>
 			<Snackbar
 				visible={!!lastReview && reviewedSuccess}
