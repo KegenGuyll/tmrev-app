@@ -1,7 +1,7 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { RefreshControl, ScrollView } from 'react-native';
-import { useTheme } from 'react-native-paper';
-import { useState } from 'react';
+import { RefreshControl, ScrollView, View } from 'react-native';
+import { Text, useTheme } from 'react-native-paper';
+import { useMemo, useState } from 'react';
 import { FromLocation } from '@/models';
 import { useGetGenreInsightsQuery } from '@/redux/api/tmrev';
 import BarChart from '@/components/CustomCharts/BarChart';
@@ -20,6 +20,11 @@ const GenreInsights: React.FC = () => {
 		skip: !profileId,
 	});
 
+	const hasInsightsToView = useMemo(
+		() => insightData && !!insightData.data.mostReviewedRankedGenres.length,
+		[insightData]
+	);
+
 	const handleDataRefresh = async () => {
 		setRefreshing(true);
 		await refetchInsights().unwrap();
@@ -35,7 +40,15 @@ const GenreInsights: React.FC = () => {
 					<RefreshControl tintColor="white" refreshing={refreshing} onRefresh={handleDataRefresh} />
 				}
 			>
-				{insightData && insightData.data.mostReviewedRankedGenres.length && (
+				{!hasInsightsToView && (
+					<View>
+						<Text>
+							Not enough data to generate insights. Try adding more reviews to get more insights.
+							You need at least 4 reviews in a category to generate insights.
+						</Text>
+					</View>
+				)}
+				{insightData && hasInsightsToView && (
 					<BarChart
 						chartTitle="Highest Ranked Genres"
 						barLabelColor="black"
