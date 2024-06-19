@@ -146,11 +146,14 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 				<KeyboardAvoidingView
 					style={{ flex: 1 }}
 					behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-					keyboardVerticalOffset={113}
+					keyboardVerticalOffset={0}
 				>
-					<BottomSheetScrollView style={styles.bottomSheetContainer}>
+					<BottomSheetScrollView
+						automaticallyAdjustKeyboardInsets
+						style={styles.bottomSheetContainer}
+					>
 						{selectedMovie && (
-							<View style={{ gap: 16, marginBottom: 32 }}>
+							<View style={{ gap: 16 }}>
 								<View
 									style={{ display: 'flex', flexDirection: 'row', gap: 8, alignItems: 'center' }}
 								>
@@ -196,14 +199,12 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 									value={selectedMovie.title || title}
 									onChangeText={setTitle}
 								/>
-
 								<MultiLineInput
 									value={note}
 									onChangeText={setNote}
 									numberOfLines={6}
 									label="Review Notes"
 								/>
-
 								<Divider />
 							</View>
 						)}
@@ -248,6 +249,7 @@ const makeStyles = () =>
 			flexDirection: 'column',
 			padding: 16,
 			gap: 32,
+			marginBottom: 32,
 		},
 		customHandleStyle: {
 			backgroundColor: 'white',

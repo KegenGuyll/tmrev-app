@@ -29,6 +29,7 @@ const MultiLineInput = forwardRef(
 		}: MultiLineInputProps,
 		ref: React.LegacyRef<TextInput>
 	) => {
+		const [isFocused, setIsFocused] = React.useState(false);
 		const theme = useTheme();
 
 		if (Platform.OS === 'ios') {
@@ -39,7 +40,7 @@ const MultiLineInput = forwardRef(
 						ref={ref}
 						style={[
 							{
-								height,
+								minHeight: height,
 								padding: 8,
 								backgroundColor: theme.colors.surfaceVariant,
 								borderRadius: 4,
@@ -48,12 +49,14 @@ const MultiLineInput = forwardRef(
 							inputStyle,
 						]}
 						placeholder={placeholder}
-						editable
 						defaultValue={value}
 						onBlur={onBlur}
-						onFocus={onFocus}
+						onFocus={() => {
+							setIsFocused(true);
+						}}
+						scrollEnabled={false}
 						onChange={(e) => onChangeText(e.nativeEvent.text)}
-						multiline
+						multiline={isFocused}
 						numberOfLines={numberOfLines}
 					/>
 				</View>
