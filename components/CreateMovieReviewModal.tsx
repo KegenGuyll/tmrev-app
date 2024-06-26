@@ -1,9 +1,10 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { Divider, Snackbar, Switch, Text } from 'react-native-paper';
+import { Button, Divider, Snackbar, Switch, Text } from 'react-native-paper';
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import dayjs from 'dayjs';
+import { DateType } from 'react-native-ui-datepicker';
 import { MoviePosterImage } from '@/components/MoviePoster';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import CustomBottomSheetBackground from '@/components/CustomBottomSheetBackground';
@@ -15,6 +16,7 @@ import { movieDetailsRoute } from '@/constants/routes';
 import TitledHandledComponent from './BottomSheetModal/TitledHandledComponent';
 import TextInput from './Inputs/TextInput';
 import MultiLineInput from './Inputs/MultiLineInput';
+import DatePickerSingle from './Date/DatePickerSingle';
 
 const defaultRatings: Ratings = {
 	plot: 5,
@@ -52,7 +54,9 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 	const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 	const [ratings, setRatings] = useState<Ratings>(defaultRatings);
 	const [note, setNote] = useState('');
+	const [reviewDate, setReviewDate] = useState<DateType | null>(new Date());
 	const styles = makeStyles();
+	const [datePickerVisible, setDatePickerVisible] = useState(false);
 
 	const handleSetRatings = (key: string, value: number) => {
 		setRatings({ ...ratings, [key]: value });
@@ -98,7 +102,7 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 						visuals: ratings.visuals,
 						personalScore: ratings.personalScore,
 					},
-					reviewedDate: dayjs(new Date()).format('YYYY-MM-DD'),
+					reviewedDate: dayjs(reviewDate).format('YYYY-MM-DD'),
 					title: selectedMovie.title,
 					notes: note,
 					public: isPublic,
@@ -146,7 +150,6 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 				<KeyboardAvoidingView
 					style={{ flex: 1 }}
 					behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-					keyboardVerticalOffset={0}
 				>
 					<BottomSheetScrollView
 						automaticallyAdjustKeyboardInsets
@@ -186,6 +189,17 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 									<Text variant="labelLarge">Public Review</Text>
 									<Switch value={isPublic} onValueChange={() => setIsPublic(!isPublic)} />
 								</View>
+								<View>
+									<Text variant="labelLarge">Review Date</Text>
+									<View
+										style={{ display: 'flex', flexDirection: 'row', gap: 4, alignItems: 'center' }}
+									>
+										<View style={{ flexGrow: 1 }}>
+											<Text variant="bodyLarge">{dayjs(reviewDate).format('MMM DD, YYYY')}</Text>
+										</View>
+										<Button onPress={() => setDatePickerVisible(true)}>Update</Button>
+									</View>
+								</View>
 								<RatingSliderList
 									expanded={expanded}
 									setExpanded={setExpanded}
@@ -205,6 +219,7 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 									numberOfLines={6}
 									label="Review Notes"
 								/>
+
 								<Divider />
 							</View>
 						)}
@@ -227,6 +242,12 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 			>
 				{`${lastReview?.title} Reviewed Successfully`}
 			</Snackbar>
+			<DatePickerSingle
+				onDateChange={(d) => setReviewDate(d)}
+				visible={datePickerVisible}
+				initDate={reviewDate}
+				onDismiss={() => setDatePickerVisible(false)}
+			/>
 		</>
 	);
 };
