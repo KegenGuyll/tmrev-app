@@ -1,5 +1,13 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { Button, Chip, Snackbar, Surface, Text, TouchableRipple } from 'react-native-paper';
+import {
+	Button,
+	Chip,
+	SegmentedButtons,
+	Snackbar,
+	Surface,
+	Text,
+	TouchableRipple,
+} from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Image, StyleSheet, Share, ScrollView, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -42,6 +50,7 @@ const MovieDetails = () => {
 	const [showCreateReviewModal, setShowCreateReviewModal] = useState(false);
 	const [snackBarMessage, setSnackBarMessage] = useState<string | null>(null);
 	const [loginMessage, setLoginMessage] = useState<string | null>(null);
+	const [activeSegment, setActiveSegment] = useState('review');
 
 	const { currentUser } = auth();
 
@@ -104,6 +113,25 @@ const MovieDetails = () => {
 		setShowAddMovieToListModal(true);
 	};
 
+	const handleSegmentButtons = (value: string) => {
+		switch (value) {
+			case 'review':
+				handleReviewMovie();
+				break;
+			case 'watched-movie':
+				handleAddToList();
+				break;
+			case 'share':
+				shareMovie();
+				break;
+			case 'watchlist':
+				handleAddToList();
+				break;
+			default:
+				break;
+		}
+	};
+
 	if (movieDataIsFetching || movieDataIsLoading || !movieData) {
 		return (
 			<>
@@ -146,7 +174,33 @@ const MovieDetails = () => {
 						</Text>
 						<Text variant="headlineSmall">{`(${formatDateYear(movieData.release_date)})`}</Text>
 					</View>
-					<View
+					<SegmentedButtons
+						value={activeSegment}
+						onValueChange={handleSegmentButtons}
+						buttons={[
+							{
+								value: 'review',
+								label: 'Review',
+								icon: 'message-draw',
+							},
+							{
+								value: 'watched-movie',
+								label: 'Watched',
+								icon: 'eye',
+							},
+							// {
+							// 	value: 'share',
+							// 	label: 'Share',
+							// 	icon: 'share',
+							// },
+							{
+								value: 'watchlist',
+								label: 'WatchList',
+								icon: 'plus',
+							},
+						]}
+					/>
+					{/* <View
 						style={{
 							flexDirection: 'row',
 							alignItems: 'center',
@@ -163,7 +217,7 @@ const MovieDetails = () => {
 						<Button onPress={handleAddToList} icon="plus" mode="outlined">
 							WatchList
 						</Button>
-					</View>
+					</View> */}
 					{movieReviews && (
 						<WatchedMovie
 							movieId={Number(movieId!)}
