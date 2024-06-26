@@ -50,7 +50,7 @@ const MovieDetails = () => {
 	const [showCreateReviewModal, setShowCreateReviewModal] = useState(false);
 	const [snackBarMessage, setSnackBarMessage] = useState<string | null>(null);
 	const [loginMessage, setLoginMessage] = useState<string | null>(null);
-	const [activeSegment, setActiveSegment] = useState('review');
+	const [watchedSnackbar, setWatchedSnackbar] = useState<boolean>(false);
 
 	const { currentUser } = auth();
 
@@ -119,7 +119,7 @@ const MovieDetails = () => {
 				handleReviewMovie();
 				break;
 			case 'watched-movie':
-				handleAddToList();
+				setWatchedSnackbar(true);
 				break;
 			case 'share':
 				shareMovie();
@@ -175,7 +175,7 @@ const MovieDetails = () => {
 						<Text variant="headlineSmall">{`(${formatDateYear(movieData.release_date)})`}</Text>
 					</View>
 					<SegmentedButtons
-						value={activeSegment}
+						value=""
 						onValueChange={handleSegmentButtons}
 						buttons={[
 							{
@@ -377,6 +377,16 @@ const MovieDetails = () => {
 				onDismiss={() => setLoginMessage(null)}
 			>
 				{loginMessage}
+			</Snackbar>
+			<Snackbar
+				visible={watchedSnackbar}
+				onDismiss={() => setWatchedSnackbar(false)}
+				action={{
+					label: 'Review',
+					onPress: () => handleReviewMovie(),
+				}}
+			>
+				Successfully watched movie!
 			</Snackbar>
 		</>
 	);
