@@ -159,3 +159,24 @@ export interface Visual2 {
 	label: string;
 	value: number;
 }
+
+type ActorInsightData = {
+	id: number;
+	name: string;
+	count: number;
+	details: {
+		adult: boolean;
+		gender: number;
+		known_for_department: string;
+		name: string;
+		original_name: string;
+		popularity: number;
+		profile_path: string;
+	};
+};
+
+export type ActorInsightResponse = {
+	success: boolean;
+	watchedActorMapSorted: ActorInsightData[];
+	reviewedActorMapSorted: ActorInsightData[];
+};

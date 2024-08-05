@@ -161,6 +161,16 @@ type GetUserHighlightedReviewsResponse = {
 	};
 };
 
+type GetReviewByActorResponse = {
+	success: boolean;
+	reviews: TmrevReview[];
+};
+
+type GetReviewByActorParams = {
+	actorId: number;
+	userId: string;
+};
+
 export type {
 	AdvancedScore,
 	AllReviewsResponse,
@@ -175,4 +185,6 @@ export type {
 	GetUserMovieReviewsPayload,
 	GetUserHighlightedReviewsResponse,
 	GetUserMovieReviewsQuery,
+	GetReviewByActorResponse,
+	GetReviewByActorParams,
 };
