@@ -1,9 +1,10 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import React, { useEffect } from 'react';
 import { FlatList, SafeAreaView, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Surface, Text } from 'react-native-paper';
+import { Chip, Surface, Text } from 'react-native-paper';
 import ImageView from '@techvox/react-native-image-viewing';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import auth from '@react-native-firebase/auth';
 import {
 	useGetPersonImagesQuery,
 	useGetPersonMostPopularMoviesQuery,
@@ -13,6 +14,7 @@ import ActorPlaceholderImage from '@/components/ActorPlacholderImage';
 import MoviePoster from '@/components/MoviePoster';
 import { PosterPath } from '@/models';
 import imageUrl from '@/utils/imageUrl';
+import { useGetReviewsByActorQuery } from '@/redux/api/tmrev';
 
 type PersonDetailsParams = {
 	personId: string;
@@ -35,6 +37,13 @@ const PersonDetails: React.FC = () => {
 		isFetching: isPersonFetching,
 		isLoading: isPersonLoading,
 	} = useGetPersonQuery({ personId: Number(slug.personId) });
+
+	const { currentUser } = auth();
+
+	const { data: reviewData } = useGetReviewsByActorQuery(
+		{ actorId: Number(slug.personId), userId: currentUser?.uid ?? '' },
+		{ skip: !currentUser }
+	);
 
 	const { data: personMovieData } = useGetPersonMostPopularMoviesQuery({
 		personId: Number(slug.personId),
@@ -78,7 +87,9 @@ const PersonDetails: React.FC = () => {
 
 	return (
 		<>
-			<Stack.Screen options={{ headerShown: true, title: personData?.name }} />
+			<Stack.Screen
+				options={{ headerShown: true, title: personData?.name, headerRight: () => null }}
+			/>
 			<SafeAreaView style={{ gap: 16 }}>
 				<Surface style={styles.actorOverviewContainer}>
 					<ActorPlaceholderImage
@@ -91,6 +102,38 @@ const PersonDetails: React.FC = () => {
 						{personData.biography}
 					</Text>
 				</Surface>
+				{currentUser && (
+					<View style={{ gap: 8 }}>
+						<Text variant="headlineLarge">Reviewed Movies</Text>
+						<FlatList
+							data={reviewData?.reviews}
+							keyExtractor={(item) => item._id}
+							renderItem={({ item }) => (
+								<View
+									style={{
+										marginRight: 8,
+										borderRadius: 4,
+										gap: 8,
+										position: 'relative',
+									}}
+								>
+									<MoviePoster
+										height={175}
+										width={150}
+										movieId={item.tmdbID}
+										moviePoster={item.movieDetails.poster_path}
+										location={slug.from ?? 'movies'}
+									/>
+									<Chip style={{ position: 'absolute', bottom: 0, right: 0 }} icon="star">
+										{item.averagedAdvancedScore}
+									</Chip>
+								</View>
+							)}
+							horizontal
+							showsHorizontalScrollIndicator={false}
+						/>
+					</View>
+				)}
 				<View style={{ gap: 8 }}>
 					<Text variant="headlineLarge">Popular Movies</Text>
 					<FlatList
