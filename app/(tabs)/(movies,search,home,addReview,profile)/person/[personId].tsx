@@ -1,4 +1,4 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React, { useEffect } from 'react';
 import { FlatList, SafeAreaView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Chip, Surface, Text } from 'react-native-paper';
@@ -15,6 +15,7 @@ import MoviePoster from '@/components/MoviePoster';
 import { PosterPath } from '@/models';
 import imageUrl from '@/utils/imageUrl';
 import { useGetReviewsByActorQuery } from '@/redux/api/tmrev';
+import { feedReviewRoute } from '@/constants/routes';
 
 type PersonDetailsParams = {
 	personId: string;
@@ -102,7 +103,7 @@ const PersonDetails: React.FC = () => {
 						{personData.biography}
 					</Text>
 				</Surface>
-				{currentUser && (
+				{currentUser && reviewData && reviewData?.reviews.length > 0 && (
 					<View style={{ gap: 8 }}>
 						<Text variant="headlineLarge">Reviewed Movies</Text>
 						<FlatList
@@ -121,6 +122,9 @@ const PersonDetails: React.FC = () => {
 										height={175}
 										width={150}
 										movieId={item.tmdbID}
+										onPress={() =>
+											router.navigate(feedReviewRoute(item._id, 'reviews', slug.from!))
+										}
 										moviePoster={item.movieDetails.poster_path}
 										location={slug.from ?? 'movies'}
 									/>
