@@ -42,6 +42,8 @@ import {
 import {
 	AllReviewsResponse,
 	DeleteReviewQuery,
+	GetReviewByActorParams,
+	GetReviewByActorResponse,
 	GetUserHighlightedReviewsResponse,
 	GetUserMovieReviewsPayload,
 	GetUserMovieReviewsResponse,
@@ -79,7 +81,7 @@ import {
 	IsUsernameAvailableResponse,
 	UpdateUserQuery,
 } from '@/models/tmrev/user';
-import { MovieGenreInsightResponse } from '@/models/tmrev/insights';
+import { ActorInsightResponse, MovieGenreInsightResponse } from '@/models/tmrev/insights';
 import { FeedQuery, FeedResponse } from '@/models/tmrev/feed';
 import { GetCommentResponse, GetCommentsResponse } from '@/models/tmrev/comments';
 
@@ -395,6 +397,16 @@ export const tmrevApi = createApi({
 		getJustReviewed: builder.query<JustReviewed, void>({
 			query: () => ({
 				url: '/movie/just-reviewed',
+			}),
+		}),
+		getActorInsights: builder.query<ActorInsightResponse, string>({
+			query: (userId) => ({
+				url: `/movie/actor/insights/${userId}`,
+			}),
+		}),
+		getReviewsByActor: builder.query<GetReviewByActorResponse, GetReviewByActorParams>({
+			query: (data) => ({
+				url: `/movie/reviews/actor/${data.actorId}/${data.userId}`,
 			}),
 		}),
 		getList: builder.query<WatchList, GetListPayload>({
@@ -770,6 +782,8 @@ export const {
 	useDeleteUserMutation,
 	useDeleteDeviceTokenMutation,
 	useIsDeviceTokenSavedQuery,
+	useGetActorInsightsQuery,
+	useGetReviewsByActorQuery,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;
 

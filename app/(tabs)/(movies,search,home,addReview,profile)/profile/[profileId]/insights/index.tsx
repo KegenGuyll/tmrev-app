@@ -2,7 +2,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { View } from 'react-native';
 import { List, useTheme, Icon } from 'react-native-paper';
 import { FromLocation } from '@/models';
-import { profileInsightGenreRoute } from '@/constants/routes';
+import { actorInsightsRoute, profileInsightGenreRoute } from '@/constants/routes';
 
 const ListItems = [
 	{
@@ -15,19 +15,10 @@ const ListItems = [
 	},
 	{
 		title: 'Actors',
-		description:
-			'Discover your favorite genres, least favorites, and genre-based category rankings.',
+		description: 'Discover your most reviewed actors.',
 		icon: 'account-group',
-		enabled: false,
-		route: (from: FromLocation, profileId: string) => '',
-	},
-	{
-		title: 'Crew Members',
-		description:
-			'Discover your favorite genres, least favorites, and genre-based category rankings.',
-		icon: 'video-vintage',
-		enabled: false,
-		route: (from: FromLocation, profileId: string) => '',
+		enabled: true,
+		route: (from: FromLocation, profileId: string) => actorInsightsRoute(from, profileId),
 	},
 ];
 

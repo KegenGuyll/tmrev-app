@@ -98,6 +98,10 @@ export const profileInsightGenreRoute = (from: FromLocation, profileId: string) 
 	return `${baseTabUrl}/(${from})/profile/${profileId}/insights/genre?from=${from}`;
 };
 
+export const actorInsightsRoute = (from: FromLocation, profileId: string) => {
+	return `${baseTabUrl}/(${from})/profile/${profileId}/insights/actor?from=${from}`;
+};
+
 export const notificationsRoute = (from: FromLocation) =>
 	`${baseTabUrl}/${from}/notifications?from=${from.replace('(', '').replace(')', '')}`;
 
