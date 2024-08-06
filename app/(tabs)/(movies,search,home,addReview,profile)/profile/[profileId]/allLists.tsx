@@ -2,13 +2,15 @@ import { Stack, useLocalSearchParams } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import auth from '@react-native-firebase/auth';
 import { RefreshControl, View } from 'react-native';
-import { IconButton, Text, ActivityIndicator } from 'react-native-paper';
+import { IconButton, Text, ActivityIndicator, Searchbar } from 'react-native-paper';
 import { FlatGrid } from 'react-native-super-grid';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import CreateWatchListModal from '@/components/CreateWatchListModal';
 import { useGetUserWatchListsQuery } from '@/redux/api/tmrev';
 import { FromLocation } from '@/models';
 import MovieListItem from '@/components/MovieList/MovieListItem';
+import { GetUserWatchListPayload } from '@/models/tmrev/watchList';
+import useDebounce from '@/hooks/useDebounce';
 
 type AllListsSearchParams = {
 	profileId: string;
@@ -20,10 +22,19 @@ const pageSize = 10;
 const AllListsPage: React.FC = () => {
 	const { profileId, from } = useLocalSearchParams<AllListsSearchParams>();
 	const [page, setPage] = useState(0);
+	const [searchValue, setSearchValue] = useState('');
 
-	const query = useMemo(() => {
-		return { pageNumber: page, userId: profileId, pageSize };
-	}, [page, profileId]);
+	const debouncedSearchTerm = useDebounce(searchValue, 500);
+
+	const query: GetUserWatchListPayload = useMemo(() => {
+		return {
+			pageNumber: page,
+			userId: profileId,
+			pageSize,
+			sort_by: 'updatedAt.desc',
+			textSearch: debouncedSearchTerm,
+		};
+	}, [page, profileId, debouncedSearchTerm]);
 
 	const [refreshing, setRefreshing] = useState(false);
 	const [movies, setMovies] = useState<MovieGeneral[]>([]);
@@ -78,13 +89,29 @@ const AllListsPage: React.FC = () => {
 				}}
 			/>
 			<FlatGrid
+				ListHeaderComponent={
+					<View style={{ marginTop: 8 }}>
+						<Searchbar
+							onChangeText={(text) => setSearchValue(text)}
+							value={searchValue}
+							placeholder="Search for list..."
+						/>
+					</View>
+				}
 				refreshControl={
 					<RefreshControl tintColor="white" refreshing={refreshing} onRefresh={handleRefresh} />
 				}
+				spacing={0}
 				itemDimension={400}
-				spacing={8}
 				data={[...data.body.watchlists, ...data.body.emptyWatchlists]}
-				renderItem={({ item }) => <MovieListItem item={item} profileId={profileId!} from={from!} />}
+				renderItem={({ item }) => (
+					<MovieListItem
+						touchableRippleStyle={{ marginTop: 8 }}
+						item={item}
+						profileId={profileId!}
+						from={from!}
+					/>
+				)}
 				keyExtractor={(item) => item._id}
 				onEndReachedThreshold={1}
 				onEndReached={incrementPage}

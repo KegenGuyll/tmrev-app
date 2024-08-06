@@ -1,7 +1,7 @@
 /* eslint-disable react/no-array-index-key */
 import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { GestureResponderEvent, View } from 'react-native';
+import { GestureResponderEvent, StyleProp, View, ViewStyle } from 'react-native';
 import { TouchableRipple, Surface, Text } from 'react-native-paper';
 import { WatchList } from '@/models/tmrev';
 import { FromLocation } from '@/models';
@@ -13,6 +13,8 @@ type WatchListItemProps = {
 	onPress?: (e: GestureResponderEvent) => void;
 	profileId?: string;
 	from?: FromLocation;
+	style?: StyleProp<ViewStyle>;
+	touchableRippleStyle?: StyleProp<ViewStyle>;
 };
 
 const MovieListItem: React.FC<WatchListItemProps> = ({
@@ -20,6 +22,8 @@ const MovieListItem: React.FC<WatchListItemProps> = ({
 	from,
 	profileId,
 	onPress,
+	style,
+	touchableRippleStyle,
 }: WatchListItemProps) => {
 	const firstFiveMovies = useMemo(() => item.movies.slice(0, 5), [item.movies]);
 	const router = useRouter();
@@ -33,8 +37,8 @@ const MovieListItem: React.FC<WatchListItemProps> = ({
 	};
 
 	return (
-		<TouchableRipple onPress={handleOnPress}>
-			<Surface style={{ padding: 8, borderRadius: 4 }}>
+		<TouchableRipple style={touchableRippleStyle} onPress={handleOnPress}>
+			<Surface style={[{ padding: 8, borderRadius: 4 }, style]}>
 				<View style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
 					<View>
 						<Text variant="labelLarge">{item.title}</Text>

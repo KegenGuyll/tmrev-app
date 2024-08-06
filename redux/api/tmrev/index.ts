@@ -315,7 +315,10 @@ export const tmrevApi = createApi({
 			},
 			// Refetch when the page arg changes
 			forceRefetch({ currentArg, previousArg }) {
-				return currentArg?.pageNumber !== previousArg?.pageNumber;
+				return (
+					currentArg?.sort_by !== previousArg?.sort_by ||
+					currentArg?.pageNumber !== previousArg?.pageNumber
+				);
 			},
 		}),
 		getWatchListDetails: builder.query<GetWatchListDetailsResponse, GetWatchListDetailsPayload>({

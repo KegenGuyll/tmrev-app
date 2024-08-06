@@ -1,9 +1,8 @@
 /* eslint-disable react-native/no-color-literals */
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
+import { BottomSheetModal, BottomSheetVirtualizedList } from '@gorhom/bottom-sheet';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator } from 'react-native-paper';
+import { ActivityIndicator, Searchbar } from 'react-native-paper';
 import auth from '@react-native-firebase/auth';
-import { FlatGrid } from 'react-native-super-grid';
 import { RefreshControl, View } from 'react-native';
 import { useAddMovieToWatchListMutation, useGetUserWatchListsQuery } from '@/redux/api/tmrev';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
@@ -11,6 +10,8 @@ import CustomBackground from '@/components/CustomBottomSheetBackground';
 import MovieListItem from '@/components/MovieList/MovieListItem';
 import TitledHandledComponent from '@/components/BottomSheetModal/TitledHandledComponent';
 import CreateWatchListModal from '@/components/CreateWatchListModal';
+import { GetUserWatchListPayload } from '@/models/tmrev/watchList';
+import useDebounce from '@/hooks/useDebounce';
 
 type AddMovieToListProps = {
 	visible: boolean;
@@ -30,6 +31,7 @@ const AddMovieToList: React.FC<AddMovieToListProps> = ({
 	onError,
 }: AddMovieToListProps) => {
 	const [movies, setMovies] = useState<MovieGeneral[]>([]);
+	const [searchValue, setSearchValue] = useState('');
 	const [openCreateModal, setOpenCreateModal] = useState(false);
 	const bottomSheetModalAddMoviesRef = useRef<BottomSheetModal>(null);
 	const [page, setPage] = useState(0);
@@ -37,13 +39,26 @@ const AddMovieToList: React.FC<AddMovieToListProps> = ({
 
 	const { currentUser } = auth();
 
-	const query = useMemo(() => {
-		if (!currentUser) return { pageNumber: page, pageSize };
+	const debouncedSearchTerm = useDebounce(searchValue, 500);
 
-		return { pageNumber: page, userId: currentUser?.uid, pageSize };
-	}, [page, currentUser]);
+	const query: GetUserWatchListPayload = useMemo(() => {
+		if (!currentUser) return { pageNumber: page, pageSize, sort_by: 'updatedAt.desc' };
 
-	const { data, isLoading, refetch, isFetching } = useGetUserWatchListsQuery(query, {
+		if (debouncedSearchTerm) {
+			setPage(0);
+			return {
+				pageNumber: 0,
+				userId: currentUser?.uid,
+				pageSize,
+				textSearch: debouncedSearchTerm,
+				sort_by: 'updatedAt.desc',
+			};
+		}
+
+		return { pageNumber: page, userId: currentUser?.uid, pageSize, sort_by: 'updatedAt.desc' };
+	}, [page, currentUser, debouncedSearchTerm]);
+
+	const { data, isLoading, isFetching } = useGetUserWatchListsQuery(query, {
 		skip: !currentUser,
 	});
 
@@ -69,7 +84,7 @@ const AddMovieToList: React.FC<AddMovieToListProps> = ({
 
 	const handleRefresh = async () => {
 		setRefreshing(true);
-		await refetch().unwrap();
+		setPage(0);
 		setRefreshing(false);
 	};
 
@@ -123,39 +138,44 @@ const AddMovieToList: React.FC<AddMovieToListProps> = ({
 					}
 				}}
 			>
-				<BottomSheetView>
-					{data && data.success && data.body && (
-						<FlatGrid
-							refreshControl={
-								<RefreshControl
-									tintColor="white"
-									refreshing={refreshing}
-									onRefresh={handleRefresh}
-								/>
+				{data && data.success && data.body && (
+					<BottomSheetVirtualizedList
+						ListHeaderComponent={
+							<Searchbar
+								onChangeText={(text) => setSearchValue(text)}
+								value={searchValue}
+								placeholder="Search for list..."
+							/>
+						}
+						getItem={(d, index) => d[index]}
+						getItemCount={() => data.body.watchlists.length + data.body.emptyWatchlists.length}
+						refreshControl={
+							<RefreshControl tintColor="white" refreshing={refreshing} onRefresh={handleRefresh} />
+						}
+						data={[...data.body.emptyWatchlists, ...data.body.watchlists]}
+						contentContainerStyle={{ padding: 8 }}
+						renderItem={({ item }) => (
+							<MovieListItem
+								touchableRippleStyle={{ marginTop: 8 }}
+								onPress={() => handleAddMovie(item._id)}
+								item={item}
+							/>
+						)}
+						keyExtractor={(item) => item._id}
+						onEndReached={incrementPage}
+						ListFooterComponent={() => {
+							if (isLoading || isFetching) {
+								return (
+									<View>
+										<ActivityIndicator />
+									</View>
+								);
 							}
-							itemDimension={400}
-							spacing={8}
-							data={[...data.body.emptyWatchlists, ...data.body.watchlists]}
-							renderItem={({ item }) => (
-								<MovieListItem onPress={() => handleAddMovie(item._id)} item={item} />
-							)}
-							keyExtractor={(item) => item._id}
-							onEndReachedThreshold={1}
-							onEndReached={incrementPage}
-							ListFooterComponent={() => {
-								if (isLoading || isFetching) {
-									return (
-										<View>
-											<ActivityIndicator />
-										</View>
-									);
-								}
 
-								return null;
-							}}
-						/>
-					)}
-				</BottomSheetView>
+							return null;
+						}}
+					/>
+				)}
 			</BottomSheetModal>
 			<CreateWatchListModal
 				open={openCreateModal}

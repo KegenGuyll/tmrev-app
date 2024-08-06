@@ -61,12 +61,20 @@ type GetUserWatchListResponse = {
 	body: GetUserWatchListResponseData;
 };
 
+type GetUserWatchListSortBy =
+	| 'createdAt.asc'
+	| 'createdAt.desc'
+	| 'updatedAt.asc'
+	| 'updatedAt.desc'
+	| 'title.asc'
+	| 'title.desc';
+
 type GetUserWatchListPayload = {
 	pageNumber: number;
 	pageSize: number;
 	userId?: string;
 	textSearch?: string;
-	sortBy?: string;
+	sort_by?: GetUserWatchListSortBy;
 };
 
 type GetWatchListDetailsResponse = {
