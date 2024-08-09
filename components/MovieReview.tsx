@@ -1,7 +1,9 @@
 import { Chip, Divider, Text } from 'react-native-paper';
 import { Image, View } from 'react-native';
 import { Link } from 'expo-router';
+import dayjs from 'dayjs';
 import { TmrevReview } from '@/models/tmrev';
+import { formatDate } from '@/utils/common';
 
 type MovieReviewProps = {
 	review: TmrevReview;
@@ -40,9 +42,21 @@ const MovieReview: React.FC<MovieReviewProps> = ({ review, from }: MovieReviewPr
 									style={{ width: 40, height: 40, borderRadius: 50 }}
 								/>
 							)}
-							<Text variant="labelLarge">{review.profile?.username}</Text>
+							<View style={{ flexGrow: 1 }}>
+								<Text variant="labelLarge">{review.profile?.username}</Text>
+								<Text variant="labelSmall">
+									{dayjs(formatDate(review.createdAt)).format('hh:mm A · MMM DD, YYYY')}
+								</Text>
+							</View>
 						</View>
 					</Link>
+				</View>
+				<View
+					style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}
+				>
+					<View style={{ flexGrow: 1 }}>
+						<Text variant="titleMedium">{review.title}</Text>
+					</View>
 					<Chip icon="star">
 						<Text>{review.averagedAdvancedScore}</Text>
 					</Chip>
