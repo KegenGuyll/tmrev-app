@@ -1,12 +1,29 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { Button, Chip, Snackbar, Surface, Text, TouchableRipple } from 'react-native-paper';
+import {
+	Button,
+	Chip,
+	Snackbar,
+	Surface,
+	Text,
+	TouchableRipple,
+	useTheme,
+} from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { View, Image, StyleSheet, Share, ScrollView, FlatList } from 'react-native';
+import {
+	View,
+	Image,
+	StyleSheet,
+	Share,
+	ScrollView,
+	FlatList,
+	TouchableHighlight,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useBottomSheetModal } from '@gorhom/bottom-sheet';
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import auth from '@react-native-firebase/auth';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import {
 	useGetMovieCreditsQuery,
 	useGetMovieDetailsQuery,
@@ -18,7 +35,7 @@ import { formatRuntime, numberShortHand, roundWithMaxPrecision } from '@/utils/c
 import ISO3166_1 from '@/models/tmdb/ISO3166-1';
 import ActorPlaceholderImage from '@/components/ActorPlacholderImage';
 import { PosterPath } from '@/models';
-import { useGetAllReviewsQuery } from '@/redux/api/tmrev';
+import { useGetAllReviewsQuery, useGetReviewsByMovieIdQuery } from '@/redux/api/tmrev';
 import MovieRadarChart from '@/components/MovieRadarChart';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import CreateMovieReviewModal from '@/components/CreateMovieReviewModal';
@@ -35,6 +52,7 @@ type MovieDetailsParams = {
 const MovieDetails = () => {
 	const { movieId, from } = useLocalSearchParams<MovieDetailsParams>();
 	const router = useRouter();
+	const theme = useTheme();
 	const { dismissAll } = useBottomSheetModal();
 	const { data: movieReviews } = useGetAllReviewsQuery({ movie_id: Number(movieId) });
 	const [selectedMovie, setSelectedMovie] = useState<MovieGeneral | null>(null);
@@ -56,6 +74,15 @@ const MovieDetails = () => {
 	} = useGetMovieDetailsQuery({
 		movie_id: Number(movieId),
 		params: {},
+	});
+
+	const { data: movieReviewsData } = useGetReviewsByMovieIdQuery({
+		movieId: Number(movieId),
+		query: {
+			pageNumber: 0,
+			pageSize: 1,
+			sort_by: 'createdAt.desc',
+		},
 	});
 
 	const { data: movieReleaseDates } = useGetMovieReleaseDatesQuery({
@@ -104,7 +131,7 @@ const MovieDetails = () => {
 		setShowAddMovieToListModal(true);
 	};
 
-	if (movieDataIsFetching || movieDataIsLoading || !movieData) {
+	if (movieDataIsFetching || movieDataIsLoading || !movieData || !movieReviewsData) {
 		return (
 			<>
 				<Stack.Screen options={{ headerShown: true }} />
@@ -219,9 +246,124 @@ const MovieDetails = () => {
 							borderRadius: 4,
 							flexWrap: 'wrap',
 							padding: 8,
+							gap: 4,
 						}}
 					>
+						<Text variant="labelLarge">Overview</Text>
 						<Text variant="bodyMedium">{movieData.overview}</Text>
+					</Surface>
+					<Surface style={{ padding: 8, borderRadius: 4 }}>
+						<View
+							style={{
+								paddingBottom: 8,
+								display: 'flex',
+								flexDirection: 'row',
+								alignItems: 'center',
+								gap: 4,
+							}}
+						>
+							{movieReviewsData?.body.totalCount > 0 ? (
+								<>
+									<Text variant="labelLarge">Reviews</Text>
+									<Text variant="bodyMedium">
+										{numberShortHand(movieReviewsData?.body.totalCount)}
+									</Text>
+								</>
+							) : (
+								<Text variant="labelLarge">Be the first to review!</Text>
+							)}
+						</View>
+						{movieReviewsData?.body.reviews.map((review) => (
+							<TouchableOpacity
+								key={review._id}
+								onPress={() =>
+									router.navigate(
+										movieReviewsRoute(from || 'movies', String(movieId), movieData.title)
+									)
+								}
+							>
+								<View
+									style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 8 }}
+								>
+									<View>
+										<Image
+											style={{ width: 50, height: 50, borderRadius: 100 }}
+											source={{ uri: review.profile?.photoUrl }}
+										/>
+									</View>
+									<View style={{ flex: 1 }}>
+										<View
+											style={{
+												display: 'flex',
+												flexDirection: 'row',
+												alignItems: 'center',
+												flexWrap: 'wrap',
+											}}
+										>
+											<Text style={{ flexGrow: 1 }} variant="titleSmall">
+												{review.title}
+											</Text>
+											{review.averagedAdvancedScore && (
+												<Chip icon="star">
+													<Text>{roundWithMaxPrecision(review.averagedAdvancedScore, 1)}</Text>
+												</Chip>
+											)}
+										</View>
+										{review.notes && <Text variant="bodyMedium">{review.notes}</Text>}
+									</View>
+								</View>
+								{/* 
+								commented out because I'm not sure how to make these look good
+								<View
+									style={{
+										display: 'flex',
+										flexDirection: 'row',
+										gap: 16,
+										marginTop: 12,
+										justifyContent: 'flex-end',
+										opacity: 0.5,
+									}}
+								>
+									<View
+										style={{ display: 'flex', flexDirection: 'row', gap: 4, alignItems: 'center' }}
+									>
+										<Icon source="thumb-up" size={20} />
+										<Text>{review.votes?.upVote}</Text>
+									</View>
+									<View
+										style={{ display: 'flex', flexDirection: 'row', gap: 4, alignItems: 'center' }}
+									>
+										<Icon source="thumb-down" size={20} />
+										<Text>{review.votes?.downVote}</Text>
+									</View>
+								</View> */}
+							</TouchableOpacity>
+						))}
+						{movieReviewsData?.body.totalCount === 0 && currentUser && (
+							<View style={{ display: 'flex', flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+								<Image
+									style={{ width: 50, height: 50, borderRadius: 100 }}
+									source={{
+										uri: currentUser.photoURL || require('@/assets/images/actor-placeholder.jpg'),
+									}}
+								/>
+								<TouchableHighlight
+									onPress={handleReviewMovie}
+									style={{ width: '100%', flex: 1, borderRadius: 4 }}
+								>
+									<View
+										// eslint-disable-next-line react-native/no-color-literals
+										style={{
+											padding: 8,
+											backgroundColor: 'rgba(255, 255, 255, 0.1)',
+											borderRadius: 4,
+										}}
+									>
+										<Text style={{ color: theme.colors.onBackground }}>Leave a review</Text>
+									</View>
+								</TouchableHighlight>
+							</View>
+						)}
 					</Surface>
 					<View style={{ marginBottom: 8 }}>
 						<Button onPress={handleReviewMovie} style={{ marginBottom: 8 }} mode="contained">
@@ -231,14 +373,6 @@ const MovieDetails = () => {
 							ADD TO LIST
 						</Button>
 					</View>
-					<Button
-						onPress={() =>
-							router.navigate(movieReviewsRoute(from || 'movies', String(movieId), movieData.title))
-						}
-						mode="outlined"
-					>
-						View All Reviews
-					</Button>
 					<MovieRadarChart reviews={movieReviews?.body.reviews || []} />
 					<View style={{ flexDirection: 'row', marginBottom: 8 }}>
 						{movieCredits?.cast && (
