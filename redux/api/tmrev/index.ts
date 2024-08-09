@@ -44,6 +44,8 @@ import {
 	DeleteReviewQuery,
 	GetReviewByActorParams,
 	GetReviewByActorResponse,
+	GetReviewByMovieIdQuery,
+	GetReviewByMovieIdResponse,
 	GetUserHighlightedReviewsResponse,
 	GetUserMovieReviewsPayload,
 	GetUserMovieReviewsResponse,
@@ -411,6 +413,47 @@ export const tmrevApi = createApi({
 			query: (data) => ({
 				url: `/movie/reviews/actor/${data.actorId}/${data.userId}`,
 			}),
+		}),
+		getReviewsByMovieId: builder.query<GetReviewByMovieIdResponse, GetReviewByMovieIdQuery>({
+			providesTags: ['REVIEW'],
+			query: ({ movieId, query }) => ({
+				url: `/movie/v2/review/${movieId}`,
+				params: query,
+			}),
+			serializeQueryArgs: ({ queryArgs }) => {
+				const refetchQueries = { ...queryArgs.query };
+
+				// @ts-expect-error
+				delete refetchQueries.pageNumber;
+
+				return {
+					...refetchQueries,
+				};
+			},
+			merge: (currentCache, newItems) => {
+				if (newItems.body.pageNumber >= 1) {
+					// make sure there isn't duplicate data being added
+					const newData = [...currentCache.body.reviews, ...newItems.body.reviews];
+
+					// remove duplicates
+					const uniqueData = newData.filter((v, i, a) => a.findIndex((t) => t._id === v._id) === i);
+
+					// Merge the new items into the cache
+					currentCache.body.reviews = uniqueData;
+
+					return currentCache;
+				}
+
+				return newItems;
+			},
+			// Refetch when the page arg changes
+			forceRefetch({ currentArg, previousArg }) {
+				return (
+					currentArg?.movieId !== previousArg?.movieId ||
+					currentArg?.query?.pageNumber !== previousArg?.query?.pageNumber ||
+					currentArg?.query.pageSize !== previousArg?.query.pageSize
+				);
+			},
 		}),
 		getList: builder.query<WatchList, GetListPayload>({
 			providesTags: ['WATCH_LIST'],
@@ -787,6 +830,7 @@ export const {
 	useIsDeviceTokenSavedQuery,
 	useGetActorInsightsQuery,
 	useGetReviewsByActorQuery,
+	useGetReviewsByMovieIdQuery,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;
 

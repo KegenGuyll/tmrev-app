@@ -171,6 +171,40 @@ type GetReviewByActorParams = {
 	userId: string;
 };
 
+type GetReviewByMovieIdSortBy =
+	| 'createdAt.asc'
+	| 'createdAt.desc'
+	| 'averagedAdvancedScore.asc'
+	| 'averagedAdvancedScore.desc'
+	| 'updatedAt.asc'
+	| 'updatedAt.desc'
+	| 'upVote.asc.votes'
+	| 'upVote.desc.votes'
+	| 'downVote.asc.votes'
+	| 'downVote.desc.votes';
+
+type GetReviewByMovieIdQuery = {
+	movieId: number;
+	query: {
+		includeUserReview?: string;
+		pageNumber: number;
+		pageSize: number;
+		sort_by?: GetReviewByMovieIdSortBy;
+	};
+};
+
+type GetReviewByMovieIdResponse = {
+	success: boolean;
+	body: {
+		pageNumber: number;
+		pageSize: number;
+		totalNumberOfPages: number;
+		totalCount: number;
+		reviews: TmrevReview[];
+		includeUserReview: TmrevReview[];
+	};
+};
+
 export type {
 	AdvancedScore,
 	AllReviewsResponse,
@@ -187,4 +221,6 @@ export type {
 	GetUserMovieReviewsQuery,
 	GetReviewByActorResponse,
 	GetReviewByActorParams,
+	GetReviewByMovieIdQuery,
+	GetReviewByMovieIdResponse,
 };
