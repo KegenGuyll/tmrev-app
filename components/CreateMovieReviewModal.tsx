@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { Divider, Snackbar, Switch, Text } from 'react-native-paper';
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
@@ -9,12 +9,13 @@ import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import CustomBottomSheetBackground from '@/components/CustomBottomSheetBackground';
 import formatDateYear from '@/utils/formatDateYear';
 import RatingSliderList, { Ratings } from '@/components/AddReview/RatingSliderList';
-import { useAddTmrevReviewMutation } from '@/redux/api/tmrev';
-import { CreateTmrevReviewQuery } from '@/models/tmrev';
+import { useAddTmrevReviewMutation, useUpdateTmrevReviewMutation } from '@/redux/api/tmrev';
+import { CreateTmrevReviewQuery, TmrevReview } from '@/models/tmrev';
 import { movieDetailsRoute } from '@/constants/routes';
 import TitledHandledComponent from './BottomSheetModal/TitledHandledComponent';
 import TextInput from './Inputs/TextInput';
 import MultiLineInput from './Inputs/MultiLineInput';
+import { useGetMovieDetailsQuery } from '@/redux/api/tmdb/movieApi';
 
 const defaultRatings: Ratings = {
 	plot: 5,
@@ -35,12 +36,15 @@ type CreateMovieReviewModalProps = {
 	visible: boolean;
 	onDismiss: () => void;
 	selectedMovie: MovieGeneral | null;
+	reviewData?: TmrevReview;
 };
 
+// deprecated
 const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 	selectedMovie,
 	visible,
 	onDismiss,
+	reviewData,
 }: CreateMovieReviewModalProps) => {
 	const router = useRouter();
 	const [lastReview, setLastReview] = useState<MovieGeneral | null>(null);
@@ -49,14 +53,47 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 	const [title, setTitle] = useState('');
 	const [isPublic, setIsPublic] = useState(true);
 	const [createReview] = useAddTmrevReviewMutation();
+	const [updateReview] = useUpdateTmrevReviewMutation();
 	const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 	const [ratings, setRatings] = useState<Ratings>(defaultRatings);
 	const [note, setNote] = useState('');
 	const styles = makeStyles();
 
+	const { data: movieData } = useGetMovieDetailsQuery(
+		{ movie_id: reviewData?.tmdbID || 0, params: {} },
+		{ skip: !!selectedMovie || !reviewData }
+	);
+
+	const selectedMovieData = useMemo(() => selectedMovie || movieData, [selectedMovie, movieData]);
+
 	const handleSetRatings = (key: string, value: number) => {
 		setRatings({ ...ratings, [key]: value });
 	};
+
+	const handleEditMode = useCallback(() => {
+		if (!reviewData) return;
+
+		setRatings({
+			plot: reviewData.advancedScore?.plot || 0,
+			theme: reviewData.advancedScore?.theme || 0,
+			climax: reviewData.advancedScore?.climax || 0,
+			ending: reviewData.advancedScore?.ending || 0,
+			acting: reviewData.advancedScore?.acting || 0,
+			characters: reviewData.advancedScore?.characters || 0,
+			music: reviewData.advancedScore?.music || 0,
+			cinematography: reviewData.advancedScore?.cinematography || 0,
+			visuals: reviewData.advancedScore?.visuals || 0,
+			personalScore: reviewData.advancedScore?.personalScore || 0,
+		});
+
+		setTitle(reviewData.title || '');
+		setNote(reviewData.notes || '');
+		setIsPublic(reviewData.public || true);
+	}, [reviewData]);
+
+	useEffect(() => {
+		handleEditMode();
+	}, [handleEditMode]);
 
 	const handleClearRatings = () => {
 		setRatings(defaultRatings);
@@ -83,9 +120,9 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 
 	const handleCreateMovieReview = async () => {
 		try {
-			if (selectedMovie) {
+			if (selectedMovieData) {
 				const review: CreateTmrevReviewQuery = {
-					tmdbID: selectedMovie.id,
+					tmdbID: selectedMovieData.id,
 					advancedScore: {
 						plot: ratings.plot,
 						theme: ratings.theme,
@@ -99,13 +136,18 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 						personalScore: ratings.personalScore,
 					},
 					reviewedDate: dayjs(new Date()).format('YYYY-MM-DD'),
-					title: selectedMovie.title,
+					title: selectedMovieData.title,
 					notes: note,
 					public: isPublic,
 				};
-				await createReview(review).unwrap();
 
-				setLastReview(selectedMovie);
+				if (reviewData) {
+					await updateReview(review).unwrap();
+				} else {
+					await createReview(review).unwrap();
+				}
+
+				setLastReview(selectedMovieData);
 
 				handleBottomSheetDismiss();
 				resetAllValues();
@@ -124,7 +166,7 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 				handleComponent={({ ...props }) => (
 					<TitledHandledComponent
 						{...props}
-						title="Add Review"
+						title={reviewData ? 'Edit Review' : 'Add Review'}
 						cancelButton={{
 							title: 'Cancel',
 							onPress: handleBottomSheetDismiss,
@@ -152,13 +194,13 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 						automaticallyAdjustKeyboardInsets
 						style={styles.bottomSheetContainer}
 					>
-						{selectedMovie && (
+						{selectedMovieData && (
 							<View style={{ gap: 16 }}>
 								<View
 									style={{ display: 'flex', flexDirection: 'row', gap: 8, alignItems: 'center' }}
 								>
 									<MoviePosterImage
-										moviePoster={selectedMovie.poster_path}
+										moviePoster={selectedMovieData.poster_path}
 										height={100}
 										width={50}
 									/>
@@ -170,8 +212,11 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 											flexWrap: 'wrap',
 										}}
 									>
-										<Text variant="titleMedium">{selectedMovie.title}</Text>
-										<Text variant="bodyMedium"> {formatDateYear(selectedMovie.release_date)}</Text>
+										<Text variant="titleMedium">{selectedMovieData.title}</Text>
+										<Text variant="bodyMedium">
+											{' '}
+											{formatDateYear(selectedMovieData.release_date)}
+										</Text>
 									</View>
 								</View>
 								<Divider />
@@ -196,7 +241,7 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 								<TextInput
 									label="Title"
 									placeholder="Review Title"
-									value={selectedMovie.title || title}
+									value={selectedMovieData.title || title}
 									onChangeText={setTitle}
 								/>
 								<MultiLineInput

@@ -3,7 +3,7 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { View, Image, TextInput, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import { ActivityIndicator, Button, Text, useTheme } from 'react-native-paper';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
 	useAddCommentMutation,
 	useGetCommentDetailsQuery,

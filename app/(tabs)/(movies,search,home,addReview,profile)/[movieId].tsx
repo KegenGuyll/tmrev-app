@@ -20,7 +20,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useBottomSheetModal } from '@gorhom/bottom-sheet';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import auth from '@react-native-firebase/auth';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -39,7 +39,12 @@ import { useGetAllReviewsQuery, useGetReviewsByMovieIdQuery } from '@/redux/api/
 import MovieRadarChart from '@/components/MovieRadarChart';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import CreateMovieReviewModal from '@/components/CreateMovieReviewModal';
-import { loginRoute, movieReviewsRoute, personDetailsRoute } from '@/constants/routes';
+import {
+	loginRoute,
+	movieReviewsRoute,
+	personDetailsRoute,
+	reviewFunctionRoute,
+} from '@/constants/routes';
 import WatchedMovie from '@/features/movieDetails/WatchedMovie';
 import AddMovieToList from '@/features/movieDetails/addMovieToList';
 import { addToListLoginPrompt, reviewLoginPrompt } from '@/constants/messages';
@@ -119,7 +124,7 @@ const MovieDetails = () => {
 			return;
 		}
 
-		setShowCreateReviewModal(true);
+		router.navigate(reviewFunctionRoute(from || 'addReview', Number(movieId), 'create'));
 	};
 
 	const handleAddToList = () => {

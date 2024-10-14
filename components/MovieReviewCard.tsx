@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import { TmrevReview } from '@/models/tmrev';
 import MoviePoster from './MoviePoster';
 import { FromLocation } from '@/models';
-import { movieDetailsRoute } from '@/constants/routes';
+import { feedReviewRoute } from '@/constants/routes';
 import { formatRuntime, numberShortHand } from '@/utils/common';
 
 type EllipsizeSettings = {
@@ -43,7 +43,7 @@ const MovieReviewCard: React.FC<MovieReviewCardProps> = ({
 			return;
 		}
 
-		router.navigate(movieDetailsRoute(from, review.tmdbID));
+		router.navigate(feedReviewRoute(review._id, 'reviews', from));
 	};
 
 	return (

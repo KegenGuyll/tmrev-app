@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import { Text, useTheme, MD3Theme, Divider, ActivityIndicator, Snackbar } from 'react-native-paper';
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FlatList } from 'react-native-gesture-handler';
 import {
 	useGetCommentDetailsQuery,

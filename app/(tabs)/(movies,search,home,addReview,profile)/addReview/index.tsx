@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Divider, Searchbar, Snackbar } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,7 +11,7 @@ import { MoviePosterImage } from '@/components/MoviePoster';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import CreateMovieReviewModal from '@/components/CreateMovieReviewModal';
 import MovieDiscoverGrid from '@/components/MovieDiscoverGrid';
-import { loginRoute } from '@/constants/routes';
+import { loginRoute, reviewFunctionRoute } from '@/constants/routes';
 import useDebounce from '@/hooks/useDebounce';
 import { reviewLoginPrompt } from '@/constants/messages';
 
@@ -31,8 +31,7 @@ const AddReviewPage = () => {
 	});
 
 	const handlePosterSelection = (item: MovieGeneral) => {
-		setOpen(true);
-		setSelectedMovie(item);
+		router.navigate(reviewFunctionRoute('addReview', item.id, 'create'));
 	};
 
 	return (
