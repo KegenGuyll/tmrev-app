@@ -11,7 +11,7 @@ import {
 } from 'react-native-paper';
 import dayjs from 'dayjs';
 import { useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import auth from '@react-native-firebase/auth';
 import { FeedReviews } from '@/models/tmrev/feed';
 import MoviePoster from '@/components/MoviePoster';
@@ -20,6 +20,7 @@ import {
 	feedReviewDetailsRoute,
 	feedReviewRoute,
 	profileRoute,
+	reviewFunctionRoute,
 } from '@/constants/routes';
 import { useVoteTmrevReviewMutation } from '@/redux/api/tmrev';
 import { formatDate } from '@/utils/common';
@@ -157,6 +158,11 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from, setLoginMessage }: Fe
 		setShowMenu(false);
 	};
 
+	const handleEditMode = () => {
+		router.navigate(reviewFunctionRoute(from, review.tmdbID, 'edit', review._id));
+		setShowMenu(false);
+	};
+
 	return (
 		<>
 			<TouchableRipple
@@ -192,6 +198,9 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from, setLoginMessage }: Fe
 									onPress={handleShowFullReview}
 									title="View Full Review"
 								/>
+								{review.userId === currentUser?.uid && (
+									<Menu.Item onPress={handleEditMode} leadingIcon="pencil" title="Edit" />
+								)}
 							</Menu>
 						</View>
 					</View>

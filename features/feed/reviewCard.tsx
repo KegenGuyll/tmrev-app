@@ -17,7 +17,7 @@ import { useRouter } from 'expo-router';
 import MoviePoster from '@/components/MoviePoster';
 import { ReviewResponse } from '@/models/tmrev/movie';
 import { useVoteTmrevReviewMutation } from '@/redux/api/tmrev';
-import { feedReviewDetailsRoute, profileRoute } from '@/constants/routes';
+import { feedReviewDetailsRoute, profileRoute, reviewFunctionRoute } from '@/constants/routes';
 import { formatDate } from '@/utils/common';
 import { FromLocation } from '@/models';
 import BarChart from '@/components/CustomCharts/BarChart';
@@ -44,6 +44,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 	const [hasDisliked, setHasDisliked] = useState<boolean>(false);
 	const [showMenu, setShowMenu] = useState<boolean>(false);
 	const [showFullReview, setShowFullReview] = useState<boolean>(true);
+
 	const theme = useTheme();
 
 	const fullReviewData = useMemo(() => {
@@ -152,6 +153,13 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 		setShowMenu(false);
 	};
 
+	const handleEditMode = () => {
+		router.navigate(
+			reviewFunctionRoute(from, reviewData?.body?.tmdbID || 0, 'edit', reviewData?.body?._id)
+		);
+		setShowMenu(false);
+	};
+
 	if (!reviewData) return null;
 
 	return (
@@ -186,6 +194,9 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 								onPress={handleShowFullReview}
 								title="View Full Review"
 							/>
+							{reviewData.body?.userId === currentUser?.uid && (
+								<Menu.Item onPress={handleEditMode} leadingIcon="pencil" title="Edit" />
+							)}
 						</Menu>
 					</View>
 				</View>

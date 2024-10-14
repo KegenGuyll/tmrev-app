@@ -14,6 +14,8 @@ export const allReviewsRoute = (from: FromLocation, profileId: string, advancedS
 
 export type FeedReviewContentTypes = 'comments' | 'reviews';
 
+export type ReviewFunction = 'edit' | 'create';
+
 export const feedReviewRoute = (
 	reviewId: string,
 	contentType: FeedReviewContentTypes,
@@ -28,6 +30,15 @@ export const feedReviewDetailsRoute = (
 	from: FromLocation
 ) => {
 	return `${baseTabUrl}/(${from})/home/reply/${postId}?contentType=${contentType}&from=${from}`;
+};
+
+export const reviewFunctionRoute = (
+	from: FromLocation,
+	movieId: number,
+	content: ReviewFunction,
+	reviewId?: string
+) => {
+	return `${baseTabUrl}/(${from})/addReview/${movieId}?from=${from}&content=${content}&reviewId=${reviewId}`;
 };
 
 export const homeRoute = (from: FromLocation) => {
