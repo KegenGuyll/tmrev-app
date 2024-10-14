@@ -1,8 +1,9 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { View, ScrollView } from 'react-native';
+import { View } from 'react-native';
 import { Button, Divider, Switch, Text, useTheme } from 'react-native-paper';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { capitalize } from '@/utils/common';
 import { useGetMovieDetailsQuery } from '@/redux/api/tmdb/movieApi';
 import RatingSliderList, { Ratings } from '@/components/AddReview/RatingSliderList';
@@ -143,7 +144,7 @@ const CreateReview = () => {
 			<Stack.Screen
 				options={{ title: `${capitalize(content || '')} Review`, headerRight: () => null }}
 			/>
-			<ScrollView style={{ backgroundColor: theme.colors.background }}>
+			<KeyboardAwareScrollView style={{ backgroundColor: theme.colors.background }}>
 				{selectedMovieData && (
 					<View
 						style={{
@@ -206,7 +207,7 @@ const CreateReview = () => {
 						</Button>
 					</View>
 				)}
-			</ScrollView>
+			</KeyboardAwareScrollView>
 		</>
 	);
 };

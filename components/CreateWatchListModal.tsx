@@ -1,7 +1,7 @@
 import { BottomSheetModal, BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
 import { View } from 'react-native';
 import { Divider, Badge, Searchbar, Button, Text, Switch } from 'react-native-paper';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
 import CustomBackground from './CustomBottomSheetBackground';
 import MovieGrid from './MovieGrid';
