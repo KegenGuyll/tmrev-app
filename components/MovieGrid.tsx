@@ -19,6 +19,11 @@ type MovieGridProps = {
 	itemDimension?: number;
 	imageHeight?: number;
 	imageWidth?: number;
+	ListHeaderComponent?:
+		| React.ComponentType<any>
+		| React.ReactElement<any, string | React.JSXElementConstructor<any>>
+		| null
+		| undefined;
 };
 
 const MovieGrid: React.FC<MovieGridProps> = ({
@@ -34,12 +39,14 @@ const MovieGrid: React.FC<MovieGridProps> = ({
 	itemDimension = 100,
 	imageHeight,
 	imageWidth,
+	ListHeaderComponent,
 }: MovieGridProps) => {
 	return (
 		<>
 			{isLoading && <Text>Loading...</Text>}
 			{movies && (
 				<FlatGrid
+					ListHeaderComponent={ListHeaderComponent}
 					itemDimension={itemDimension}
 					style={styles.list}
 					data={movies}
