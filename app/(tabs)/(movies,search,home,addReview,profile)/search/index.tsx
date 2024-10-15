@@ -2,12 +2,9 @@ import { Link } from 'expo-router';
 import React from 'react';
 import { StyleSheet, View, FlatList } from 'react-native';
 import { Chip, Divider, List, Searchbar, Text } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFindMoviesQuery, useFindPeopleQuery } from '@/redux/api/tmdb/searchApi';
 import MovieGrid from '@/components/MovieGrid';
 import ActorPlaceholderImage from '@/components/ActorPlacholderImage';
-import MovieQuickActions from '@/components/MovieQuickActions';
-import { useAppSelector } from '@/hooks/reduxHooks';
 import { personDetailsRoute } from '@/constants/routes';
 import MovieDiscoverGrid from '@/components/MovieDiscoverGrid';
 import useDebounce from '@/hooks/useDebounce';
@@ -32,10 +29,45 @@ const SearchSelectionChip: React.FC<SearchSelectionChipProps> = ({
 	);
 };
 
+type SearchBarComponentProps = {
+	searchQuery: string;
+	setSearchQuery: (query: string) => void;
+	setSearchSelection: (selection: SearchSelection) => void;
+	searchSelection: SearchSelection;
+};
+
+const SearchBarComponent: React.FC<SearchBarComponentProps> = ({
+	searchQuery,
+	setSearchQuery,
+	searchSelection,
+	setSearchSelection,
+}: SearchBarComponentProps) => {
+	return (
+		<View style={{ paddingVertical: 16 }}>
+			<Searchbar
+				placeholder="Search..."
+				value={searchQuery}
+				onChangeText={(t) => setSearchQuery(t)}
+			/>
+			<View style={styles.chipContainer}>
+				<SearchSelectionChip
+					label="Movies"
+					onPress={() => setSearchSelection('movies')}
+					isSelected={searchSelection === 'movies'}
+				/>
+				<SearchSelectionChip
+					label="Cast, Crew or Studios"
+					onPress={() => setSearchSelection('crew')}
+					isSelected={searchSelection === 'crew'}
+				/>
+			</View>
+		</View>
+	);
+};
+
 const Search: React.FC = () => {
 	const [searchQuery, setSearchQuery] = React.useState('');
 	const [searchSelection, setSearchSelection] = React.useState<SearchSelection>('movies');
-	const { moviePosterQuickActionData } = useAppSelector((state) => state.bottomSheet);
 
 	const debouncedSearchTerm = useDebounce(searchQuery, 500);
 
@@ -49,71 +81,73 @@ const Search: React.FC = () => {
 		{ skip: searchSelection !== 'crew' }
 	);
 
-	const handleFindMovie = () => {
-		const movie = movieData?.results.find((m) => m.id === moviePosterQuickActionData?.movieId);
-
-		return movie;
-	};
-
 	return (
-		<>
-			<SafeAreaView>
-				<Searchbar
-					placeholder="Search..."
-					value={searchQuery}
-					onChangeText={(t) => setSearchQuery(t)}
+		<View>
+			{!searchQuery && searchSelection === 'movies' && (
+				<MovieDiscoverGrid
+					ListHeaderComponent={
+						<SearchBarComponent
+							searchQuery={searchQuery}
+							setSearchQuery={setSearchQuery}
+							searchSelection={searchSelection}
+							setSearchSelection={setSearchSelection}
+						/>
+					}
+					from="search"
 				/>
-				<View style={styles.chipContainer}>
-					<SearchSelectionChip
-						label="Movies"
-						onPress={() => setSearchSelection('movies')}
-						isSelected={searchSelection === 'movies'}
-					/>
-					<SearchSelectionChip
-						label="Cast, Crew or Studios"
-						onPress={() => setSearchSelection('crew')}
-						isSelected={searchSelection === 'crew'}
-					/>
-				</View>
-				{!searchQuery && searchSelection === 'movies' && <MovieDiscoverGrid from="search" />}
-				{movieData && searchSelection === 'movies' && (
-					<MovieGrid
-						movies={movieData.results}
-						isLoading={movieIsFetching}
-						onEndReached={() => {}}
-						onEndReachedThreshold={1}
-						posterPath="search"
-						bottomPadding={100}
-					/>
-				)}
-				{peopleData && searchSelection === 'crew' && (
-					<FlatList
-						data={peopleData.results}
-						renderItem={({ item }) => (
-							<>
-								<Link href={personDetailsRoute('search', String(item.id))}>
-									<List.Item
-										title={item.name}
-										left={() => (
-											<ActorPlaceholderImage
-												profile_url={item.profile_path}
-												department={item.known_for_department}
-												height={50}
-												width={50}
-											/>
-										)}
-										description={item.known_for_department}
-									/>
-								</Link>
-								<Divider />
-							</>
-						)}
-						keyExtractor={(item) => item.id.toString()}
-					/>
-				)}
-			</SafeAreaView>
-			<MovieQuickActions movie={handleFindMovie()} />
-		</>
+			)}
+			{movieData && searchSelection === 'movies' && (
+				<MovieGrid
+					ListHeaderComponent={
+						<SearchBarComponent
+							searchQuery={searchQuery}
+							setSearchQuery={setSearchQuery}
+							searchSelection={searchSelection}
+							setSearchSelection={setSearchSelection}
+						/>
+					}
+					movies={movieData.results}
+					isLoading={movieIsFetching}
+					onEndReached={() => {}}
+					onEndReachedThreshold={1}
+					posterPath="search"
+					bottomPadding={100}
+				/>
+			)}
+			{peopleData && searchSelection === 'crew' && (
+				<FlatList
+					ListHeaderComponent={
+						<SearchBarComponent
+							searchQuery={searchQuery}
+							setSearchQuery={setSearchQuery}
+							searchSelection={searchSelection}
+							setSearchSelection={setSearchSelection}
+						/>
+					}
+					data={peopleData.results}
+					renderItem={({ item }) => (
+						<>
+							<Link href={personDetailsRoute('search', String(item.id))}>
+								<List.Item
+									title={item.name}
+									left={() => (
+										<ActorPlaceholderImage
+											profile_url={item.profile_path}
+											department={item.known_for_department}
+											height={50}
+											width={50}
+										/>
+									)}
+									description={item.known_for_department}
+								/>
+							</Link>
+							<Divider />
+						</>
+					)}
+					keyExtractor={(item) => item.id.toString()}
+				/>
+			)}
+		</View>
 	);
 };
 
