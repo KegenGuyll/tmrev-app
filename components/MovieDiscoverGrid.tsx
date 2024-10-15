@@ -9,11 +9,17 @@ import { FromLocation } from '@/models';
 type MovieDiscoverGridProps = {
 	onPress?: (item: MovieGeneral) => void;
 	from: FromLocation;
+	ListHeaderComponent?:
+		| React.ComponentType<any>
+		| React.ReactElement<any, string | React.JSXElementConstructor<any>>
+		| null
+		| undefined;
 };
 
 const MovieDiscoverGrid: React.FC<MovieDiscoverGridProps> = ({
 	onPress,
 	from,
+	ListHeaderComponent,
 }: MovieDiscoverGridProps) => {
 	const [page, setPage] = React.useState(1);
 	const [movieData, setMovieData] = React.useState<MovieGeneral[]>([]);
@@ -50,6 +56,7 @@ const MovieDiscoverGrid: React.FC<MovieDiscoverGridProps> = ({
 
 	return (
 		<MovieGrid
+			ListHeaderComponent={ListHeaderComponent}
 			movies={movieData}
 			isLoading={isFetching}
 			onEndReached={handlePageChange}
