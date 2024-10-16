@@ -5,11 +5,18 @@ import React, { useEffect, useState } from 'react';
 import auth from '@react-native-firebase/auth';
 import useAuth from '@/hooks/useAuth';
 import ProfileHeader from '@/components/Profile/ProfileHeader';
-import { useGetGenreInsightsQuery, useGetV2UserQuery } from '@/redux/api/tmrev';
+import {
+	useGetGenreInsightsQuery,
+	useGetUserMovieActivityInsightsQuery,
+	useGetV2UserQuery,
+} from '@/redux/api/tmrev';
 import ProfileNavigation from '@/components/Profile/ProfileListNavigationt';
 import ProfilePinnedMovies from '@/components/Profile/ProfilePinnedMovies';
 import { loginRoute, profileSettingsRoute, signupRoute } from '@/constants/routes';
 import BarChart from '@/components/CustomCharts/BarChart';
+import Heatmap from '@/components/CustomCharts/Heatmap';
+
+const days = 60;
 
 const Profile = () => {
 	const { currentUser } = useAuth({});
@@ -35,6 +42,13 @@ const Profile = () => {
 		}
 	);
 
+	const { data: heatmapData, refetch: refetchHeatMap } = useGetUserMovieActivityInsightsQuery(
+		{ userId: currentUser?.uid as string, days },
+		{ skip: !currentUser || !currentUser.uid }
+	);
+
+	console.log(theme.colors.onBackground);
+
 	useEffect(() => {
 		if (!userError || !currentUser) return;
 
@@ -46,6 +60,7 @@ const Profile = () => {
 	const handleRefresh = async () => {
 		setRefreshing(true);
 		await refetchInsights().unwrap();
+		await refetchHeatMap().unwrap();
 		await refetch().unwrap();
 		setRefreshing(false);
 	};
@@ -121,6 +136,14 @@ const Profile = () => {
 									canvasHeight={insightData.data.mostReviewedGenres.length * 38}
 								/>
 							)}
+							<View style={{ height: 150, width: '100%', paddingTop: 16, paddingBottom: 8 }}>
+								<Heatmap
+									chartTitle={`Movie Reviews (${days} days)`}
+									customColor={theme.colors.inversePrimary}
+									noValueColor={theme.colors.background}
+									heatmapData={heatmapData?.data || []}
+								/>
+							</View>
 							<ProfilePinnedMovies
 								refreshing={refreshing}
 								profileId={currentUser.uid}

@@ -1,19 +1,26 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { IconButton, Menu, Snackbar, Text, useTheme } from 'react-native-paper';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { View, SafeAreaView, ScrollView, RefreshControl } from 'react-native';
 import ProfileHeader from '@/components/Profile/ProfileHeader';
-import { useGetGenreInsightsQuery, useGetV2UserQuery } from '@/redux/api/tmrev';
+import {
+	useGetGenreInsightsQuery,
+	useGetUserMovieActivityInsightsQuery,
+	useGetV2UserQuery,
+} from '@/redux/api/tmrev';
 import { FromLocation } from '@/models';
 import ProfileNavigation from '@/components/Profile/ProfileListNavigationt';
 import ProfilePinnedMovies from '@/components/Profile/ProfilePinnedMovies';
 import BarChart from '@/components/CustomCharts/BarChart';
 import { loginRoute } from '@/constants/routes';
+import Heatmap from '@/components/CustomCharts/Heatmap';
 
 export type ProfileSearchParams = {
 	profileId: string;
 	from?: FromLocation;
 };
+
+const days = 60;
 
 const Profile = () => {
 	const router = useRouter();
@@ -35,11 +42,17 @@ const Profile = () => {
 		skip: !profileId,
 	});
 
+	const { data: heatmapData, refetch: refetchHeatMap } = useGetUserMovieActivityInsightsQuery(
+		{ userId: profileId, days },
+		{ skip: !profileId }
+	);
+
 	const [visible, setVisible] = useState(false);
 
 	const handleRefresh = async () => {
 		setRefreshing(true);
 		await refetchInsights().unwrap();
+		await refetchHeatMap().unwrap();
 		await refetch().unwrap();
 		setRefreshing(false);
 	};
@@ -101,6 +114,14 @@ const Profile = () => {
 									canvasHeight={insightData.data.mostReviewedGenres.length * 38}
 								/>
 							)}
+							<View style={{ height: 150, width: '100%', paddingTop: 16, paddingBottom: 8 }}>
+								<Heatmap
+									chartTitle={`Movie Reviews (${days} days)`}
+									customColor={theme.colors.inversePrimary}
+									noValueColor={theme.colors.background}
+									heatmapData={heatmapData?.data || []}
+								/>
+							</View>
 							<ProfilePinnedMovies
 								refreshing={refreshing}
 								profileId={profileId}
