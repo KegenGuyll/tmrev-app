@@ -17,6 +17,7 @@ import {
 } from '@/redux/api/tmrev';
 import TextInput from '@/components/Inputs/TextInput';
 import { CreateTmrevReviewQuery } from '@/models/tmrev/review';
+import DatePicker from '@/components/Date/DatePicker';
 
 type CreateReviewSearchParams = {
 	movieId: string;
@@ -44,6 +45,8 @@ const CreateReview = () => {
 	const [expanded, setExpanded] = useState(true);
 	const [title, setTitle] = useState('');
 	const [isPublic, setIsPublic] = useState(true);
+	const [reviewDate, setReviewDate] = useState(dayjs(new Date()).format('YYYY-MM-DD'));
+	const [updateReviewDate, setUpdateReviewDate] = useState(false);
 	const [createReview] = useAddTmrevReviewMutation();
 	const [updateReview] = useUpdateTmrevReviewMutation();
 	const [ratings, setRatings] = useState<Ratings>(defaultRatings);
@@ -81,6 +84,7 @@ const CreateReview = () => {
 		setTitle(reviewData.body?.title || '');
 		setNote(reviewData.body?.notes || '');
 		setIsPublic(reviewData.body?.public || true);
+		setReviewDate(dayjs(reviewData.body?.reviewedDate).format('YYYY-MM-DD'));
 	}, [reviewData]);
 
 	useEffect(() => {
@@ -112,7 +116,7 @@ const CreateReview = () => {
 						visuals: ratings.visuals,
 						personalScore: ratings.personalScore,
 					},
-					reviewedDate: dayjs(new Date()).format('YYYY-MM-DD'),
+					reviewedDate: dayjs(reviewDate).format('YYYY-MM-DD'),
 					title: selectedMovieData.title,
 					notes: note,
 					public: isPublic,
@@ -181,6 +185,21 @@ const CreateReview = () => {
 						>
 							<Text variant="labelLarge">Public Review</Text>
 							<Switch value={isPublic} onValueChange={() => setIsPublic(!isPublic)} />
+						</View>
+						<View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+							<View style={{ flexGrow: 1 }}>
+								<Text variant="labelLarge">Review Date</Text>
+								<Text variant="bodyMedium">{dayjs(reviewDate).format('MMMM DD, YYYY')}</Text>
+							</View>
+							<Button compact mode="contained-tonal" onPress={() => setUpdateReviewDate(true)}>
+								Change Date
+							</Button>
+							<DatePicker
+								onDateChange={(d) => setReviewDate(dayjs(d).format('YYYY-MM-DD'))}
+								date={reviewDate}
+								visible={updateReviewDate}
+								onDismiss={() => setUpdateReviewDate(false)}
+							/>
 						</View>
 						<RatingSliderList
 							expanded={expanded}
