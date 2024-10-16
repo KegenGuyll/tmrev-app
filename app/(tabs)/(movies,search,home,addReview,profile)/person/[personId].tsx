@@ -1,6 +1,14 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React, { useEffect } from 'react';
-import { FlatList, SafeAreaView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+	FlatList,
+	Platform,
+	SafeAreaView,
+	ScrollView,
+	StyleSheet,
+	TouchableOpacity,
+	View,
+} from 'react-native';
 import { Chip, Surface, Text } from 'react-native-paper';
 import ImageView from '@techvox/react-native-image-viewing';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -91,7 +99,14 @@ const PersonDetails: React.FC = () => {
 			<Stack.Screen
 				options={{ headerShown: true, title: personData?.name, headerRight: () => null }}
 			/>
-			<SafeAreaView style={{ gap: 16 }}>
+			<ScrollView
+				contentContainerStyle={{
+					display: 'flex',
+					flexDirection: 'column',
+					gap: 16,
+					paddingVertical: 16,
+				}}
+			>
 				<Surface style={styles.actorOverviewContainer}>
 					<ActorPlaceholderImage
 						profile_url={personData.profile_path}
@@ -164,36 +179,38 @@ const PersonDetails: React.FC = () => {
 						showsHorizontalScrollIndicator={false}
 					/>
 				</View>
-				<View style={{ gap: 8 }}>
-					<Text variant="headlineLarge">Media</Text>
-					{personImages && (
-						<FlatList
-							data={personImages.profiles}
-							keyExtractor={(item) => item.file_path}
-							renderItem={({ item, index }) => (
-								<View
-									style={{
-										marginRight: 8,
-										borderRadius: 4,
-										gap: 8,
-									}}
-								>
-									<TouchableOpacity onPress={() => handleImagePress(index)}>
-										<ActorPlaceholderImage
-											profile_url={item.file_path}
-											department="Acting"
-											height={175}
-											width={150}
-										/>
-									</TouchableOpacity>
-								</View>
-							)}
-							horizontal
-							showsHorizontalScrollIndicator={false}
-						/>
-					)}
-				</View>
-			</SafeAreaView>
+				{Platform.OS !== 'ios' && (
+					<View style={{ gap: 8 }}>
+						<Text variant="headlineLarge">Media</Text>
+						{personImages && (
+							<FlatList
+								data={personImages.profiles}
+								keyExtractor={(item) => item.file_path}
+								renderItem={({ item, index }) => (
+									<View
+										style={{
+											marginRight: 8,
+											borderRadius: 4,
+											gap: 8,
+										}}
+									>
+										<TouchableOpacity onPress={() => handleImagePress(index)}>
+											<ActorPlaceholderImage
+												profile_url={item.file_path}
+												department="Acting"
+												height={175}
+												width={150}
+											/>
+										</TouchableOpacity>
+									</View>
+								)}
+								horizontal
+								showsHorizontalScrollIndicator={false}
+							/>
+						)}
+					</View>
+				)}
+			</ScrollView>
 			<ImageView
 				webViewSupportedMimeTypes={['image/jpeg', 'image/png']}
 				ShareIcon={(<Icon name="share" color="white" size={18} />) as any}
