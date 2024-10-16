@@ -7,7 +7,6 @@ import {
 	ScrollView,
 	RefreshControl,
 } from 'react-native';
-import auth from '@react-native-firebase/auth';
 import { Text, useTheme, MD3Theme, Divider, ActivityIndicator, Snackbar } from 'react-native-paper';
 import React, { useMemo, useState } from 'react';
 import { FlatList } from 'react-native-gesture-handler';
@@ -21,6 +20,7 @@ import { FeedReviewContentTypes, feedReviewDetailsRoute, loginRoute } from '@/co
 import ReviewCard from '@/features/feed/reviewCard';
 import { FromLocation } from '@/models';
 import { commentLoginPrompt } from '@/constants/messages';
+import useAuth from '@/hooks/useAuth';
 
 type ReviewSearchProps = {
 	reviewId: string;
@@ -32,7 +32,7 @@ const ReviewPage: React.FC = () => {
 	const { reviewId, contentType, from } = useLocalSearchParams<ReviewSearchProps>();
 	const [loginMessage, setLoginMessage] = useState<string | null>(null);
 
-	const { currentUser } = auth();
+	const { currentUser } = useAuth({});
 
 	const theme = useTheme();
 	const styles = makeStyles(theme);

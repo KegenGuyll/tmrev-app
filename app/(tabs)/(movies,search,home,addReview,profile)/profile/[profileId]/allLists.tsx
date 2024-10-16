@@ -1,9 +1,9 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useMemo, useState } from 'react';
-import auth from '@react-native-firebase/auth';
 import { RefreshControl, View } from 'react-native';
 import { IconButton, Text, ActivityIndicator, Searchbar } from 'react-native-paper';
 import { FlatGrid } from 'react-native-super-grid';
+import useAuth from '@/hooks/useAuth';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import CreateWatchListModal from '@/components/CreateWatchListModal';
 import { useGetUserWatchListsQuery } from '@/redux/api/tmrev';
@@ -44,7 +44,7 @@ const AllListsPage: React.FC = () => {
 		skip: !profileId,
 	});
 
-	const { currentUser } = auth();
+	const { currentUser } = useAuth({});
 
 	const isCurrentUser = useMemo(() => currentUser?.uid === profileId, [currentUser, profileId]);
 

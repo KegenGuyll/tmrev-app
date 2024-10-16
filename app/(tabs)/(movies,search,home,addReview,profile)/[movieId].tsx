@@ -22,7 +22,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useBottomSheetModal } from '@gorhom/bottom-sheet';
 import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import auth from '@react-native-firebase/auth';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import {
 	useGetMovieCreditsQuery,
@@ -48,6 +47,7 @@ import {
 import WatchedMovie from '@/features/movieDetails/WatchedMovie';
 import AddMovieToList from '@/features/movieDetails/addMovieToList';
 import { addToListLoginPrompt, reviewLoginPrompt } from '@/constants/messages';
+import useAuth from '@/hooks/useAuth';
 
 type MovieDetailsParams = {
 	movieId: string;
@@ -66,7 +66,7 @@ const MovieDetails = () => {
 	const [snackBarMessage, setSnackBarMessage] = useState<string | null>(null);
 	const [loginMessage, setLoginMessage] = useState<string | null>(null);
 
-	const { currentUser } = auth();
+	const { currentUser } = useAuth({});
 
 	useEffect(() => {
 		dismissAll();

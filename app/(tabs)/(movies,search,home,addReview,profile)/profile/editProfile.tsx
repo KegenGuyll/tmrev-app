@@ -1,8 +1,8 @@
 import { Stack, useRouter } from 'expo-router';
 import { View, StyleSheet } from 'react-native';
-import auth from '@react-native-firebase/auth';
 import { Button, Divider, TextInput, Text } from 'react-native-paper';
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import useAuth from '@/hooks/useAuth';
 import {
 	useGetUserQuery,
 	useIsUsernameAvailableQuery,
@@ -11,7 +11,7 @@ import {
 import useDebounce from '@/hooks/useDebounce';
 
 const EditProfile = () => {
-	const { currentUser } = auth();
+	const { currentUser } = useAuth({});
 	const { data } = useGetUserQuery(
 		{ uid: currentUser?.uid as string },
 		{ skip: !currentUser || !currentUser.uid }

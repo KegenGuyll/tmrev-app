@@ -4,7 +4,6 @@ import { View, StyleSheet } from 'react-native';
 import { Searchbar, Snackbar } from 'react-native-paper';
 import { FlatGrid } from 'react-native-super-grid';
 import { TouchableHighlight } from 'react-native-gesture-handler';
-import auth from '@react-native-firebase/auth';
 import { useFindMoviesQuery } from '@/redux/api/tmdb/searchApi';
 import { MoviePosterImage } from '@/components/MoviePoster';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
@@ -12,6 +11,7 @@ import MovieDiscoverGrid from '@/components/MovieDiscoverGrid';
 import { loginRoute, reviewFunctionRoute } from '@/constants/routes';
 import useDebounce from '@/hooks/useDebounce';
 import { reviewLoginPrompt } from '@/constants/messages';
+import useAuth from '@/hooks/useAuth';
 
 const AddReviewPage = () => {
 	const [searchQuery, setSearchQuery] = useState('');
@@ -19,7 +19,7 @@ const AddReviewPage = () => {
 	const styles = makeStyles();
 	const router = useRouter();
 
-	const { currentUser } = auth();
+	const { currentUser } = useAuth({});
 
 	const debouncedSearchTerm = useDebounce(searchQuery, 500);
 

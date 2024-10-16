@@ -1,12 +1,12 @@
 /* eslint-disable react/no-unstable-nested-components */
 import React from 'react';
-import auth from '@react-native-firebase/auth';
 import { Stack, useRouter } from 'expo-router';
 import { Badge, IconButton } from 'react-native-paper';
 import { View } from 'react-native';
 import { notificationsRoute } from '@/constants/routes';
 import { FromLocation } from '@/models';
 import { useGetNotificationCountQuery } from '@/redux/api/tmrev';
+import useAuth from '@/hooks/useAuth';
 
 type DynamicLayoutProps = {
 	segment: string;
@@ -32,7 +32,7 @@ const segmentToTitle = (segment: string) => {
 const DynamicLayout = ({ segment }: DynamicLayoutProps) => {
 	const router = useRouter();
 
-	const { currentUser } = auth();
+	const { currentUser } = useAuth({});
 
 	const { data: notificationCountData } = useGetNotificationCountQuery(undefined, {
 		skip: !currentUser,

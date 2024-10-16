@@ -1,9 +1,9 @@
 /* eslint-disable react-native/no-color-literals */
 import { FlatList, View, StyleSheet } from 'react-native';
 import { Button, Icon, Text, TouchableRipple } from 'react-native-paper';
-import auth from '@react-native-firebase/auth';
 import { useMemo } from 'react';
 import { useRouter } from 'expo-router';
+import useAuth from '@/hooks/useAuth';
 import { FromLocation } from '@/models';
 import { useGetPinnedMoviesQuery } from '@/redux/api/tmrev';
 import MovieReviewCard from '../MovieReviewCard';
@@ -20,7 +20,7 @@ const ProfilePinnedMovies: React.FC<ProfilePinnedMoviesProps> = ({
 	from,
 	refreshing,
 }: ProfilePinnedMoviesProps) => {
-	const { currentUser } = auth();
+	const { currentUser } = useAuth({});
 	const router = useRouter();
 	const { data: pinnedData, refetch } = useGetPinnedMoviesQuery(profileId);
 

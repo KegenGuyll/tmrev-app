@@ -1,10 +1,10 @@
 import { Stack } from 'expo-router';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 // eslint-disable-next-line react-native/split-platform-components
 import { PermissionsAndroid, Platform, View } from 'react-native';
 import { Snackbar, Switch, Text } from 'react-native-paper';
-import auth from '@react-native-firebase/auth';
 import messaging from '@react-native-firebase/messaging';
+import useAuth from '@/hooks/useAuth';
 import {
 	useDeleteDeviceTokenMutation,
 	useIsDeviceTokenSavedQuery,
@@ -56,7 +56,7 @@ const notifications = () => {
 		}
 	};
 
-	const { currentUser } = auth();
+	const { currentUser } = useAuth({});
 
 	const requestAccess = async (): Promise<string | undefined> => {
 		try {

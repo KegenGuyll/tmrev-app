@@ -10,8 +10,8 @@ import {
 import { useRouter } from 'expo-router';
 import { Text, Divider, Button, Snackbar, IconButton, Menu } from 'react-native-paper';
 import dayjs from 'dayjs';
-import { useEffect, useMemo, useState } from 'react';
-import auth from '@react-native-firebase/auth';
+import React, { useEffect, useMemo, useState } from 'react';
+import useAuth from '@/hooks/useAuth';
 import { CommentWithUser } from '@/models/tmrev/comments';
 import { feedReviewDetailsRoute, feedReviewRoute, profileRoute } from '@/constants/routes';
 import { numberShortHand } from '@/utils/common';
@@ -51,7 +51,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
 
 	const [voteComment] = useVoteCommentMutation();
 	const [deleteComment] = useDeleteCommentMutation();
-	const { currentUser } = auth();
+	const { currentUser } = useAuth({});
 
 	const { data: reviewData } = useGetSingleReviewQuery(
 		{ reviewId: comment.post.id },
