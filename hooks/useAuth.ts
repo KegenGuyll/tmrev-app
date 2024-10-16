@@ -2,6 +2,7 @@ import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { appleAuth } from '@invertase/react-native-apple-authentication';
 import { GOOGLE_WEB_CLIENT_ID, TMREV_API_URL } from '@env';
+import { useCallback, useEffect, useState } from 'react';
 
 type CreateTMREVUser = {
 	bio: string;
@@ -29,11 +30,24 @@ const findUserByUid = async (uid?: string) => {
 };
 
 type UseGoogleAuthInitialValues = {
-	onSuccessfulSignIn: () => void;
-	onError: (error: string) => void;
+	onSuccessfulSignIn?: () => void;
+	onError?: (error: string) => void;
 };
 
 const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) => {
+	const [initializing, setInitializing] = useState(true);
+	const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
+
+	const onAuthStateChanged = useCallback((u: FirebaseAuthTypes.User | null) => {
+		setUser(u);
+		if (initializing) setInitializing(false);
+	}, []);
+
+	useEffect(() => {
+		const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+		return subscriber; // unsubscribe on unmount
+	}, []);
+
 	const checkIfUserExists = async (uid: string) => {
 		const result = await findUserByUid(uid);
 
@@ -99,19 +113,16 @@ const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) =>
 				const result = await createTMREVUser(currentUser);
 
 				if (!result.success) {
-					onError('Failed to create user');
+					if (onError) onError('Failed to create user');
+
 					currentUser.delete();
-				} else {
-					onSuccessfulSignIn();
-				}
-			} else {
-				onSuccessfulSignIn();
-			}
+				} else if (onSuccessfulSignIn) onSuccessfulSignIn();
+			} else if (onSuccessfulSignIn) onSuccessfulSignIn();
 		} catch (error: any) {
 			if (error.message && typeof error.message === 'string') {
 				const message = error.message.split(']')[1];
 
-				onError(message);
+				if (onError) onError(message);
 			}
 		}
 	};
@@ -128,7 +139,7 @@ const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) =>
 
 			// Ensure Apple returned a user identityToken
 			if (!appleAuthRequestResponse.identityToken) {
-				onError('Apple Sign-In failed - no identify token returned');
+				if (onError) onError('Apple Sign-In failed - no identify token returned');
 				return;
 			}
 
@@ -156,17 +167,13 @@ const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) =>
 			if (!doesUserExist) {
 				const result = await createTMREVUser(currentUser);
 				if (!result.success) {
-					onError('Failed to create user');
+					if (onError) onError('Failed to create user');
 					currentUser.delete();
-				} else {
-					onSuccessfulSignIn();
-				}
-			} else {
-				onSuccessfulSignIn();
-			}
+				} else if (onSuccessfulSignIn) onSuccessfulSignIn();
+			} else if (onSuccessfulSignIn) onSuccessfulSignIn();
 		} catch (error: any) {
 			if (error.message && typeof error.message === 'string') {
-				onError(error.message);
+				if (onError) onError(error.message);
 			}
 		}
 	};
@@ -175,12 +182,12 @@ const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) =>
 		try {
 			await auth().signInWithEmailAndPassword(email, password);
 
-			onSuccessfulSignIn();
+			if (onSuccessfulSignIn) onSuccessfulSignIn();
 		} catch (error: any) {
 			if (error.message && typeof error.message === 'string') {
 				const message = error.message.split(']')[1];
 
-				onError(message);
+				if (onError) onError(message);
 			}
 		}
 	};
@@ -203,16 +210,14 @@ const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) =>
 			const result = await createTMREVUser(currentUser, username);
 
 			if (!result.success) {
-				onError('Failed to create user');
+				if (onError) onError('Failed to create user');
 				currentUser.delete();
-			} else {
-				onSuccessfulSignIn();
-			}
+			} else if (onSuccessfulSignIn) onSuccessfulSignIn();
 		} catch (error: any) {
 			if (error.message && typeof error.message === 'string') {
 				const message = error.message.split(']')[1];
 
-				onError(message);
+				if (onError) onError(message);
 			}
 		}
 	};
@@ -222,6 +227,7 @@ const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) =>
 		onAppleSignInButtonPress,
 		emailSignIn,
 		emailSignUp,
+		currentUser: user,
 	};
 };
 
