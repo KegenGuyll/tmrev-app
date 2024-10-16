@@ -83,7 +83,12 @@ import {
 	IsUsernameAvailableResponse,
 	UpdateUserQuery,
 } from '@/models/tmrev/user';
-import { ActorInsightResponse, MovieGenreInsightResponse } from '@/models/tmrev/insights';
+import {
+	ActorInsightResponse,
+	MovieActivityInsightQuery,
+	MovieActivityInsightResponse,
+	MovieGenreInsightResponse,
+} from '@/models/tmrev/insights';
 import { FeedQuery, FeedResponse } from '@/models/tmrev/feed';
 import { GetCommentResponse, GetCommentsResponse } from '@/models/tmrev/comments';
 
@@ -407,6 +412,17 @@ export const tmrevApi = createApi({
 		getActorInsights: builder.query<ActorInsightResponse, string>({
 			query: (userId) => ({
 				url: `/movie/actor/insights/${userId}`,
+			}),
+		}),
+		getUserMovieActivityInsights: builder.query<
+			MovieActivityInsightResponse,
+			MovieActivityInsightQuery
+		>({
+			query: ({ userId, days }) => ({
+				url: `/movie/heat-map/insights/${userId}`,
+				params: {
+					days,
+				},
 			}),
 		}),
 		getReviewsByActor: builder.query<GetReviewByActorResponse, GetReviewByActorParams>({
@@ -830,6 +846,7 @@ export const {
 	useIsDeviceTokenSavedQuery,
 	useGetActorInsightsQuery,
 	useGetReviewsByActorQuery,
+	useGetUserMovieActivityInsightsQuery,
 	useGetReviewsByMovieIdQuery,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;

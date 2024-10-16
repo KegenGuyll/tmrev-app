@@ -180,3 +180,13 @@ export type ActorInsightResponse = {
 	watchedActorMapSorted: ActorInsightData[];
 	reviewedActorMapSorted: ActorInsightData[];
 };
+
+export type MovieActivityInsightResponse = {
+	success: boolean;
+	data: number[];
+};
+
+export type MovieActivityInsightQuery = {
+	userId: string;
+	days: number;
+};
