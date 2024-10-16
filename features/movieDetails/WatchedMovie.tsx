@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { IconButton, Text } from 'react-native-paper';
-import auth from '@react-native-firebase/auth';
+import useAuth from '@/hooks/useAuth';
 import {
 	useCreateWatchedMutation,
 	useGetSingleWatchedQuery,
@@ -22,7 +22,7 @@ const WatchedMovie: React.FC<WatchedMovieProps> = ({
 	movieId,
 	setLoginMessage,
 }: WatchedMovieProps) => {
-	const { currentUser } = auth();
+	const { currentUser } = useAuth({});
 	const [hasWatched, setHasWatched] = useState(false);
 	const [hasLiked, setHasLiked] = useState(false);
 

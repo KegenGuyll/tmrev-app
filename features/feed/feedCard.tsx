@@ -12,7 +12,7 @@ import {
 import dayjs from 'dayjs';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
-import auth from '@react-native-firebase/auth';
+import useAuth from '@/hooks/useAuth';
 import { FeedReviews } from '@/models/tmrev/feed';
 import MoviePoster from '@/components/MoviePoster';
 import {
@@ -45,7 +45,7 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from, setLoginMessage }: Fe
 	const styles = makeStyle();
 	const router = useRouter();
 
-	const { currentUser } = auth();
+	const { currentUser } = useAuth({});
 
 	const [hasLiked, setHasLiked] = useState<boolean>(false);
 	const [hasDisliked, setHasDisliked] = useState<boolean>(false);

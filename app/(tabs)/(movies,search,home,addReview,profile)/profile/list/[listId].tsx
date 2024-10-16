@@ -2,13 +2,13 @@
 import { Stack, useLocalSearchParams, useNavigation } from 'expo-router';
 import { View, Alert, RefreshControl } from 'react-native';
 import { Divider, IconButton, Menu, Snackbar, Surface, Text } from 'react-native-paper';
-import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatGrid } from 'react-native-super-grid';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import dayjs from 'dayjs';
+import useAuth from '@/hooks/useAuth';
 import { FromLocation } from '@/models';
 import {
 	useDeleteWatchListMutation,
@@ -107,7 +107,7 @@ const ListDetailsPage: React.FC = () => {
 
 	const debounceRankedList = useDebounce(JSON.stringify(rankedList), 2500);
 
-	const { currentUser } = auth();
+	const { currentUser } = useAuth({});
 
 	const isCurrentUser = useMemo(() => currentUser?.uid === profileId, [currentUser, profileId]);
 

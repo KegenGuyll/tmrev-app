@@ -1,10 +1,9 @@
 /* eslint-disable react-native/no-color-literals */
 import { Link, Stack, useLocalSearchParams } from 'expo-router';
-import { Image, View } from 'react-native';
+import { FlatList, Image, View } from 'react-native';
 import { Text, Button, Searchbar, Divider } from 'react-native-paper';
-import { useMemo, useState } from 'react';
-import { FlatList } from 'react-native-gesture-handler';
-import auth from '@react-native-firebase/auth';
+import React, { useMemo, useState } from 'react';
+import useAuth from '@/hooks/useAuth';
 import { FromLocation } from '@/models';
 import { useGetFollowersV2Query } from '@/redux/api/tmrev';
 import { BasicUserV2 } from '@/models/tmrev/user';
@@ -62,7 +61,7 @@ const Followers: React.FC = () => {
 
 	const debouncedSearchTerm = useDebounce(search, 500);
 
-	const { currentUser } = auth();
+	const { currentUser } = useAuth({});
 
 	const { data, isLoading } = useGetFollowersV2Query(
 		{ uid: userId!, query: { search: debouncedSearchTerm } },

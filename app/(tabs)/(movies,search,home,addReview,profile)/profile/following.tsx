@@ -2,9 +2,9 @@
 import { Link, Stack, useLocalSearchParams } from 'expo-router';
 import { Image, View } from 'react-native';
 import { Text, Button, Searchbar, Divider } from 'react-native-paper';
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FlatList } from 'react-native-gesture-handler';
-import auth from '@react-native-firebase/auth';
+import useAuth from '@/hooks/useAuth';
 import { FromLocation } from '@/models';
 import {
 	useFollowUserV2Mutation,
@@ -79,7 +79,7 @@ const FollowingItem: React.FC<FollowerItemProps> = ({
 const Following: React.FC = () => {
 	const { userId, from } = useLocalSearchParams<FollowerSearchParams>();
 	const [search, setSearch] = useState<string>('');
-	const { currentUser } = auth();
+	const { currentUser } = useAuth({});
 
 	const debouncedSearchTerm = useDebounce(search, 500);
 

@@ -1,9 +1,9 @@
 /* eslint-disable react-native/no-color-literals */
 import { BottomSheetModal, BottomSheetVirtualizedList } from '@gorhom/bottom-sheet';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Searchbar } from 'react-native-paper';
-import auth from '@react-native-firebase/auth';
 import { RefreshControl, View } from 'react-native';
+import useAuth from '@/hooks/useAuth';
 import { useAddMovieToWatchListMutation, useGetUserWatchListsQuery } from '@/redux/api/tmrev';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import CustomBackground from '@/components/CustomBottomSheetBackground';
@@ -37,7 +37,7 @@ const AddMovieToList: React.FC<AddMovieToListProps> = ({
 	const [page, setPage] = useState(0);
 	const [refreshing, setRefreshing] = useState(false);
 
-	const { currentUser } = auth();
+	const { currentUser } = useAuth({});
 
 	const debouncedSearchTerm = useDebounce(searchValue, 500);
 

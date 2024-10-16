@@ -3,6 +3,8 @@ import { Alert, View } from 'react-native';
 import { List, useTheme, Icon } from 'react-native-paper';
 import { appleAuth } from '@invertase/react-native-apple-authentication';
 import auth from '@react-native-firebase/auth';
+import React from 'react';
+import useAuth from '@/hooks/useAuth';
 import { homeRoute, profileSettingsNotificationsRoute } from '@/constants/routes';
 import { useDeleteUserMutation } from '@/redux/api/tmrev';
 
@@ -41,7 +43,7 @@ const ProfileSettings = () => {
 	};
 
 	const handleDeleteAccount = async () => {
-		const { currentUser } = auth();
+		const { currentUser } = useAuth({});
 
 		if (currentUser?.providerData[0].providerId === 'apple.com') {
 			const { authorizationCode } = await appleAuth.performRequest({

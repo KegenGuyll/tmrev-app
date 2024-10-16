@@ -4,7 +4,7 @@ import { FlatList, SafeAreaView, StyleSheet, TouchableOpacity, View } from 'reac
 import { Chip, Surface, Text } from 'react-native-paper';
 import ImageView from '@techvox/react-native-image-viewing';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import auth from '@react-native-firebase/auth';
+import useAuth from '@/hooks/useAuth';
 import {
 	useGetPersonImagesQuery,
 	useGetPersonMostPopularMoviesQuery,
@@ -39,7 +39,7 @@ const PersonDetails: React.FC = () => {
 		isLoading: isPersonLoading,
 	} = useGetPersonQuery({ personId: Number(slug.personId) });
 
-	const { currentUser } = auth();
+	const { currentUser } = useAuth({});
 
 	const { data: reviewData } = useGetReviewsByActorQuery(
 		{ actorId: Number(slug.personId), userId: currentUser?.uid ?? '' },

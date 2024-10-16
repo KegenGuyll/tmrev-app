@@ -2,9 +2,9 @@
 import { Stack, useRouter } from 'expo-router';
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { Button, Checkbox, MD3Theme, Searchbar, useTheme } from 'react-native-paper';
-import auth from '@react-native-firebase/auth';
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FlatGrid } from 'react-native-super-grid';
+import useAuth from '@/hooks/useAuth';
 import {
 	useGetPinnedMoviesQuery,
 	useGetUserMovieReviewsQuery,
@@ -20,7 +20,7 @@ const page = 0;
 const sort = 'reviewedDate.desc';
 
 const UpdatePinnedReviews = () => {
-	const { currentUser } = auth();
+	const { currentUser } = useAuth({});
 	const [pinnedReviews, setPinnedReviews] = useState<TmrevReview[]>([]);
 	const [search, setSearch] = useState('');
 	const theme = useTheme();

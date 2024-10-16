@@ -1,8 +1,9 @@
 import { RefreshControl, View, SafeAreaView, ScrollView } from 'react-native';
-import auth from '@react-native-firebase/auth';
 import { Button, Divider, IconButton, Snackbar, Text, useTheme } from 'react-native-paper';
 import { Stack, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import auth from '@react-native-firebase/auth';
+import useAuth from '@/hooks/useAuth';
 import ProfileHeader from '@/components/Profile/ProfileHeader';
 import { useGetGenreInsightsQuery, useGetV2UserQuery } from '@/redux/api/tmrev';
 import ProfileNavigation from '@/components/Profile/ProfileListNavigationt';
@@ -11,7 +12,7 @@ import { loginRoute, profileSettingsRoute, signupRoute } from '@/constants/route
 import BarChart from '@/components/CustomCharts/BarChart';
 
 const Profile = () => {
-	const { currentUser } = auth();
+	const { currentUser } = useAuth({});
 	const router = useRouter();
 	const [refreshing, setRefreshing] = useState(false);
 	const [snackbarMessage, setSnackbarMessage] = useState('');

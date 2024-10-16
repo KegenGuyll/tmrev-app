@@ -12,8 +12,8 @@ import {
 import { StyleSheet, View, Image } from 'react-native';
 import dayjs from 'dayjs';
 import React, { useEffect, useMemo, useState } from 'react';
-import auth from '@react-native-firebase/auth';
 import { useRouter } from 'expo-router';
+import useAuth from '@/hooks/useAuth';
 import MoviePoster from '@/components/MoviePoster';
 import { ReviewResponse } from '@/models/tmrev/movie';
 import { useVoteTmrevReviewMutation } from '@/redux/api/tmrev';
@@ -96,7 +96,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 
 	const [voteReview] = useVoteTmrevReviewMutation();
 
-	const { currentUser } = auth();
+	const { currentUser } = useAuth({});
 
 	useEffect(() => {
 		if (!reviewData || !reviewData?.body || !currentUser) return;

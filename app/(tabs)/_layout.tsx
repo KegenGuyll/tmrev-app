@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Tabs } from 'expo-router';
-import auth from '@react-native-firebase/auth';
 import { Image, Alert } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
+import useAuth from '@/hooks/useAuth';
 
 const iconSize = 25;
 
 const TabLayout = () => {
-	const { currentUser } = auth();
+	const { currentUser } = useAuth({});
 
 	useEffect(() => {
 		const unsubscribe = messaging().onMessage(async (remoteMessage) => {

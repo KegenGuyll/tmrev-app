@@ -9,9 +9,9 @@ import {
 	Snackbar,
 	Chip,
 } from 'react-native-paper';
-import { useState } from 'react';
-import auth from '@react-native-firebase/auth';
+import React, { useState } from 'react';
 import { Link, useRouter } from 'expo-router';
+import useAuth from '@/hooks/useAuth';
 import { numberShortHand } from '@/utils/common';
 import { useFollowUserV2Mutation, useUnfollowUserV2Mutation } from '@/redux/api/tmrev';
 import { UserV2 } from '@/models/tmrev/user';
@@ -43,7 +43,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 	const [isFollowing, setIsFollowing] = useState(user.isFollowing);
 	const [followerCount, setFollowerCount] = useState(user.followerCount);
 	const [snackbarVisible, setSnackbarVisible] = useState(false);
-	const { currentUser } = auth();
+	const { currentUser } = useAuth({});
 	const [followUser] = useFollowUserV2Mutation();
 	const [unfollowUser] = useUnfollowUserV2Mutation();
 	const router = useRouter();

@@ -1,9 +1,9 @@
 /* eslint-disable react-native/no-color-literals */
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { View, Image, TextInput, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
-import auth from '@react-native-firebase/auth';
 import { ActivityIndicator, Button, Text, useTheme } from 'react-native-paper';
 import React, { useEffect, useRef, useState } from 'react';
+import useAuth from '@/hooks/useAuth';
 import {
 	useAddCommentMutation,
 	useGetCommentDetailsQuery,
@@ -30,7 +30,7 @@ const ReplyPost: React.FC = () => {
 	const [reply, setReply] = useState<string>('');
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 
-	const { currentUser } = auth();
+	const { currentUser } = useAuth({});
 	const { data: commentData, isLoading: isCommentLoading } = useGetCommentDetailsQuery(postId!, {
 		skip: !postId || contentType !== 'comments',
 	});
