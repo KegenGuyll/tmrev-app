@@ -34,6 +34,7 @@ module.exports = {
 			primaryColor: '#ffc000',
 			googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
 			package: 'com.tmrev',
+			versionCode: 2,
 		},
 		web: {
 			bundler: 'metro',
