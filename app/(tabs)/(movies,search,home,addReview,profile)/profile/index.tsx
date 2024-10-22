@@ -47,8 +47,6 @@ const Profile = () => {
 		{ skip: !currentUser || !currentUser.uid }
 	);
 
-	console.log(theme.colors.onBackground);
-
 	useEffect(() => {
 		if (!userError || !currentUser) return;
 
