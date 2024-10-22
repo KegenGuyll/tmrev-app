@@ -2,7 +2,7 @@ module.exports = {
 	expo: {
 		name: 'tmrev',
 		slug: 'tmrev',
-		version: '1.0.0',
+		version: '1.3.4',
 		orientation: 'portrait',
 		icon: './assets/images/icon.png',
 		scheme: 'myapp',
