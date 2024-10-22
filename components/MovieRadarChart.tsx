@@ -1,18 +1,18 @@
 import { useMemo } from 'react';
+import { View } from 'react-native';
 import { TmrevReview } from '@/models/tmrev';
-import SvgRadarChart, { RadarData } from './SvgRadarChart';
+import RadarChart from './CustomCharts/RadarChart';
 
 type MovieRadarChartProps = {
 	reviews: TmrevReview[];
 };
 
 const MovieRadarChart: React.FC<MovieRadarChartProps> = ({ reviews }: MovieRadarChartProps) => {
-	const radarData: RadarData[] = useMemo(() => {
+	const radarData = useMemo(() => {
 		if (!reviews) return [];
 
 		const plot: number[] = [];
 		const acting: number[] = [];
-
 		const theme: number[] = [];
 		const climax: number[] = [];
 		const ending: number[] = [];
@@ -52,7 +52,11 @@ const MovieRadarChart: React.FC<MovieRadarChartProps> = ({ reviews }: MovieRadar
 		];
 	}, [reviews]);
 
-	return <SvgRadarChart size={120} radarData={radarData} />;
+	return (
+		<View style={{ flex: 1, height: 400, width: '100%' }}>
+			<RadarChart data={radarData} />
+		</View>
+	);
 };
 
 export default MovieRadarChart;
