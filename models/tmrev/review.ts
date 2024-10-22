@@ -20,7 +20,7 @@ export type MovieDetails = {
 
 interface TmrevReview {
 	_id: string;
-	advancedScore: AdvancedScore | null;
+	advancedScore: AdvancedScore;
 	averagedAdvancedScore: number | null;
 	createdAt: CreatedAt;
 	updatedAt: UpdatedAt;
