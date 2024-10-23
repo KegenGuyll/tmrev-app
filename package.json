@@ -1,6 +1,6 @@
 {
   "name": "tmrev-app",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
