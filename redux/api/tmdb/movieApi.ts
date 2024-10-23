@@ -36,6 +36,7 @@ import {
 	IRetrieveWatchProvidersResponse,
 } from '@/models/tmdb/movie/movieWatchProviders';
 import { MovieTrendingPayload, MovieTrendingResponse } from '@/models/tmdb/movie/movieTrending';
+import { MovieCollectionResponse } from '@/models/tmdb/movie/movieCollection';
 
 export const movieApi = createApi({
 	baseQuery: fetchBaseQuery({
@@ -43,6 +44,14 @@ export const movieApi = createApi({
 		prepareHeaders: (headers) => headers,
 	}),
 	endpoints: (builder) => ({
+		getMovieCollection: builder.query<MovieCollectionResponse, number>({
+			query: (data) => ({
+				params: {
+					api_key: tmdbAPIKey,
+				},
+				url: `/collection/${data}`,
+			}),
+		}),
 		getAlternativeTitles: builder.query<IMovieAltTitlesResponse, IMovieAltTitlesQuery>({
 			query: ({ movie_id, params }) => ({
 				params: {
@@ -259,4 +268,5 @@ export const {
 	useGetMovieGenreListQuery,
 	useGetWatchProviderListQuery,
 	useGetTrendingMoviesQuery,
+	useGetMovieCollectionQuery,
 } = movieApi;
