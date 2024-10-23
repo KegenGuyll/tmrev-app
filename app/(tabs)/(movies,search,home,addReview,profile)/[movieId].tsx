@@ -17,6 +17,7 @@ import {
 	ScrollView,
 	FlatList,
 	TouchableHighlight,
+	RefreshControl,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useBottomSheetModal } from '@gorhom/bottom-sheet';
@@ -24,6 +25,7 @@ import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import {
+	useGetMovieCollectionQuery,
 	useGetMovieCreditsQuery,
 	useGetMovieDetailsQuery,
 	useGetMovieReleaseDatesQuery,
@@ -34,11 +36,15 @@ import { formatRuntime, numberShortHand, roundWithMaxPrecision } from '@/utils/c
 import ISO3166_1 from '@/models/tmdb/ISO3166-1';
 import ActorPlaceholderImage from '@/components/ActorPlacholderImage';
 import { PosterPath } from '@/models';
-import { useGetAllReviewsQuery, useGetReviewsByMovieIdQuery } from '@/redux/api/tmrev';
+import {
+	useCreateWatchListMutation,
+	useGetAllReviewsQuery,
+	useGetReviewsByMovieIdQuery,
+} from '@/redux/api/tmrev';
 import MovieRadarChart from '@/components/MovieRadarChart';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
-import CreateMovieReviewModal from '@/components/CreateMovieReviewModal';
 import {
+	listDetailsRoute,
 	loginRoute,
 	movieReviewsRoute,
 	personDetailsRoute,
@@ -46,12 +52,24 @@ import {
 } from '@/constants/routes';
 import WatchedMovie from '@/features/movieDetails/WatchedMovie';
 import AddMovieToList from '@/features/movieDetails/addMovieToList';
-import { addToListLoginPrompt, reviewLoginPrompt } from '@/constants/messages';
+import {
+	addToListLoginPrompt,
+	createListFromMovieLoginPrompt,
+	reviewLoginPrompt,
+} from '@/constants/messages';
 import useAuth from '@/hooks/useAuth';
+import MovieHorizontalGrid from '@/components/MovieHorizontalGrid';
+import { MovieCollectionPart } from '@/models/tmdb/movie/movieCollection';
 
 type MovieDetailsParams = {
 	movieId: string;
 	from?: PosterPath;
+};
+
+const sortByReleaseDate = (a: MovieCollectionPart, b: MovieCollectionPart) => {
+	if (a.release_date < b.release_date) return -1;
+	if (a.release_date > b.release_date) return 1;
+	return 0;
 };
 
 const MovieDetails = () => {
@@ -62,9 +80,12 @@ const MovieDetails = () => {
 	const { data: movieReviews } = useGetAllReviewsQuery({ movie_id: Number(movieId) });
 	const [selectedMovie, setSelectedMovie] = useState<MovieGeneral | null>(null);
 	const [showAddMovieToListModal, setShowAddMovieToListModal] = useState(false);
-	const [showCreateReviewModal, setShowCreateReviewModal] = useState(false);
 	const [snackBarMessage, setSnackBarMessage] = useState<string | null>(null);
 	const [loginMessage, setLoginMessage] = useState<string | null>(null);
+	const [successfulListClone, setSuccessfulListClone] = useState<string | null>(null);
+	const [isRefreshing, setIsRefreshing] = useState(false);
+
+	const [createWatchList] = useCreateWatchListMutation();
 
 	const { currentUser } = useAuth({});
 
@@ -74,14 +95,24 @@ const MovieDetails = () => {
 
 	const {
 		data: movieData,
+		refetch: movieDataRefetch,
 		isFetching: movieDataIsFetching,
 		isLoading: movieDataIsLoading,
 	} = useGetMovieDetailsQuery({
 		movie_id: Number(movieId),
-		params: {},
+		params: {
+			append_to_response: 'collection',
+		},
 	});
 
-	const { data: movieReviewsData } = useGetReviewsByMovieIdQuery({
+	const { data: movieCollection, refetch: movieCollectionRefetch } = useGetMovieCollectionQuery(
+		movieData?.belongs_to_collection?.id || 0,
+		{
+			skip: !movieData?.belongs_to_collection?.id,
+		}
+	);
+
+	const { data: movieReviewsData, refetch: movieReviewsRefetch } = useGetReviewsByMovieIdQuery({
 		movieId: Number(movieId),
 		query: {
 			pageNumber: 0,
@@ -90,14 +121,27 @@ const MovieDetails = () => {
 		},
 	});
 
-	const { data: movieReleaseDates } = useGetMovieReleaseDatesQuery({
-		movie_id: Number(movieId),
-	});
+	const { data: movieReleaseDates, refetch: movieReleaseDatesRefetch } =
+		useGetMovieReleaseDatesQuery({
+			movie_id: Number(movieId),
+		});
 
-	const { data: movieCredits } = useGetMovieCreditsQuery({
+	const { data: movieCredits, refetch: movieCreditsRefetch } = useGetMovieCreditsQuery({
 		movie_id: Number(movieId),
 		params: { language: 'en-US' },
 	});
+
+	const onRefresh = async () => {
+		setIsRefreshing(true);
+		await Promise.all([
+			movieDataRefetch(),
+			movieCollectionRefetch(),
+			movieReviewsRefetch(),
+			movieReleaseDatesRefetch(),
+			movieCreditsRefetch(),
+		]);
+		setIsRefreshing(false);
+	};
 
 	useEffect(() => {
 		if (movieData) {
@@ -127,6 +171,28 @@ const MovieDetails = () => {
 		router.navigate(reviewFunctionRoute(from || 'addReview', Number(movieId), 'create'));
 	};
 
+	const handleCreateList = async () => {
+		if (!currentUser) {
+			setLoginMessage(createListFromMovieLoginPrompt);
+			return;
+		}
+
+		if (!movieCollection) return;
+
+		const response = await createWatchList({
+			description: movieCollection.overview || '',
+			title: movieCollection.name || '',
+			public: true,
+			tags: [],
+			movies: movieCollection.parts.map((m, i) => ({
+				order: i,
+				tmdbID: m.id,
+			})),
+		}).unwrap();
+
+		setSuccessfulListClone(response._id);
+	};
+
 	const handleAddToList = () => {
 		if (!currentUser) {
 			setLoginMessage(addToListLoginPrompt);
@@ -152,7 +218,11 @@ const MovieDetails = () => {
 			<Stack.Screen
 				options={{ headerShown: true, title: movieData.title, headerRight: () => null }}
 			/>
-			<ScrollView>
+			<ScrollView
+				refreshControl={
+					<RefreshControl tintColor="white" refreshing={isRefreshing} onRefresh={onRefresh} />
+				}
+			>
 				<View style={styles.backgroundImageContainer}>
 					<Image
 						style={styles.backgroundImage}
@@ -370,15 +440,40 @@ const MovieDetails = () => {
 							</View>
 						)}
 					</Surface>
-					<View style={{ marginBottom: 8 }}>
+					{/* <View style={{ marginBottom: 8 }}>
 						<Button onPress={handleReviewMovie} style={{ marginBottom: 8 }} mode="contained">
 							REVIEW MOVIE
 						</Button>
 						<Button onPress={handleAddToList} mode="outlined">
 							ADD TO LIST
 						</Button>
-					</View>
-					<MovieRadarChart reviews={movieReviews?.body.reviews || []} />
+					</View> */}
+					{!!movieReviews?.body.reviews.length && (
+						<MovieRadarChart reviews={movieReviews?.body.reviews || []} />
+					)}
+					{movieCollection && (
+						<View style={{ flex: 1, gap: 4 }}>
+							<View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+								<Text style={{ flexGrow: 1 }} variant="labelLarge">
+									{movieCollection.name}
+								</Text>
+								<Button onPress={handleCreateList} icon="plus" mode="text">
+									Create List
+								</Button>
+							</View>
+							<MovieHorizontalGrid
+								data={[...movieCollection.parts].sort(sortByReleaseDate).map((m) => ({
+									uniqueId: m.id.toString(),
+									movieId: m.id,
+									moviePoster: m.poster_path,
+								}))}
+								selectedMovieId={Number(movieId)}
+								posterHeight={150}
+								posterSelectionLocation={from || 'movies'}
+							/>
+						</View>
+					)}
+
 					<View style={{ flexDirection: 'row', marginBottom: 8 }}>
 						{movieCredits?.cast && (
 							<FlatList
@@ -435,11 +530,6 @@ const MovieDetails = () => {
 				}
 				onSuccess={() => setSnackBarMessage('Movie added to list')}
 			/>
-			<CreateMovieReviewModal
-				visible={showCreateReviewModal}
-				onDismiss={() => setShowCreateReviewModal(false)}
-				selectedMovie={selectedMovie}
-			/>
 			{snackBarMessage && (
 				<Snackbar
 					action={{
@@ -463,6 +553,21 @@ const MovieDetails = () => {
 			>
 				{loginMessage}
 			</Snackbar>
+			{successfulListClone && (
+				<Snackbar
+					action={{
+						label: 'View',
+						onPress: () =>
+							router.navigate(
+								listDetailsRoute(from || 'movies', successfulListClone, currentUser!.uid)
+							),
+					}}
+					visible={!!successfulListClone}
+					onDismiss={() => setSuccessfulListClone(null)}
+				>
+					Successfully Create List
+				</Snackbar>
+			)}
 		</>
 	);
 };
