@@ -46,6 +46,7 @@ const MovieGrid: React.FC<MovieGridProps> = ({
 			{isLoading && <Text>Loading...</Text>}
 			{movies && (
 				<FlatGrid
+					ListHeaderComponentStyle={{ width: '100%' }}
 					ListHeaderComponent={ListHeaderComponent}
 					itemDimension={itemDimension}
 					style={styles.list}
@@ -96,8 +97,8 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	list: {
-		display: 'flex',
-		flexDirection: 'row',
-		flexWrap: 'wrap',
+		width: '100%',
 	},
 });
+
+export type { MovieGridProps };
