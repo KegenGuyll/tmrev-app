@@ -3,6 +3,7 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { appleAuth } from '@invertase/react-native-apple-authentication';
 import { GOOGLE_WEB_CLIENT_ID, TMREV_API_URL } from '@env';
 import { useCallback, useEffect, useState } from 'react';
+import * as Sentry from '@sentry/react-native';
 
 type CreateTMREVUser = {
 	bio: string;
@@ -119,6 +120,7 @@ const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) =>
 				} else if (onSuccessfulSignIn) onSuccessfulSignIn();
 			} else if (onSuccessfulSignIn) onSuccessfulSignIn();
 		} catch (error: any) {
+			Sentry.captureException(error);
 			if (error.message && typeof error.message === 'string') {
 				const message = error.message.split(']')[1];
 
@@ -172,6 +174,7 @@ const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) =>
 				} else if (onSuccessfulSignIn) onSuccessfulSignIn();
 			} else if (onSuccessfulSignIn) onSuccessfulSignIn();
 		} catch (error: any) {
+			Sentry.captureException(error);
 			if (error.message && typeof error.message === 'string') {
 				if (onError) onError(error.message);
 			}

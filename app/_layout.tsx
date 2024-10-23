@@ -12,7 +12,15 @@ import { Provider } from 'react-redux';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar, View } from 'react-native';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import * as Sentry from '@sentry/react-native';
 import { store } from '@/redux/store';
+
+Sentry.init({
+	dsn: 'https://9c8c84585fb730b65ab416d6f989e981@o4508169060745216.ingest.us.sentry.io/4508169062055936',
+
+	// uncomment the line below to enable Spotlight (https://spotlightjs.com)
+	// enableSpotlight: __DEV__,
+});
 
 export {
 	// Catch any errors thrown by the Layout component.
