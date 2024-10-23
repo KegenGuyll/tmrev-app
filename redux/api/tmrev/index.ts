@@ -202,6 +202,7 @@ export const tmrevApi = createApi({
 			}),
 		}),
 		getUserMovieReviews: builder.query<GetUserMovieReviewsResponse, GetUserMovieReviewsPayload>({
+			providesTags: ['REVIEW', 'MOVIE'],
 			query: ({ query, userId }) => ({
 				params: {
 					...query,

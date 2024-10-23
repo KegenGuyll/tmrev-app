@@ -1,6 +1,6 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { View } from 'react-native';
-import { Button, Divider, Switch, Text, useTheme } from 'react-native-paper';
+import { Button, Divider, Icon, Surface, Switch, Text, useTheme } from 'react-native-paper';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -13,11 +13,13 @@ import formatDateYear from '@/utils/formatDateYear';
 import {
 	useAddTmrevReviewMutation,
 	useGetSingleReviewQuery,
+	useGetUserMovieReviewsQuery,
 	useUpdateTmrevReviewMutation,
 } from '@/redux/api/tmrev';
 import TextInput from '@/components/Inputs/TextInput';
 import { CreateTmrevReviewQuery } from '@/models/tmrev/review';
 import DatePicker from '@/components/Date/DatePicker';
+import useAuth from '@/hooks/useAuth';
 
 type CreateReviewSearchParams = {
 	movieId: string;
@@ -52,6 +54,7 @@ const CreateReview = () => {
 	const [ratings, setRatings] = useState<Ratings>(defaultRatings);
 	const [note, setNote] = useState('');
 	const theme = useTheme();
+	const { currentUser } = useAuth({});
 
 	const { data: movieData } = useGetMovieDetailsQuery({
 		movie_id: Number(movieId) || 0,
@@ -61,6 +64,19 @@ const CreateReview = () => {
 	const { data: reviewData } = useGetSingleReviewQuery(
 		{ reviewId: reviewId || '' },
 		{ skip: content !== 'edit' || !reviewId }
+	);
+
+	const { data: userPrevReviewData } = useGetUserMovieReviewsQuery(
+		{
+			userId: currentUser?.uid || '',
+			query: {
+				pageNumber: 0,
+				pageSize: 100,
+				textSearch: movieData?.title,
+				sort_by: 'reviewedDate.desc',
+			},
+		},
+		{ skip: !currentUser || content === 'edit' || !movieData?.title }
 	);
 
 	const selectedMovieData = useMemo(() => movieData, [movieData]);
@@ -156,6 +172,24 @@ const CreateReview = () => {
 							padding: 16,
 						}}
 					>
+						{userPrevReviewData && userPrevReviewData?.body?.totalCount > 0 && (
+							<Surface
+								style={{
+									padding: 8,
+									borderRadius: 4,
+									display: 'flex',
+									flexDirection: 'row',
+									gap: 8,
+									alignItems: 'center',
+								}}
+								elevation={0}
+							>
+								<Icon source="chart-timeline-variant-shimmer" size={20} />
+								<Text variant="labelLarge">
+									You&apos;ve reviewed this movie {userPrevReviewData?.body.totalCount} times before
+								</Text>
+							</Surface>
+						)}
 						<View style={{ display: 'flex', flexDirection: 'row', gap: 8, alignItems: 'center' }}>
 							<MoviePosterImage
 								moviePoster={selectedMovieData.poster_path}
