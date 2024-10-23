@@ -26,6 +26,7 @@ type MoviePosterProps = {
 	onPress?: () => void;
 	rankedPosition?: number;
 	onLongPress?: ((event: GestureResponderEvent) => void) | undefined;
+	overlayComponent?: React.ReactNode;
 };
 
 type MoviePosterStyleProps = {
@@ -154,12 +155,13 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 	onPress,
 	rankedPosition,
 	onLongPress,
+	overlayComponent,
 }: MoviePosterProps) => {
 	const router = useRouter();
 
 	if (!clickable) {
 		return (
-			<View>
+			<View style={{ position: 'relative' }}>
 				<MoviePosterImage
 					isSelected={isSelected}
 					moviePoster={moviePoster}
@@ -167,6 +169,7 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 					width={width}
 					rankedPosition={rankedPosition}
 				/>
+				{overlayComponent}
 			</View>
 		);
 	}
@@ -182,7 +185,7 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 				}
 			}}
 		>
-			<View>
+			<View style={{ position: 'relative' }}>
 				<MoviePosterImage
 					isSelected={isSelected}
 					moviePoster={moviePoster}
@@ -190,6 +193,7 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 					width={width}
 					rankedPosition={rankedPosition}
 				/>
+				{overlayComponent}
 			</View>
 		</TouchableHighlight>
 	);
