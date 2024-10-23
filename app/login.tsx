@@ -3,7 +3,7 @@ import { Text, Button, TextInput, Divider, Snackbar } from 'react-native-paper';
 import { GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import { AppleButton } from '@invertase/react-native-apple-authentication';
 import { Link, Stack, useRouter } from 'expo-router';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import useAuth from '@/hooks/useAuth';
 import { loggedInProfileRoute } from '@/constants/routes';
 
@@ -74,7 +74,6 @@ const Login: React.FC = () => {
 						Don&apos;t have an account? Sign up
 					</Text>
 				</Link>
-
 				<View style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
 					<GoogleSigninButton
 						style={{ width: '100%', height: 45 }}
