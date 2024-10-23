@@ -14,6 +14,7 @@ type MovieHorizontalGridProps = {
 	posterSelectionLocation: FromLocation;
 	posterHeight?: number;
 	isLoading?: boolean;
+	selectedMovieId?: number;
 };
 
 const MovieHorizontalGrid: React.FC<MovieHorizontalGridProps> = ({
@@ -21,6 +22,7 @@ const MovieHorizontalGrid: React.FC<MovieHorizontalGridProps> = ({
 	posterSelectionLocation,
 	posterHeight,
 	isLoading,
+	selectedMovieId,
 }: MovieHorizontalGridProps) => {
 	if (isLoading) {
 		return <Text>Loading...</Text>;
@@ -34,6 +36,7 @@ const MovieHorizontalGrid: React.FC<MovieHorizontalGridProps> = ({
 			}}
 			renderItem={({ item }) => (
 				<MoviePoster
+					isSelected={selectedMovieId === item.movieId}
 					movieId={item.movieId}
 					moviePoster={item.moviePoster}
 					location={posterSelectionLocation}
