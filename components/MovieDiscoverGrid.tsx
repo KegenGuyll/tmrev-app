@@ -14,12 +14,20 @@ type MovieDiscoverGridProps = {
 		| React.ReactElement<any, string | React.JSXElementConstructor<any>>
 		| null
 		| undefined;
+	itemSpacing?: number;
+	itemDimension?: number;
+	imageHeight?: number;
+	imageWidth?: number;
 };
 
 const MovieDiscoverGrid: React.FC<MovieDiscoverGridProps> = ({
 	onPress,
 	from,
 	ListHeaderComponent,
+	imageHeight,
+	itemDimension,
+	itemSpacing,
+	imageWidth,
 }: MovieDiscoverGridProps) => {
 	const [page, setPage] = React.useState(1);
 	const [movieData, setMovieData] = React.useState<MovieGeneral[]>([]);
@@ -63,6 +71,10 @@ const MovieDiscoverGrid: React.FC<MovieDiscoverGridProps> = ({
 			onEndReachedThreshold={1}
 			posterPath={from}
 			onPress={onPress}
+			imageHeight={imageHeight}
+			itemDimension={itemDimension}
+			itemSpacing={itemSpacing}
+			imageWidth={imageWidth}
 		/>
 	);
 };

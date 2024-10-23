@@ -44,6 +44,8 @@ const AddReviewPage = () => {
 								onChangeText={(t) => setSearchQuery(t)}
 							/>
 						}
+						itemDimension={75}
+						imageHeight={125}
 						from="addReview"
 						onPress={(item) => handlePosterSelection(item)}
 					/>
@@ -58,13 +60,13 @@ const AddReviewPage = () => {
 								onChangeText={(t) => setSearchQuery(t)}
 							/>
 						}
-						itemDimension={100}
+						itemDimension={75}
 						style={styles.list}
 						data={movieData?.results}
 						spacing={8}
 						renderItem={({ item }) => (
 							<TouchableHighlight onPress={() => handlePosterSelection(item)}>
-								<MoviePosterImage moviePoster={item.poster_path} height={170} width={100} />
+								<MoviePosterImage moviePoster={item.poster_path} height={125} />
 							</TouchableHighlight>
 						)}
 						keyExtractor={(item) => item.id.toString()}

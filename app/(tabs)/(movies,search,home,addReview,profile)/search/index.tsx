@@ -43,8 +43,9 @@ const SearchBarComponent: React.FC<SearchBarComponentProps> = ({
 	setSearchSelection,
 }: SearchBarComponentProps) => {
 	return (
-		<View style={{ paddingVertical: 16 }}>
+		<View style={{ paddingVertical: 16, width: '100%', flexGrow: 1 }}>
 			<Searchbar
+				style={{ width: '100%', flexGrow: 1 }}
 				placeholder="Search..."
 				value={searchQuery}
 				onChangeText={(t) => setSearchQuery(t)}
@@ -85,6 +86,8 @@ const Search: React.FC = () => {
 		<View>
 			{!searchQuery && searchSelection === 'movies' && (
 				<MovieDiscoverGrid
+					imageHeight={125}
+					itemDimension={75}
 					ListHeaderComponent={
 						<SearchBarComponent
 							searchQuery={searchQuery}
@@ -106,6 +109,8 @@ const Search: React.FC = () => {
 							setSearchSelection={setSearchSelection}
 						/>
 					}
+					imageHeight={125}
+					itemDimension={75}
 					movies={movieData.results}
 					isLoading={movieIsFetching}
 					onEndReached={() => {}}
@@ -116,6 +121,7 @@ const Search: React.FC = () => {
 			)}
 			{peopleData && searchSelection === 'crew' && (
 				<FlatList
+					style={{ width: '100%' }}
 					ListHeaderComponent={
 						<SearchBarComponent
 							searchQuery={searchQuery}

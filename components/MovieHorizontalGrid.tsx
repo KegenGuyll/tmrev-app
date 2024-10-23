@@ -7,6 +7,7 @@ type MovieHorizontalGridData = {
 	uniqueId: string;
 	movieId: number;
 	moviePoster?: string;
+	overlayComponent?: React.ReactNode;
 };
 
 type MovieHorizontalGridProps = {
@@ -41,6 +42,7 @@ const MovieHorizontalGrid: React.FC<MovieHorizontalGridProps> = ({
 					moviePoster={item.moviePoster}
 					location={posterSelectionLocation}
 					height={posterHeight}
+					overlayComponent={item.overlayComponent}
 				/>
 			)}
 			keyExtractor={(item) => item.uniqueId}

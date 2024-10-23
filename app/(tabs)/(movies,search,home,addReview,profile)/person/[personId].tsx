@@ -1,8 +1,9 @@
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import React, { useEffect } from 'react';
 import {
 	FlatList,
 	Platform,
+	RefreshControl,
 	SafeAreaView,
 	ScrollView,
 	StyleSheet,
@@ -19,11 +20,10 @@ import {
 	useGetPersonQuery,
 } from '@/redux/api/tmdb/peopleApi';
 import ActorPlaceholderImage from '@/components/ActorPlacholderImage';
-import MoviePoster from '@/components/MoviePoster';
 import { PosterPath } from '@/models';
 import imageUrl from '@/utils/imageUrl';
 import { useGetReviewsByActorQuery } from '@/redux/api/tmrev';
-import { feedReviewRoute } from '@/constants/routes';
+import MovieHorizontalGrid from '@/components/MovieHorizontalGrid';
 
 type PersonDetailsParams = {
 	personId: string;
@@ -45,22 +45,37 @@ const PersonDetails: React.FC = () => {
 		data: personData,
 		isFetching: isPersonFetching,
 		isLoading: isPersonLoading,
+		refetch: refetchPerson,
 	} = useGetPersonQuery({ personId: Number(slug.personId) });
+	const [isRefreshing, setIsRefreshing] = React.useState(false);
 
 	const { currentUser } = useAuth({});
 
-	const { data: reviewData } = useGetReviewsByActorQuery(
+	const { data: reviewData, refetch: reviewRefresh } = useGetReviewsByActorQuery(
 		{ actorId: Number(slug.personId), userId: currentUser?.uid ?? '' },
 		{ skip: !currentUser }
 	);
 
-	const { data: personMovieData } = useGetPersonMostPopularMoviesQuery({
+	const { data: personMovieData, refetch: personMovieRefresh } = useGetPersonMostPopularMoviesQuery(
+		{
+			personId: Number(slug.personId),
+		}
+	);
+
+	const { data: personImages, refetch: personImagesRefresh } = useGetPersonImagesQuery({
 		personId: Number(slug.personId),
 	});
 
-	const { data: personImages } = useGetPersonImagesQuery({
-		personId: Number(slug.personId),
-	});
+	const onRefresh = async () => {
+		setIsRefreshing(true);
+		await Promise.all([
+			refetchPerson(),
+			reviewRefresh(),
+			personMovieRefresh(),
+			personImagesRefresh(),
+		]);
+		setIsRefreshing(false);
+	};
 
 	useEffect(() => {
 		const imageList: ImageList[] = [];
@@ -100,6 +115,9 @@ const PersonDetails: React.FC = () => {
 				options={{ headerShown: true, title: personData?.name, headerRight: () => null }}
 			/>
 			<ScrollView
+				refreshControl={
+					<RefreshControl refreshing={isRefreshing} tintColor="white" onRefresh={onRefresh} />
+				}
 				contentContainerStyle={{
 					display: 'flex',
 					flexDirection: 'column',
@@ -120,68 +138,42 @@ const PersonDetails: React.FC = () => {
 				</Surface>
 				{currentUser && reviewData && reviewData?.reviews.length > 0 && (
 					<View style={{ gap: 8 }}>
-						<Text variant="headlineLarge">Reviewed Movies</Text>
-						<FlatList
-							data={reviewData?.reviews}
-							keyExtractor={(item) => item._id}
-							renderItem={({ item }) => (
-								<View
-									style={{
-										marginRight: 8,
-										borderRadius: 4,
-										gap: 8,
-										position: 'relative',
-									}}
-								>
-									<MoviePoster
-										height={175}
-										width={150}
-										movieId={item.tmdbID}
-										onPress={() =>
-											router.navigate(feedReviewRoute(item._id, 'reviews', slug.from!))
-										}
-										moviePoster={item.movieDetails.poster_path}
-										location={slug.from ?? 'movies'}
-									/>
-									<Chip style={{ position: 'absolute', bottom: 0, right: 0 }} icon="star">
-										{item.averagedAdvancedScore}
-									</Chip>
-								</View>
-							)}
-							horizontal
-							showsHorizontalScrollIndicator={false}
+						<Text variant="headlineMedium">Reviewed Movies</Text>
+						<MovieHorizontalGrid
+							data={
+								reviewData.reviews?.map((m) => ({
+									uniqueId: m._id,
+									movieId: m.tmdbID,
+									moviePoster: m.movieDetails.poster_path,
+									overlayComponent: (
+										<Chip style={{ position: 'absolute', bottom: 4, right: 4 }} icon="star">
+											{m.averagedAdvancedScore}
+										</Chip>
+									),
+								})) || []
+							}
+							posterSelectionLocation={slug.from ?? 'movies'}
+							posterHeight={150}
 						/>
 					</View>
 				)}
 				<View style={{ gap: 8 }}>
-					<Text variant="headlineLarge">Popular Movies</Text>
-					<FlatList
-						data={personMovieData}
-						keyExtractor={(item) => item.id.toString()}
-						renderItem={({ item }) => (
-							<View
-								style={{
-									marginRight: 8,
-									borderRadius: 4,
-									gap: 8,
-								}}
-							>
-								<MoviePoster
-									height={175}
-									width={150}
-									movieId={item.id}
-									moviePoster={item.poster_path}
-									location={slug.from ?? 'movies'}
-								/>
-							</View>
-						)}
-						horizontal
-						showsHorizontalScrollIndicator={false}
+					<Text variant="headlineMedium">Popular Movies</Text>
+					<MovieHorizontalGrid
+						data={
+							personMovieData?.map((m) => ({
+								uniqueId: m.id.toString(),
+								movieId: m.id,
+								moviePoster: m.poster_path,
+							})) || []
+						}
+						posterSelectionLocation={slug.from ?? 'movies'}
+						posterHeight={150}
 					/>
 				</View>
 				{Platform.OS !== 'ios' && (
 					<View style={{ gap: 8 }}>
-						<Text variant="headlineLarge">Media</Text>
+						<Text variant="headlineMedium">Media</Text>
 						{personImages && (
 							<FlatList
 								data={personImages.profiles}
@@ -198,8 +190,8 @@ const PersonDetails: React.FC = () => {
 											<ActorPlaceholderImage
 												profile_url={item.file_path}
 												department="Acting"
-												height={175}
-												width={150}
+												height={135}
+												width={100}
 											/>
 										</TouchableOpacity>
 									</View>
