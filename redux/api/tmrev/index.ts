@@ -432,7 +432,7 @@ export const tmrevApi = createApi({
 			}),
 		}),
 		getReviewsByMovieId: builder.query<GetReviewByMovieIdResponse, GetReviewByMovieIdQuery>({
-			providesTags: ['REVIEW'],
+			providesTags: ['REVIEW', 'MOVIE'],
 			query: ({ movieId, query }) => ({
 				url: `/movie/v2/review/${movieId}`,
 				params: query,

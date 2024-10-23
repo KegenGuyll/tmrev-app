@@ -7,6 +7,13 @@ interface IMovieDetailQuery extends IMovieQueryGeneral {
 	};
 }
 
-interface IMovieDetailResponse extends MovieGeneral {}
+interface IMovieDetailResponse extends MovieGeneral {
+	belongs_to_collection?: {
+		id: number;
+		name: string;
+		poster_path: string;
+		backdrop_path: string;
+	};
+}
 
 export type { IMovieDetailQuery, IMovieDetailResponse };
