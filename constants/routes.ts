@@ -114,6 +114,10 @@ export const createListRoute = (from: FromLocation, movieIds?: string, listId?: 
 	return url;
 };
 
+export const addToListRoute = (from: FromLocation, movieId: string) => {
+	return `${baseTabUrl}/(${from})/profile/list/addToList/${movieId}?from=${from}`;
+};
+
 export const profileInsightGenreRoute = (from: FromLocation, profileId: string) => {
 	return `${baseTabUrl}/(${from})/profile/${profileId}/insights/genre?from=${from}`;
 };
