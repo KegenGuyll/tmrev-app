@@ -7,10 +7,16 @@ type MovieHorizontalGridData = {
 	uniqueId: string;
 	movieId: number;
 	moviePoster?: string;
+	onPress?: () => void;
 	overlayComponent?: React.ReactNode;
 };
 
 type MovieHorizontalGridProps = {
+	ListHeaderComponent?:
+		| React.ReactElement<any, string | React.JSXElementConstructor<any>>
+		| React.ComponentType<any>
+		| null
+		| undefined;
 	data: MovieHorizontalGridData[];
 	posterSelectionLocation: FromLocation;
 	posterHeight?: number;
@@ -24,6 +30,7 @@ const MovieHorizontalGrid: React.FC<MovieHorizontalGridProps> = ({
 	posterHeight,
 	isLoading,
 	selectedMovieId,
+	ListHeaderComponent,
 }: MovieHorizontalGridProps) => {
 	if (isLoading) {
 		return <Text>Loading...</Text>;
@@ -32,11 +39,13 @@ const MovieHorizontalGrid: React.FC<MovieHorizontalGridProps> = ({
 	return (
 		<FlatList
 			horizontal
+			ListHeaderComponent={ListHeaderComponent}
 			contentContainerStyle={{
 				gap: 8,
 			}}
 			renderItem={({ item }) => (
 				<MoviePoster
+					onPress={item.onPress}
 					isSelected={selectedMovieId === item.movieId}
 					movieId={item.movieId}
 					moviePoster={item.moviePoster}

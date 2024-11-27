@@ -44,6 +44,7 @@ import {
 import MovieRadarChart from '@/components/MovieRadarChart';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import {
+	addToListRoute,
 	listDetailsRoute,
 	loginRoute,
 	movieReviewsRoute,
@@ -202,7 +203,9 @@ const MovieDetails = () => {
 			return;
 		}
 
-		setShowAddMovieToListModal(true);
+		if (!movieId) return;
+
+		router.push(addToListRoute(from || 'movies', movieId));
 	};
 
 	if (movieDataIsFetching || movieDataIsLoading || !movieData || !movieReviewsData) {

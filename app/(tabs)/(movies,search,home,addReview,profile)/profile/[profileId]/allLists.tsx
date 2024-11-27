@@ -1,16 +1,15 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useMemo, useState } from 'react';
 import { RefreshControl, View } from 'react-native';
 import { IconButton, Text, ActivityIndicator, Searchbar } from 'react-native-paper';
 import { FlatGrid } from 'react-native-super-grid';
 import useAuth from '@/hooks/useAuth';
-import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
-import CreateWatchListModal from '@/components/CreateWatchListModal';
 import { useGetUserWatchListsQuery } from '@/redux/api/tmrev';
 import { FromLocation } from '@/models';
 import MovieListItem from '@/components/MovieList/MovieListItem';
 import { GetUserWatchListPayload } from '@/models/tmrev/watchList';
 import useDebounce from '@/hooks/useDebounce';
+import { createListRoute } from '@/constants/routes';
 
 type AllListsSearchParams = {
 	profileId: string;
@@ -37,9 +36,6 @@ const AllListsPage: React.FC = () => {
 	}, [page, profileId, debouncedSearchTerm]);
 
 	const [refreshing, setRefreshing] = useState(false);
-	const [movies, setMovies] = useState<MovieGeneral[]>([]);
-	const [openCreateModal, setOpenCreateModal] = useState(false);
-
 	const { data, isLoading, isFetching } = useGetUserWatchListsQuery(query, {
 		skip: !profileId,
 	});
@@ -63,7 +59,7 @@ const AllListsPage: React.FC = () => {
 	}, [data, page]);
 
 	const handleOpenBottomSheet = () => {
-		setOpenCreateModal(true);
+		router.push(createListRoute(from!));
 	};
 
 	if (isLoading || !data) {
@@ -126,12 +122,6 @@ const AllListsPage: React.FC = () => {
 
 					return null;
 				}}
-			/>
-			<CreateWatchListModal
-				handleClose={() => setOpenCreateModal(false)}
-				open={openCreateModal}
-				movies={movies}
-				setMovies={setMovies}
 			/>
 		</>
 	);

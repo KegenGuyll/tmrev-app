@@ -1,5 +1,5 @@
 /* eslint-disable react/no-unstable-nested-components */
-import { Stack, useLocalSearchParams, useNavigation } from 'expo-router';
+import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { View, Alert, RefreshControl } from 'react-native';
 import { Divider, IconButton, Menu, Snackbar, Surface, Text } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -19,10 +19,10 @@ import { MovieDetails } from '@/models/tmrev/review';
 import MoviePoster, { MoviePosterImage } from '@/components/MoviePoster';
 import EditRankPosition from '@/features/listDetails/EditRankPosition';
 import { WatchList } from '@/models/tmrev';
-import EditListDetails from '@/features/listDetails/EditDetails';
 import useDebounce from '@/hooks/useDebounce';
 import AddMovieToListModal from '@/features/listDetails/AddMovieToCurrentListModal';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
+import { createListRoute } from '@/constants/routes';
 
 type ListDetailsPageSearchParams = {
 	listId: string;
@@ -100,10 +100,10 @@ const ListDetailsPage: React.FC = () => {
 	const [hasSaved, setHasSaved] = useState(false);
 	const [menuVisible, setMenuVisible] = useState(false);
 	const [snackBarMessage, setSnackBarMessage] = useState('');
-	const [editDetails, setEditDetails] = useState(false);
 	const [addMovie, setAddMovie] = useState(false);
 	const [newMovies, setNewMovies] = useState<MovieGeneral[]>([]);
 	const [isRefreshing, setIsRefreshing] = useState(false);
+	const router = useRouter();
 
 	const debounceRankedList = useDebounce(JSON.stringify(rankedList), 2500);
 
@@ -375,25 +375,12 @@ const ListDetailsPage: React.FC = () => {
 
 	const handleOpenEditModal = () => {
 		setMenuVisible(false);
-		setEditDetails(true);
+		router.push(createListRoute(from || 'profile', '', listId));
 	};
 
 	const handleOpenAddMovies = () => {
 		setMenuVisible(false);
 		setAddMovie(true);
-	};
-
-	const updateValues = (
-		key: 'title' | 'description' | 'movies',
-		value: string | MovieDetails[]
-	) => {
-		if (key === 'title') {
-			setTitle(value as string);
-		} else if (key === 'description') {
-			setDescription(value as string);
-		} else {
-			setRankedList(value as MovieDetails[]);
-		}
 	};
 
 	const handleLongPress = (item: MovieDetails) => {
@@ -534,7 +521,7 @@ const ListDetailsPage: React.FC = () => {
 				onDismiss={() => setAddMovie(false)}
 				setMovies={setNewMovies}
 			/>
-			<EditListDetails
+			{/* <EditListDetails
 				visible={editDetails}
 				onDismiss={() => setEditDetails(false)}
 				updateValue={updateValues}
@@ -542,7 +529,7 @@ const ListDetailsPage: React.FC = () => {
 				title={title}
 				description={description}
 				handleSave={handleUpdateWatchList}
-			/>
+			/> */}
 			{selectedMovie && (
 				<EditRankPosition
 					data={selectedMovie}
