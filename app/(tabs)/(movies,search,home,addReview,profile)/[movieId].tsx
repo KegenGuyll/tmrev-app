@@ -462,11 +462,14 @@ const MovieDetails = () => {
 								</Button>
 							</View>
 							<MovieHorizontalGrid
-								data={[...movieCollection.parts].sort(sortByReleaseDate).map((m) => ({
-									uniqueId: m.id.toString(),
-									movieId: m.id,
-									moviePoster: m.poster_path,
-								}))}
+								data={[...movieCollection.parts]
+									.filter((m) => m.release_date)
+									.sort(sortByReleaseDate)
+									.map((m) => ({
+										uniqueId: m.id.toString(),
+										movieId: m.id,
+										moviePoster: m.poster_path,
+									}))}
 								selectedMovieId={Number(movieId)}
 								posterHeight={150}
 								posterSelectionLocation={from || 'movies'}
