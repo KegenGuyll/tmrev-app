@@ -1,22 +1,21 @@
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View } from 'react-native';
 import { Searchbar, Snackbar } from 'react-native-paper';
 import { FlatGrid } from 'react-native-super-grid';
-import { TouchableHighlight } from 'react-native-gesture-handler';
 import { useFindMoviesQuery } from '@/redux/api/tmdb/searchApi';
-import { MoviePosterImage } from '@/components/MoviePoster';
+import MoviePoster from '@/components/MoviePoster';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
-import MovieDiscoverGrid from '@/components/MovieDiscoverGrid';
 import { loginRoute, reviewFunctionRoute } from '@/constants/routes';
 import useDebounce from '@/hooks/useDebounce';
 import { reviewLoginPrompt } from '@/constants/messages';
 import useAuth from '@/hooks/useAuth';
+import { useGetMovieDiscoverQuery } from '@/redux/api/tmdb/movieApi';
+import { SortBy } from '@/models/tmdb/movie/movieDiscover';
 
 const AddReviewPage = () => {
 	const [searchQuery, setSearchQuery] = useState('');
-	const [selectedMovie, setSelectedMovie] = useState<MovieGeneral | null>(null);
-	const styles = makeStyles();
+	const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 	const router = useRouter();
 
 	const { currentUser } = useAuth({});
@@ -27,59 +26,74 @@ const AddReviewPage = () => {
 		query: debouncedSearchTerm,
 	});
 
+	const { data: discoverData } = useGetMovieDiscoverQuery(
+		{
+			params: {
+				language: 'en-US',
+				sort_by: SortBy.MOST_POPULAR,
+				include_adult: false,
+				include_video: false,
+				page: 1,
+			},
+		},
+		{ skip: !!searchQuery }
+	);
+
 	const handlePosterSelection = (item: MovieGeneral) => {
-		router.navigate(reviewFunctionRoute('addReview', item.id, 'create'));
+		if (!currentUser) {
+			setShowLoginPrompt(true);
+		} else {
+			router.navigate(reviewFunctionRoute('addReview', item.id, 'create'));
+		}
 	};
+
+	const results = useMemo(() => {
+		if (movieData?.results.length) {
+			const movieDataResults = [...movieData.results];
+			return movieDataResults.sort((a, b) => b.popularity - a.popularity);
+		}
+
+		if (discoverData?.results.length) {
+			const discoverDataResults = [...discoverData.results];
+			return discoverDataResults.sort((a, b) => b.popularity - a.popularity);
+		}
+
+		return [];
+	}, [movieData, discoverData]);
 
 	return (
 		<>
 			<View>
-				{!searchQuery && (
-					<MovieDiscoverGrid
-						ListHeaderComponent={
-							<Searchbar
-								style={{ marginBottom: 16 }}
-								placeholder="Search..."
-								value={searchQuery}
-								onChangeText={(t) => setSearchQuery(t)}
-							/>
-						}
-						itemDimension={75}
-						imageHeight={125}
-						from="addReview"
-						onPress={(item) => handlePosterSelection(item)}
-					/>
-				)}
-				{movieData && (
-					<FlatGrid
-						ListHeaderComponent={
-							<Searchbar
-								style={{ marginBottom: 16 }}
-								placeholder="Search..."
-								value={searchQuery}
-								onChangeText={(t) => setSearchQuery(t)}
-							/>
-						}
-						itemDimension={75}
-						style={styles.list}
-						data={movieData?.results}
-						spacing={8}
-						renderItem={({ item }) => (
-							<TouchableHighlight onPress={() => handlePosterSelection(item)}>
-								<MoviePosterImage moviePoster={item.poster_path} height={125} />
-							</TouchableHighlight>
-						)}
-						keyExtractor={(item) => item.id.toString()}
-					/>
-				)}
+				<FlatGrid
+					itemDimension={75}
+					ListHeaderComponentStyle={{ paddingVertical: 12 }}
+					ListHeaderComponent={
+						<Searchbar
+							placeholder="Search for Movie to Review..."
+							value={searchQuery}
+							onChangeText={(t) => setSearchQuery(t)}
+						/>
+					}
+					data={results}
+					renderItem={({ item }) => (
+						<MoviePoster
+							onPress={() => handlePosterSelection(item)}
+							movieId={item.id}
+							moviePoster={item.poster_path}
+							location="addReview"
+							height={125}
+							width={75}
+						/>
+					)}
+				/>
 			</View>
 			<Snackbar
-				onDismiss={() => setSelectedMovie(null)}
+				onDismiss={() => setShowLoginPrompt(false)}
 				action={{
 					label: 'Login',
 					onPress: () => router.navigate(loginRoute()),
 				}}
-				visible={!currentUser && !!selectedMovie}
+				visible={showLoginPrompt}
 			>
 				{reviewLoginPrompt}
 			</Snackbar>
@@ -88,25 +102,3 @@ const AddReviewPage = () => {
 };
 
 export default AddReviewPage;
-
-const makeStyles = () =>
-	StyleSheet.create({
-		container: {
-			flex: 1,
-		},
-		list: {
-			display: 'flex',
-			flexDirection: 'row',
-			flexWrap: 'wrap',
-		},
-		bottomSheetContainer: {
-			flex: 1,
-			display: 'flex',
-			flexDirection: 'column',
-			padding: 16,
-			gap: 32,
-		},
-		customHandleStyle: {
-			backgroundColor: 'white',
-		},
-	});
