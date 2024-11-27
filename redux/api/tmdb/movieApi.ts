@@ -39,10 +39,7 @@ import { MovieTrendingPayload, MovieTrendingResponse } from '@/models/tmdb/movie
 import { MovieCollectionResponse } from '@/models/tmdb/movie/movieCollection';
 
 export const movieApi = createApi({
-	baseQuery: fetchBaseQuery({
-		baseUrl: `${tmdbBaseUrl}`,
-		prepareHeaders: (headers) => headers,
-	}),
+	baseQuery: fetchBaseQuery({ baseUrl: `${tmdbBaseUrl}`, prepareHeaders: (headers) => headers }),
 	endpoints: (builder) => ({
 		getMovieCollection: builder.query<MovieCollectionResponse, number>({
 			query: (data) => ({
@@ -86,6 +83,25 @@ export const movieApi = createApi({
 				},
 				url: `/movie/${movie_id}`,
 			}),
+		}),
+		getManyMovieDetails: builder.query<IMovieDetailResponse[], number[]>({
+			// eslint-disable-next-line no-empty-pattern
+			async queryFn(args, {}, extraOptions, baseQuery) {
+				try {
+					const results = await Promise.all(
+						args.map((id) =>
+							baseQuery({
+								url: `/movie/${id}`,
+								params: { api_key: tmdbAPIKey },
+							})
+						)
+					);
+
+					return { data: results.map((response) => response.data as IMovieDetailResponse) } as any;
+				} catch (error) {
+					return { error };
+				}
+			},
 		}),
 		getMovieDiscover: builder.query<IMovieDiscoverResponse, IMovieDiscoverQuery>({
 			query: ({ params }) => ({
@@ -269,4 +285,5 @@ export const {
 	useGetWatchProviderListQuery,
 	useGetTrendingMoviesQuery,
 	useGetMovieCollectionQuery,
+	useGetManyMovieDetailsQuery,
 } = movieApi;
