@@ -105,11 +105,12 @@ export const profileInsightNavigationRoute = (from: FromLocation, profileId: str
 	return `${baseTabUrl}/(${from})/profile/${profileId}/insights?from=${from}`;
 };
 
-export const createListRoute = (from: FromLocation, movieIds: string, listId?: string) => {
-	let url = `${baseTabUrl}/(${from})/profile/list/createList?${movieIds}&from=${from}`;
+export const createListRoute = (from: FromLocation, movieIds?: string, listId?: string) => {
+	let url = `${baseTabUrl}/(${from})/profile/list/createList?movieIds=${movieIds}&from=${from}`;
 	if (listId) {
 		url += `&listId=${listId}`;
 	}
+
 	return url;
 };
 
