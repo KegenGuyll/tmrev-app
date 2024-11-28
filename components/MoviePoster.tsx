@@ -27,11 +27,13 @@ type MoviePosterProps = {
 	rankedPosition?: number;
 	onLongPress?: ((event: GestureResponderEvent) => void) | undefined;
 	overlayComponent?: React.ReactNode;
+	customSelectedColor?: string;
 };
 
 type MoviePosterStyleProps = {
 	height?: number;
 	width?: number;
+	selectedColor?: string;
 };
 
 type MoviePosterImageSize = 92 | 154 | 185 | 342 | 500 | 780 | 'original';
@@ -44,6 +46,7 @@ type MoviePosterImageProps = {
 	isSelected?: boolean;
 	posterSize?: MoviePosterImageSize;
 	rankedPosition?: number;
+	customSelectedColor?: string;
 };
 
 type RankedNumberOverlayProps = {
@@ -102,8 +105,9 @@ export const MoviePosterImage: React.FC<MoviePosterImageProps> = ({
 	isSelected,
 	posterSize = 342,
 	rankedPosition,
+	customSelectedColor,
 }: MoviePosterImageProps) => {
-	const styles = makeStyles({ height, width });
+	const styles = makeStyles({ height, width, selectedColor: customSelectedColor });
 
 	if (rankedPosition && moviePoster) {
 		return (
@@ -156,6 +160,7 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 	rankedPosition,
 	onLongPress,
 	overlayComponent,
+	customSelectedColor,
 }: MoviePosterProps) => {
 	const router = useRouter();
 
@@ -168,6 +173,7 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 					height={height}
 					width={width}
 					rankedPosition={rankedPosition}
+					customSelectedColor={customSelectedColor}
 				/>
 				{overlayComponent}
 			</View>
@@ -192,6 +198,7 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 					height={height}
 					width={width}
 					rankedPosition={rankedPosition}
+					customSelectedColor={customSelectedColor}
 				/>
 				{overlayComponent}
 			</View>
@@ -201,7 +208,7 @@ const MoviePoster: React.FC<MoviePosterProps> = ({
 
 export default MoviePoster;
 
-const makeStyles = ({ height = 175, width = 100 }: MoviePosterStyleProps) =>
+const makeStyles = ({ height = 175, width = 100, selectedColor = 'red' }: MoviePosterStyleProps) =>
 	StyleSheet.create({
 		moviePoster: {
 			width: width ?? 100,
@@ -223,7 +230,7 @@ const makeStyles = ({ height = 175, width = 100 }: MoviePosterStyleProps) =>
 			backgroundColor: '#121212',
 		},
 		selected: {
-			borderColor: 'red',
+			borderColor: selectedColor,
 			borderWidth: 2,
 		},
 	});
