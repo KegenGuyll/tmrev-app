@@ -1,4 +1,4 @@
-import { MovieDetails } from './review';
+import { MovieDetails, TmrevReview } from './review';
 
 interface WatchList {
 	_id: string;
@@ -86,6 +86,44 @@ type GetWatchListDetailsPayload = {
 	listId: string;
 };
 
+type GetWatchListMovie = {
+	id: number;
+	budget: number;
+	runtime: number;
+	title: string;
+	reviews: TmrevReview[];
+	order: number;
+	poster_path: string;
+	backdrop_path: string;
+};
+
+type GetWatchListInsightsBody = {
+	_id: string;
+	tags: string[];
+	public: boolean;
+	description: string;
+	title: string;
+	createdAt: string;
+	updatedAt: string;
+	userId: string;
+	movies: GetWatchListMovie[];
+	user: {
+		username: string;
+		photoUrl: string;
+		uuid: string;
+	};
+	totalBudget: number;
+	totalRuntime: number;
+	totalRevenue: number;
+	completionPercentage: number;
+	averageAdvancedScore: number;
+};
+
+type GetWatchListInsightsResponse = {
+	success: boolean;
+	body: GetWatchListInsightsBody;
+};
+
 export type {
 	AddMovieToWatchList,
 	GetListPayload,
@@ -98,4 +136,7 @@ export type {
 	GetUserWatchListPayload,
 	GetWatchListDetailsResponse,
 	GetWatchListDetailsPayload,
+	GetWatchListInsightsResponse,
+	GetWatchListInsightsBody,
+	GetWatchListMovie,
 };
