@@ -4,6 +4,7 @@ import { View, Alert, RefreshControl, StyleSheet, Image } from 'react-native';
 import {
 	Chip,
 	Divider,
+	Icon,
 	IconButton,
 	Menu,
 	ProgressBar,
@@ -494,6 +495,7 @@ const ListDetailsPage: React.FC = () => {
 									flexDirection: 'column',
 									gap: 8,
 									padding: 8,
+									width: '100%',
 								}}
 							>
 								<View>
@@ -555,8 +557,43 @@ const ListDetailsPage: React.FC = () => {
 							location={from!}
 							moviePoster={item.poster_path}
 							rankedPosition={index + 1}
-							customSelectedColor="green"
-							isSelected={item.reviews.length > 0}
+							overlayComponent={
+								item.reviews.length > 0 && (
+									<View
+										style={{
+											display: 'flex',
+											justifyContent: 'center',
+											alignItems: 'center',
+											position: 'absolute',
+											top: 0,
+											left: 0,
+											right: 0,
+											bottom: 0,
+											zIndex: 999,
+										}}
+									>
+										<View
+											// eslint-disable-next-line react-native/no-color-literals
+											style={{
+												top: 0,
+												left: 0,
+												right: 0,
+												bottom: 0,
+												backgroundColor: 'rgba(0,0,0,0.7)',
+												borderRadius: 25,
+												zIndex: 999,
+												height: 50,
+												width: 50,
+												display: 'flex',
+												justifyContent: 'center',
+												alignItems: 'center',
+											}}
+										>
+											<Icon size={25} source="eye" />
+										</View>
+									</View>
+								)
+							}
 							onPress={
 								selectedMovie
 									? () => setSelectedMovie({ position: index, details: item })
