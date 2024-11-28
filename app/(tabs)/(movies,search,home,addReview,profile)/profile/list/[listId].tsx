@@ -1,28 +1,40 @@
 /* eslint-disable react/no-unstable-nested-components */
 import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
-import { View, Alert, RefreshControl } from 'react-native';
-import { Divider, IconButton, Menu, Snackbar, Surface, Text } from 'react-native-paper';
+import { View, Alert, RefreshControl, StyleSheet, Image } from 'react-native';
+import {
+	Chip,
+	Divider,
+	Icon,
+	IconButton,
+	Menu,
+	ProgressBar,
+	Snackbar,
+	Surface,
+	Text,
+	useTheme,
+} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatGrid } from 'react-native-super-grid';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import dayjs from 'dayjs';
+import { LinearGradient } from 'expo-linear-gradient';
 import useAuth from '@/hooks/useAuth';
 import { FromLocation } from '@/models';
 import {
 	useDeleteWatchListMutation,
-	useGetWatchListDetailsQuery,
+	useGetWatchListInsightsQuery,
 	useUpdateWatchListMutation,
 } from '@/redux/api/tmrev';
 import { MovieDetails } from '@/models/tmrev/review';
 import MoviePoster, { MoviePosterImage } from '@/components/MoviePoster';
 import EditRankPosition from '@/features/listDetails/EditRankPosition';
-import { WatchList } from '@/models/tmrev';
 import useDebounce from '@/hooks/useDebounce';
-import AddMovieToListModal from '@/features/listDetails/AddMovieToCurrentListModal';
-import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import { createListRoute } from '@/constants/routes';
+import { formatRuntime, numberShortHand } from '@/utils/common';
+import { GetWatchListInsightsBody, GetWatchListMovie } from '@/models/tmrev/watchList';
+import imageUrl from '@/utils/imageUrl';
 
 type ListDetailsPageSearchParams = {
 	listId: string;
@@ -41,7 +53,7 @@ type ListMovieItemProps = {
 };
 
 type CachedData = {
-	data: WatchList;
+	data: GetWatchListInsightsBody;
 	date: Date;
 };
 
@@ -88,11 +100,11 @@ const ListMovieItem: React.FC<ListMovieItemProps> = ({
 const ListDetailsPage: React.FC = () => {
 	const { listId, profileId, from } = useLocalSearchParams<ListDetailsPageSearchParams>();
 	const [display, setDisplay] = useState<'grid' | 'list'>('grid');
-	const [rankedList, setRankedList] = useState<MovieDetails[]>([]);
+	const [rankedList, setRankedList] = useState<GetWatchListMovie[]>([]);
 	const bottomSheetEditRankRef = useRef<BottomSheetModal>(null);
 	const [selectedMovie, setSelectedMovie] = useState<{
 		position: number;
-		details: MovieDetails | null;
+		details: GetWatchListMovie | null;
 	} | null>(null);
 	const [title, setTitle] = useState('');
 	const [description, setDescription] = useState('');
@@ -100,21 +112,17 @@ const ListDetailsPage: React.FC = () => {
 	const [hasSaved, setHasSaved] = useState(false);
 	const [menuVisible, setMenuVisible] = useState(false);
 	const [snackBarMessage, setSnackBarMessage] = useState('');
-	const [addMovie, setAddMovie] = useState(false);
-	const [newMovies, setNewMovies] = useState<MovieGeneral[]>([]);
 	const [isRefreshing, setIsRefreshing] = useState(false);
 	const router = useRouter();
+	const theme = useTheme();
 
-	const debounceRankedList = useDebounce(JSON.stringify(rankedList), 2500);
+	const debounceRankedList = useDebounce(JSON.stringify(rankedList), 1500);
 
 	const { currentUser } = useAuth({});
 
 	const isCurrentUser = useMemo(() => currentUser?.uid === profileId, [currentUser, profileId]);
 
-	const { data, isLoading, refetch } = useGetWatchListDetailsQuery(
-		{ listId: listId! },
-		{ skip: !listId }
-	);
+	const { data, isLoading, refetch } = useGetWatchListInsightsQuery(listId!, { skip: !listId });
 
 	const handleRefresh = async () => {
 		setIsRefreshing(true);
@@ -124,33 +132,6 @@ const ListDetailsPage: React.FC = () => {
 
 	const [updateWatchList] = useUpdateWatchListMutation();
 	const [deleteWatchList] = useDeleteWatchListMutation();
-
-	useEffect(() => {
-		if (newMovies.length) {
-			const formatNewMovies: MovieDetails[] = newMovies.map((movie) => ({
-				id: movie.id,
-				title: movie.title,
-				poster_path: movie.poster_path,
-				backdrop_path: movie.backdrop_path,
-				budget: movie.budget,
-				genres: movie.genres,
-				imdb_id: movie.imdb_id,
-				original_language: movie.original_language,
-				release_date: movie.release_date,
-				revenue: movie.revenue,
-				runtime: movie.runtime,
-			}));
-
-			const newList = [...rankedList, ...formatNewMovies];
-
-			// remove any duplicate ids
-			const uniqueMovies = newList.filter(
-				(movie, index, self) => index === self.findIndex((m) => m.id === movie.id)
-			);
-
-			setRankedList([...uniqueMovies]);
-		}
-	}, [newMovies]);
 
 	// check if there is any unsaved data in storage
 	const checkStorage = useCallback(async () => {
@@ -187,7 +168,7 @@ const ListDetailsPage: React.FC = () => {
 		}
 	}, [data]);
 
-	const handleLoadStoredData = (cachedData: WatchList) => {
+	const handleLoadStoredData = (cachedData: GetWatchListInsightsBody) => {
 		if (cachedData) {
 			setTitle(cachedData.title);
 			setDescription(cachedData.description);
@@ -380,10 +361,10 @@ const ListDetailsPage: React.FC = () => {
 
 	const handleOpenAddMovies = () => {
 		setMenuVisible(false);
-		setAddMovie(true);
+		router.push(createListRoute(from || 'profile', '', listId));
 	};
 
-	const handleLongPress = (item: MovieDetails) => {
+	const handleLongPress = (item: GetWatchListMovie) => {
 		if (!isCurrentUser) return;
 
 		setSelectedMovie({ position: rankedList.indexOf(item), details: item });
@@ -483,7 +464,7 @@ const ListDetailsPage: React.FC = () => {
 							canMoveDown={index === rankedList.length - 1}
 							handleMoveDownInRank={handleMoveDownInRank}
 							handleMoveUpInRank={handleMoveUpInRank}
-							item={item}
+							item={item as any}
 							index={index}
 						/>
 					)}
@@ -492,6 +473,77 @@ const ListDetailsPage: React.FC = () => {
 			)}
 			{display === 'grid' && (
 				<FlatGrid
+					ListHeaderComponentStyle={styles.backgroundImageContainer}
+					ListHeaderComponent={
+						<View>
+							<Image
+								style={styles.backgroundImage}
+								source={{
+									uri: imageUrl(data.body.movies[0].backdrop_path as string),
+								}}
+							/>
+							<LinearGradient
+								colors={['transparent', 'rgba(0,0,0,0.8)', 'rgba(0,0,0,1)']}
+								style={styles.backgroundImageOverlay}
+							/>
+							<View
+								style={{
+									position: 'absolute',
+									bottom: -20,
+									zIndex: 999,
+									display: 'flex',
+									flexDirection: 'column',
+									gap: 8,
+									padding: 8,
+									width: '100%',
+								}}
+							>
+								<View>
+									<Text variant="headlineLarge">{title}</Text>
+									<Text variant="bodyLarge" ellipsizeMode="tail" numberOfLines={3.5}>
+										{description}
+									</Text>
+								</View>
+								<View
+									style={{
+										display: 'flex',
+										flexDirection: 'column',
+										gap: 3,
+									}}
+								>
+									<Text variant="labelSmall">
+										{data.body.user.username} has watched {data.body.completionPercentage}% of this
+										list
+									</Text>
+									<ProgressBar
+										style={{ width: '100%', flex: 1, flexGrow: 1 }}
+										progress={data.body.completionPercentage / 100}
+										color={
+											data.body.completionPercentage / 100 === 1 ? 'green' : theme.colors.primary
+										}
+									/>
+								</View>
+								<View
+									style={{
+										display: 'flex',
+										flexWrap: 'wrap',
+										flexDirection: 'row',
+										gap: 8,
+									}}
+								>
+									<Chip icon="star">
+										<Text>{data.body.averageAdvancedScore || 'N/A'}</Text>
+									</Chip>
+									<Chip icon="clock-time-four-outline">
+										<Text>{formatRuntime(data.body.totalRuntime)}</Text>
+									</Chip>
+									<Chip icon="cash">
+										<Text>{numberShortHand(data.body.totalBudget)}</Text>
+									</Chip>
+								</View>
+							</View>
+						</View>
+					}
 					refreshControl={
 						<RefreshControl tintColor="white" refreshing={isRefreshing} onRefresh={handleRefresh} />
 					}
@@ -505,6 +557,43 @@ const ListDetailsPage: React.FC = () => {
 							location={from!}
 							moviePoster={item.poster_path}
 							rankedPosition={index + 1}
+							overlayComponent={
+								item.reviews.length > 0 && (
+									<View
+										style={{
+											display: 'flex',
+											justifyContent: 'center',
+											alignItems: 'center',
+											position: 'absolute',
+											top: 0,
+											left: 0,
+											right: 0,
+											bottom: 0,
+											zIndex: 999,
+										}}
+									>
+										<View
+											// eslint-disable-next-line react-native/no-color-literals
+											style={{
+												top: 0,
+												left: 0,
+												right: 0,
+												bottom: 0,
+												backgroundColor: 'rgba(0,0,0,0.7)',
+												borderRadius: 25,
+												zIndex: 999,
+												height: 50,
+												width: 50,
+												display: 'flex',
+												justifyContent: 'center',
+												alignItems: 'center',
+											}}
+										>
+											<Icon size={25} source="eye" />
+										</View>
+									</View>
+								)
+							}
 							onPress={
 								selectedMovie
 									? () => setSelectedMovie({ position: index, details: item })
@@ -516,23 +605,9 @@ const ListDetailsPage: React.FC = () => {
 					keyExtractor={(item) => `${item.id}`}
 				/>
 			)}
-			<AddMovieToListModal
-				visible={addMovie}
-				onDismiss={() => setAddMovie(false)}
-				setMovies={setNewMovies}
-			/>
-			{/* <EditListDetails
-				visible={editDetails}
-				onDismiss={() => setEditDetails(false)}
-				updateValue={updateValues}
-				rankedList={rankedList}
-				title={title}
-				description={description}
-				handleSave={handleUpdateWatchList}
-			/> */}
 			{selectedMovie && (
 				<EditRankPosition
-					data={selectedMovie}
+					data={selectedMovie as any}
 					clearSelectedMovie={() => setSelectedMovie(null)}
 					updatePosition={handleSetRank}
 					maxRank={rankedList.length - 1}
@@ -554,5 +629,27 @@ const ListDetailsPage: React.FC = () => {
 		</>
 	);
 };
+
+const styles = StyleSheet.create({
+	backgroundImageContainer: {
+		width: '100%',
+		height: 400,
+		position: 'relative',
+		marginBottom: 32,
+	},
+	backgroundImage: {
+		width: '100%',
+		height: 400,
+		zIndex: 1,
+	},
+	backgroundImageOverlay: {
+		position: 'absolute',
+		left: 0,
+		right: 0,
+		top: 0,
+		height: '100%',
+		zIndex: 999,
+	},
+});
 
 export default ListDetailsPage;

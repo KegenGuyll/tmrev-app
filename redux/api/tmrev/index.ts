@@ -67,6 +67,7 @@ import {
 	GetUserWatchListResponse,
 	GetWatchListDetailsPayload,
 	GetWatchListDetailsResponse,
+	GetWatchListInsightsResponse,
 	UpdateWatchList,
 } from '@/models/tmrev/watchList';
 import { IMovieQueryGeneral } from '@/models/tmdb/movie/tmdbMovie';
@@ -333,6 +334,12 @@ export const tmrevApi = createApi({
 			providesTags: ['WATCH_LIST'],
 			query: (body) => ({
 				url: `/movie/v2/user/watchlist/${body.listId}`,
+			}),
+		}),
+		getWatchListInsights: builder.query<GetWatchListInsightsResponse, string>({
+			providesTags: ['WATCH_LIST'],
+			query: (listId) => ({
+				url: `/watch-list/${listId}/insights`,
 			}),
 		}),
 		createWatched: builder.mutation<WatchedResponse, WatchedPayload>({
@@ -849,6 +856,7 @@ export const {
 	useGetReviewsByActorQuery,
 	useGetUserMovieActivityInsightsQuery,
 	useGetReviewsByMovieIdQuery,
+	useGetWatchListInsightsQuery,
 	util: { getRunningQueriesThunk },
 } = tmrevApi;
 
