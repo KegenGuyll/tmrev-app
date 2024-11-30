@@ -23,6 +23,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import useAuth from '@/hooks/useAuth';
 import { FromLocation } from '@/models';
 import {
+	useCreateWatchListMutation,
 	useDeleteWatchListMutation,
 	useGetWatchListInsightsQuery,
 	useUpdateWatchListMutation,
@@ -31,10 +32,12 @@ import { MovieDetails } from '@/models/tmrev/review';
 import MoviePoster, { MoviePosterImage } from '@/components/MoviePoster';
 import EditRankPosition from '@/features/listDetails/EditRankPosition';
 import useDebounce from '@/hooks/useDebounce';
-import { createListRoute } from '@/constants/routes';
+import { createListRoute, listDetailsRoute } from '@/constants/routes';
 import { formatRuntime, numberShortHand } from '@/utils/common';
 import { GetWatchListInsightsBody, GetWatchListMovie } from '@/models/tmrev/watchList';
 import imageUrl from '@/utils/imageUrl';
+import { useAppDispatch } from '@/hooks/reduxHooks';
+import { showSnackbar } from '@/redux/slice/globalSnackbar';
 
 type ListDetailsPageSearchParams = {
 	listId: string;
@@ -115,6 +118,7 @@ const ListDetailsPage: React.FC = () => {
 	const [isRefreshing, setIsRefreshing] = useState(false);
 	const router = useRouter();
 	const theme = useTheme();
+	const dispatch = useAppDispatch();
 
 	const debounceRankedList = useDebounce(JSON.stringify(rankedList), 1500);
 
@@ -131,6 +135,7 @@ const ListDetailsPage: React.FC = () => {
 	};
 
 	const [updateWatchList] = useUpdateWatchListMutation();
+	const [createWatchList] = useCreateWatchListMutation();
 	const [deleteWatchList] = useDeleteWatchListMutation();
 
 	// check if there is any unsaved data in storage
@@ -336,6 +341,36 @@ const ListDetailsPage: React.FC = () => {
 		[data, description, listId, rankedList, title, updateWatchList]
 	);
 
+	// clone watchlist
+	const handleCloneWatchList = async () => {
+		if (!data) return;
+
+		try {
+			const response = await createWatchList({
+				title: title || data!.body.title,
+				description: description || data!.body.description,
+				public: data!.body.public,
+				tags: data!.body.tags,
+				movies: rankedList.map((movie, index) => ({ order: index, tmdbID: movie.id })),
+			}).unwrap();
+
+			setMenuVisible(false);
+
+			dispatch(
+				showSnackbar({
+					message: `Successfully Cloned ${title || data!.body.title}`,
+					type: 'success',
+				})
+			);
+
+			router.push(listDetailsRoute(from || 'profile', response._id, currentUser?.uid || ''));
+		} catch (error) {
+			dispatch(
+				showSnackbar({ message: `Error Cloning ${title || data!.body.title}`, type: 'error' })
+			);
+		}
+	};
+
 	const handleDeleteWatchList = async () => {
 		if (!data) return;
 
@@ -396,56 +431,68 @@ const ListDetailsPage: React.FC = () => {
 								alignItems: 'center',
 							}}
 						>
-							{isCurrentUser && (
-								<Menu
-									contentStyle={{ padding: 0, margin: 0 }}
-									visible={menuVisible}
-									onDismiss={() => setMenuVisible(false)}
-									anchor={<IconButton icon="dots-vertical" onPress={() => setMenuVisible(true)} />}
-								>
-									{display === 'grid' && (
-										<Menu.Item
-											leadingIcon="view-list"
-											onPress={handleDisplayChange}
-											title="List View"
-										/>
-									)}
-									{display === 'list' && (
-										<Menu.Item
-											leadingIcon="view-grid"
-											onPress={handleDisplayChange}
-											title="Grid View"
-										/>
-									)}
-									<Divider />
-									<Menu.Item leadingIcon="plus" onPress={handleOpenAddMovies} title="Add Movies" />
-									<Menu.Item leadingIcon="pencil" onPress={handleOpenEditModal} title="Edit" />
+							<Menu
+								contentStyle={{ padding: 0, margin: 0 }}
+								visible={menuVisible}
+								onDismiss={() => setMenuVisible(false)}
+								anchor={<IconButton icon="dots-vertical" onPress={() => setMenuVisible(true)} />}
+							>
+								{display === 'grid' && (
 									<Menu.Item
-										leadingIcon="content-save"
-										onPress={() => handleUpdateWatchList()}
-										title="Save"
+										leadingIcon="view-list"
+										onPress={handleDisplayChange}
+										title="List View"
 									/>
-									<Divider />
+								)}
+								{display === 'list' && (
 									<Menu.Item
-										leadingIcon="delete"
-										onPress={() => {
-											setMenuVisible(false);
-											Alert.alert('Delete List', 'Are you sure you want to delete this list?', [
-												{
-													text: 'Cancel',
-													style: 'cancel',
-												},
-												{
-													text: 'Delete',
-													style: 'destructive',
-													onPress: handleDeleteWatchList,
-												},
-											]);
-										}}
-										title="Delete"
+										leadingIcon="view-grid"
+										onPress={handleDisplayChange}
+										title="Grid View"
 									/>
-								</Menu>
-							)}
+								)}
+								{isCurrentUser ? (
+									<>
+										<Divider />
+										<Menu.Item
+											leadingIcon="plus"
+											onPress={handleOpenAddMovies}
+											title="Add Movies"
+										/>
+										<Menu.Item leadingIcon="pencil" onPress={handleOpenEditModal} title="Edit" />
+										<Menu.Item
+											leadingIcon="content-save"
+											onPress={() => handleUpdateWatchList()}
+											title="Save"
+										/>
+										<Divider />
+										<Menu.Item
+											leadingIcon="delete"
+											onPress={() => {
+												setMenuVisible(false);
+												Alert.alert('Delete List', 'Are you sure you want to delete this list?', [
+													{
+														text: 'Cancel',
+														style: 'cancel',
+													},
+													{
+														text: 'Delete',
+														style: 'destructive',
+														onPress: handleDeleteWatchList,
+													},
+												]);
+											}}
+											title="Delete"
+										/>
+									</>
+								) : (
+									<Menu.Item
+										onPress={handleCloneWatchList}
+										leadingIcon="content-copy"
+										title="Clone List"
+									/>
+								)}
+							</Menu>
 						</View>
 					),
 				}}
