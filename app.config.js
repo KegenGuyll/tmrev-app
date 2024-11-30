@@ -2,7 +2,7 @@ module.exports = {
 	expo: {
 		name: 'tmrev',
 		slug: 'tmrev',
-		version: '1.4.1',
+		version: '1.5.0',
 		orientation: 'portrait',
 		icon: './assets/images/icon.png',
 		scheme: 'myapp',
@@ -34,7 +34,7 @@ module.exports = {
 			primaryColor: '#ffc000',
 			googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
 			package: 'com.tmrev',
-			versionCode: 4,
+			versionCode: 5,
 		},
 		web: {
 			bundler: 'metro',
