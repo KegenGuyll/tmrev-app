@@ -2,6 +2,7 @@ module.exports = {
 	expo: {
 		name: 'tmrev',
 		slug: 'tmrev',
+		owner: 'guyllk',
 		version: '1.5.0',
 		orientation: 'portrait',
 		icon: './assets/images/icon.png',
