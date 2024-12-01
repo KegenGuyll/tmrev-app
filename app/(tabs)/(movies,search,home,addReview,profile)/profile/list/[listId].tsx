@@ -2,6 +2,7 @@
 import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { View, Alert, RefreshControl, StyleSheet, Image } from 'react-native';
 import {
+	Button,
 	Chip,
 	Divider,
 	Icon,
@@ -418,6 +419,20 @@ const ListDetailsPage: React.FC = () => {
 		return <Text>{(data as any).error as string}</Text>;
 	}
 
+	if (!data.body.movies.length) {
+		return (
+			<>
+				<Stack.Screen options={{ title: title || data.body.title, headerRight: () => null }} />
+				<View style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 12 }}>
+					<Text variant="headlineLarge">This list is currently empty</Text>
+					<Button mode="contained" onPress={handleOpenAddMovies}>
+						Add Movies?
+					</Button>
+				</View>
+			</>
+		);
+	}
+
 	return (
 		<>
 			<Stack.Screen
@@ -526,7 +541,7 @@ const ListDetailsPage: React.FC = () => {
 							<Image
 								style={styles.backgroundImage}
 								source={{
-									uri: imageUrl(data.body.movies[0].backdrop_path as string),
+									uri: imageUrl(data.body.movies[0]?.backdrop_path as string),
 								}}
 							/>
 							<LinearGradient
