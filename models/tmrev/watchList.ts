@@ -1,3 +1,4 @@
+import { MovieWatchProvidersResult } from '../tmdb/movie/movieWatchProviders';
 import { MovieDetails, TmrevReview } from './review';
 
 interface WatchList {
@@ -95,6 +96,7 @@ type GetWatchListMovie = {
 	order: number;
 	poster_path: string;
 	backdrop_path: string;
+	watchProviders: MovieWatchProvidersResult | null;
 };
 
 type GetWatchListInsightsBody = {
