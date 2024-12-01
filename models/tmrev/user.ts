@@ -1,4 +1,5 @@
 import type { TmrevReview, WatchList } from '.';
+import ISO3166_1 from '../tmdb/ISO3166-1';
 
 type Link = {
 	title: string;
@@ -47,6 +48,7 @@ type UserV2 = {
 	followerCount: number;
 	followingCount: number;
 	isFollowing: boolean;
+	countryCode: ISO3166_1;
 };
 
 type IsUsernameAvailableResponse = {

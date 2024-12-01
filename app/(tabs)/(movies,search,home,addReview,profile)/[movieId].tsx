@@ -61,6 +61,7 @@ import {
 import useAuth from '@/hooks/useAuth';
 import MovieHorizontalGrid from '@/components/MovieHorizontalGrid';
 import { MovieCollectionPart } from '@/models/tmdb/movie/movieCollection';
+import WatchProviders from '@/components/MovieDetails/WatchProviders';
 
 type MovieDetailsParams = {
 	movieId: string;
@@ -320,6 +321,7 @@ const MovieDetails = () => {
 								</Chip>
 							)}
 					</Surface>
+					<WatchProviders movieId={movieId} />
 					<Surface
 						style={{
 							flexDirection: 'row',
