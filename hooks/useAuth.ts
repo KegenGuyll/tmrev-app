@@ -4,6 +4,9 @@ import { appleAuth } from '@invertase/react-native-apple-authentication';
 import { GOOGLE_WEB_CLIENT_ID, TMREV_API_URL } from '@env';
 import { useCallback, useEffect, useState } from 'react';
 import * as Sentry from '@sentry/react-native';
+import { UserV2 } from '@/models/tmrev/user';
+import { tmrevApi } from '@/redux/api/tmrev';
+import { useAppDispatch } from './reduxHooks';
 
 type CreateTMREVUser = {
 	bio: string;
@@ -36,11 +39,32 @@ type UseGoogleAuthInitialValues = {
 };
 
 const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) => {
+	const dispatch = useAppDispatch();
 	const [initializing, setInitializing] = useState(true);
 	const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
+	const [tmrevUser, setTMREVUser] = useState<UserV2 | null>(null);
+
+	// const { data: V2UserData } = useGetV2UserQuery(
+	// 	{ uid: user?.uid || '' },
+	// 	{ skip: !user || !user.uid }
+	// );
+
+	// useEffect(() => {
+	// 	if (V2UserData) {
+	// 		setTMREVUser(V2UserData.body);
+	// 	}
+	// }, [V2UserData]);
 
 	const onAuthStateChanged = useCallback((u: FirebaseAuthTypes.User | null) => {
 		setUser(u);
+		const promise = dispatch(tmrevApi.endpoints.getV2User.initiate({ uid: u?.uid || '' }));
+
+		promise.unwrap().then((res) => {
+			if (res.success) {
+				setTMREVUser(res.body);
+			}
+		});
+
 		if (initializing) setInitializing(false);
 	}, []);
 
@@ -231,6 +255,7 @@ const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) =>
 		emailSignIn,
 		emailSignUp,
 		currentUser: user,
+		tmrevUser,
 	};
 };
 

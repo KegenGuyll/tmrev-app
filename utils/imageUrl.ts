@@ -1,4 +1,4 @@
-const imageUrl = (path: string, w?: number | string, resized = true) => {
+const imageUrl = (path: string, w?: number | 'original', resized = true) => {
 	if (w === 'original') {
 		return `https://image.tmdb.org/t/p/original${path}`;
 	}

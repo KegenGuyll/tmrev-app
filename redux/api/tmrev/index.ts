@@ -92,6 +92,7 @@ import {
 } from '@/models/tmrev/insights';
 import { FeedQuery, FeedResponse } from '@/models/tmrev/feed';
 import { GetCommentResponse, GetCommentsResponse } from '@/models/tmrev/comments';
+import ISO3166_1 from '@/models/tmdb/ISO3166-1';
 
 export const tmrevApi = createApi({
 	baseQuery: fetchBaseQuery({
@@ -336,10 +337,16 @@ export const tmrevApi = createApi({
 				url: `/movie/v2/user/watchlist/${body.listId}`,
 			}),
 		}),
-		getWatchListInsights: builder.query<GetWatchListInsightsResponse, string>({
+		getWatchListInsights: builder.query<
+			GetWatchListInsightsResponse,
+			{ listId: string; region?: ISO3166_1 }
+		>({
 			providesTags: ['WATCH_LIST'],
-			query: (listId) => ({
+			query: ({ listId, region }) => ({
 				url: `/watch-list/${listId}/insights`,
+				params: {
+					watchProvidersRegion: region,
+				},
 			}),
 		}),
 		createWatched: builder.mutation<WatchedResponse, WatchedPayload>({

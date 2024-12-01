@@ -1,26 +1,13 @@
 /* eslint-disable react/no-unstable-nested-components */
 import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
-import { View, Alert, RefreshControl, StyleSheet, Image } from 'react-native';
-import {
-	Button,
-	Chip,
-	Divider,
-	Icon,
-	IconButton,
-	Menu,
-	ProgressBar,
-	Snackbar,
-	Surface,
-	Text,
-	useTheme,
-} from 'react-native-paper';
+import { View, Alert, RefreshControl, StyleSheet } from 'react-native';
+import { Button, Divider, IconButton, Menu, Snackbar, Text } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatGrid } from 'react-native-super-grid';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import dayjs from 'dayjs';
-import { LinearGradient } from 'expo-linear-gradient';
 import useAuth from '@/hooks/useAuth';
 import { FromLocation } from '@/models';
 import {
@@ -30,15 +17,17 @@ import {
 	useUpdateWatchListMutation,
 } from '@/redux/api/tmrev';
 import { MovieDetails } from '@/models/tmrev/review';
-import MoviePoster, { MoviePosterImage } from '@/components/MoviePoster';
 import EditRankPosition from '@/features/listDetails/EditRankPosition';
 import useDebounce from '@/hooks/useDebounce';
 import { createListRoute, listDetailsRoute } from '@/constants/routes';
-import { formatRuntime, numberShortHand } from '@/utils/common';
 import { GetWatchListInsightsBody, GetWatchListMovie } from '@/models/tmrev/watchList';
-import imageUrl from '@/utils/imageUrl';
 import { useAppDispatch } from '@/hooks/reduxHooks';
 import { showSnackbar } from '@/redux/slice/globalSnackbar';
+import ListHeaderComponent from '@/components/ListDetails/HeadComponent';
+import ListGridItem from '@/components/ListDetails/GridItem';
+import ListDetailItem from '@/components/ListDetails/ListItem';
+import { MovieBuy } from '@/models/tmdb/movie/movieWatchProviders';
+import WatchProviderItem from '@/components/ListDetails/WatchProviderItem';
 
 type ListDetailsPageSearchParams = {
 	listId: string;
@@ -46,64 +35,16 @@ type ListDetailsPageSearchParams = {
 	from: FromLocation;
 };
 
-type ListMovieItemProps = {
-	item: MovieDetails;
-	index: number;
-	handleMoveUpInRank: (index: number) => void;
-	handleMoveDownInRank: (index: number) => void;
-	canMoveUp: boolean;
-	canMoveDown: boolean;
-	isCurrentUser?: boolean;
-};
-
 type CachedData = {
 	data: GetWatchListInsightsBody;
 	date: Date;
 };
 
-const ListMovieItem: React.FC<ListMovieItemProps> = ({
-	item,
-	index,
-	handleMoveDownInRank,
-	handleMoveUpInRank,
-	canMoveUp,
-	canMoveDown,
-	isCurrentUser,
-}: ListMovieItemProps) => {
-	return (
-		<Surface style={{ padding: 8, borderRadius: 4 }}>
-			<View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 32 }}>
-				<View style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-					{isCurrentUser && (
-						<IconButton
-							disabled={canMoveUp}
-							onPress={() => handleMoveUpInRank(index)}
-							icon="arrow-up-thick"
-						/>
-					)}
-					<Text variant="bodyLarge">{index + 1}</Text>
-					{isCurrentUser && (
-						<IconButton
-							disabled={canMoveDown}
-							onPress={() => handleMoveDownInRank(index)}
-							icon="arrow-down-thick"
-						/>
-					)}
-				</View>
-				<View style={{ gap: 8 }}>
-					<Text ellipsizeMode="tail" numberOfLines={1} style={{ width: 250 }} variant="labelLarge">
-						{item.title}
-					</Text>
-					<MoviePosterImage moviePoster={item.poster_path} height={100} posterSize={154} />
-				</View>
-			</View>
-		</Surface>
-	);
-};
+type ListDisplays = 'grid' | 'list' | 'watchProvider';
 
 const ListDetailsPage: React.FC = () => {
 	const { listId, profileId, from } = useLocalSearchParams<ListDetailsPageSearchParams>();
-	const [display, setDisplay] = useState<'grid' | 'list'>('grid');
+	const [display, setDisplay] = useState<ListDisplays>('grid');
 	const [rankedList, setRankedList] = useState<GetWatchListMovie[]>([]);
 	const bottomSheetEditRankRef = useRef<BottomSheetModal>(null);
 	const [selectedMovie, setSelectedMovie] = useState<{
@@ -118,16 +59,77 @@ const ListDetailsPage: React.FC = () => {
 	const [snackBarMessage, setSnackBarMessage] = useState('');
 	const [isRefreshing, setIsRefreshing] = useState(false);
 	const router = useRouter();
-	const theme = useTheme();
 	const dispatch = useAppDispatch();
 
 	const debounceRankedList = useDebounce(JSON.stringify(rankedList), 1500);
 
-	const { currentUser } = useAuth({});
+	const { currentUser, tmrevUser } = useAuth({});
 
 	const isCurrentUser = useMemo(() => currentUser?.uid === profileId, [currentUser, profileId]);
 
-	const { data, isLoading, refetch } = useGetWatchListInsightsQuery(listId!, { skip: !listId });
+	const { data, isLoading, refetch } = useGetWatchListInsightsQuery(
+		{ listId: listId!, region: tmrevUser?.countryCode },
+		{ skip: !listId }
+	);
+
+	const availableFlatrates = useMemo(() => {
+		const flatrates: Record<string, MovieBuy> = {};
+
+		rankedList.forEach((movie) => {
+			movie.watchProviders?.flatrate?.forEach((provider) => {
+				if (!flatrates[provider.provider_id]) {
+					flatrates[provider.provider_id] = provider;
+				}
+			});
+		});
+
+		flatrates['0'] = {
+			provider_name: 'Not Available',
+			logo_path: '',
+			provider_id: 0,
+			display_priority: 0,
+		};
+
+		return flatrates;
+	}, [rankedList]);
+
+	const moviesByStreamingPlatform = useMemo(() => {
+		const platformMap: { [key: string]: GetWatchListMovie[] } = {};
+
+		rankedList.forEach((movie) => {
+			if (!movie.watchProviders?.flatrate) {
+				if (!platformMap['0']) {
+					platformMap['0'] = [];
+				}
+				platformMap['0'].push(movie);
+			} else {
+				movie.watchProviders?.flatrate?.forEach((provider) => {
+					if (!platformMap[provider.provider_id]) {
+						platformMap[provider.provider_id] = [];
+					}
+					platformMap[provider.provider_id].push(movie);
+				});
+			}
+		});
+
+		return platformMap;
+	}, [rankedList]);
+
+	const itemDimension = useCallback(() => {
+		if (display === 'grid') {
+			return 70;
+		}
+
+		if (display === 'list') {
+			return 400;
+		}
+
+		if (display === 'watchProvider') {
+			return 400;
+		}
+
+		return 70;
+	}, [display]);
 
 	const handleRefresh = async () => {
 		setIsRefreshing(true);
@@ -406,9 +408,9 @@ const ListDetailsPage: React.FC = () => {
 		setSelectedMovie({ position: rankedList.indexOf(item), details: item });
 	};
 
-	const handleDisplayChange = () => {
+	const handleDisplayChange = (newDisplay: ListDisplays) => {
 		setMenuVisible(false);
-		setDisplay((prev) => (prev === 'grid' ? 'list' : 'grid'));
+		setDisplay(newDisplay);
 	};
 
 	if (isLoading || !data) {
@@ -452,21 +454,25 @@ const ListDetailsPage: React.FC = () => {
 								onDismiss={() => setMenuVisible(false)}
 								anchor={<IconButton icon="dots-vertical" onPress={() => setMenuVisible(true)} />}
 							>
-								{display === 'grid' && (
-									<Menu.Item
-										leadingIcon="view-list"
-										onPress={handleDisplayChange}
-										title="List View"
-									/>
-								)}
-								{display === 'list' && (
-									<Menu.Item
-										leadingIcon="view-grid"
-										onPress={handleDisplayChange}
-										title="Grid View"
-									/>
-								)}
-								{isCurrentUser ? (
+								<Menu.Item
+									disabled={display === 'list'}
+									leadingIcon="view-list"
+									onPress={() => handleDisplayChange('list')}
+									title="List View"
+								/>
+								<Menu.Item
+									disabled={display === 'grid'}
+									leadingIcon="view-grid"
+									onPress={() => handleDisplayChange('grid')}
+									title="Grid View"
+								/>
+								<Menu.Item
+									disabled={display === 'watchProvider'}
+									leadingIcon="television"
+									onPress={() => handleDisplayChange('watchProvider')}
+									title="Where to Watch"
+								/>
+								{isCurrentUser && (
 									<>
 										<Divider />
 										<Menu.Item
@@ -480,7 +486,6 @@ const ListDetailsPage: React.FC = () => {
 											onPress={() => handleUpdateWatchList()}
 											title="Save"
 										/>
-										<Divider />
 										<Menu.Item
 											leadingIcon="delete"
 											onPress={() => {
@@ -500,173 +505,82 @@ const ListDetailsPage: React.FC = () => {
 											title="Delete"
 										/>
 									</>
-								) : (
-									<Menu.Item
-										onPress={handleCloneWatchList}
-										leadingIcon="content-copy"
-										title="Clone List"
-									/>
 								)}
+								<Divider />
+								<Menu.Item
+									onPress={handleCloneWatchList}
+									leadingIcon="content-copy"
+									title="Clone List"
+								/>
 							</Menu>
 						</View>
 					),
 				}}
 			/>
-			{display === 'list' && (
-				<FlatGrid
-					refreshControl={
-						<RefreshControl tintColor="white" refreshing={isRefreshing} onRefresh={handleRefresh} />
-					}
-					data={rankedList}
-					itemDimension={400}
-					renderItem={({ item, index }) => (
-						<ListMovieItem
-							isCurrentUser={isCurrentUser}
-							canMoveUp={index === 0}
-							canMoveDown={index === rankedList.length - 1}
-							handleMoveDownInRank={handleMoveDownInRank}
-							handleMoveUpInRank={handleMoveUpInRank}
-							item={item as any}
-							index={index}
-						/>
-					)}
-					keyExtractor={(item, index) => `${item.id}-${index}`}
-				/>
-			)}
-			{display === 'grid' && (
-				<FlatGrid
-					ListHeaderComponentStyle={styles.backgroundImageContainer}
-					ListHeaderComponent={
-						<View>
-							<Image
-								style={styles.backgroundImage}
-								source={{
-									uri: imageUrl(data.body.movies[0]?.backdrop_path as string),
-								}}
+			<FlatGrid
+				ListHeaderComponentStyle={styles.backgroundImageContainer}
+				ListHeaderComponent={
+					<ListHeaderComponent
+						title={title || data.body.title}
+						backdropPath={data.body.movies[0].backdrop_path}
+						averageAdvancedScore={data.body.averageAdvancedScore}
+						completionPercentage={data.body.completionPercentage}
+						description={description}
+						totalBudget={data.body.totalBudget}
+						totalRuntime={data.body.totalRuntime}
+						username={tmrevUser?.username || ''}
+					/>
+				}
+				refreshControl={
+					<RefreshControl tintColor="white" refreshing={isRefreshing} onRefresh={handleRefresh} />
+				}
+				data={rankedList}
+				itemDimension={itemDimension()}
+				contentContainerStyle={{ paddingBottom: selectedMovie ? 200 : 0 }}
+				renderItem={({ item, index }) => {
+					if (display === 'grid') {
+						return (
+							<ListGridItem
+								item={item}
+								index={index}
+								from={from!}
+								selectedMovie={selectedMovie}
+								setSelectedMovie={setSelectedMovie}
+								handleLongPress={handleLongPress}
 							/>
-							<LinearGradient
-								colors={['transparent', 'rgba(0,0,0,0.8)', 'rgba(0,0,0,1)']}
-								style={styles.backgroundImageOverlay}
+						);
+					}
+
+					if (display === 'list') {
+						return (
+							<ListDetailItem
+								isCurrentUser={isCurrentUser}
+								canMoveUp={index === 0}
+								canMoveDown={index === rankedList.length - 1}
+								handleMoveDownInRank={handleMoveDownInRank}
+								handleMoveUpInRank={handleMoveUpInRank}
+								item={item}
+								index={index}
 							/>
-							<View
-								style={{
-									position: 'absolute',
-									bottom: -20,
-									zIndex: 999,
-									display: 'flex',
-									flexDirection: 'column',
-									gap: 8,
-									padding: 8,
-									width: '100%',
-								}}
-							>
-								<View>
-									<Text variant="headlineLarge">{title}</Text>
-									<Text variant="bodyLarge" ellipsizeMode="tail" numberOfLines={3.5}>
-										{description}
-									</Text>
-								</View>
-								<View
-									style={{
-										display: 'flex',
-										flexDirection: 'column',
-										gap: 3,
-									}}
-								>
-									<Text variant="labelSmall">
-										{data.body.user.username} has watched {data.body.completionPercentage}% of this
-										list
-									</Text>
-									<ProgressBar
-										style={{ width: '100%', flex: 1, flexGrow: 1 }}
-										progress={data.body.completionPercentage / 100}
-										color={
-											data.body.completionPercentage / 100 === 1 ? 'green' : theme.colors.primary
-										}
-									/>
-								</View>
-								<View
-									style={{
-										display: 'flex',
-										flexWrap: 'wrap',
-										flexDirection: 'row',
-										gap: 8,
-									}}
-								>
-									<Chip icon="star">
-										<Text>{data.body.averageAdvancedScore || 'N/A'}</Text>
-									</Chip>
-									<Chip icon="clock-time-four-outline">
-										<Text>{formatRuntime(data.body.totalRuntime)}</Text>
-									</Chip>
-									<Chip icon="cash">
-										<Text>{numberShortHand(data.body.totalBudget)}</Text>
-									</Chip>
-								</View>
-							</View>
-						</View>
+						);
 					}
-					refreshControl={
-						<RefreshControl tintColor="white" refreshing={isRefreshing} onRefresh={handleRefresh} />
+
+					if (display === 'watchProvider' && index === 0) {
+						return (
+							<WatchProviderItem
+								from={from!}
+								link={item.watchProviders?.link}
+								availableFlatrates={availableFlatrates}
+								items={moviesByStreamingPlatform}
+							/>
+						);
 					}
-					data={rankedList}
-					itemDimension={70}
-					contentContainerStyle={{ paddingBottom: selectedMovie ? 200 : 0 }}
-					renderItem={({ item, index }) => (
-						<MoviePoster
-							height={120}
-							movieId={item.id}
-							location={from!}
-							moviePoster={item.poster_path}
-							rankedPosition={index + 1}
-							overlayComponent={
-								item.reviews.length > 0 && (
-									<View
-										style={{
-											display: 'flex',
-											justifyContent: 'center',
-											alignItems: 'center',
-											position: 'absolute',
-											top: 0,
-											left: 0,
-											right: 0,
-											bottom: 0,
-											zIndex: 999,
-										}}
-									>
-										<View
-											// eslint-disable-next-line react-native/no-color-literals
-											style={{
-												top: 0,
-												left: 0,
-												right: 0,
-												bottom: 0,
-												backgroundColor: 'rgba(0,0,0,0.7)',
-												borderRadius: 25,
-												zIndex: 999,
-												height: 50,
-												width: 50,
-												display: 'flex',
-												justifyContent: 'center',
-												alignItems: 'center',
-											}}
-										>
-											<Icon size={25} source="eye" />
-										</View>
-									</View>
-								)
-							}
-							onPress={
-								selectedMovie
-									? () => setSelectedMovie({ position: index, details: item })
-									: undefined
-							}
-							onLongPress={() => handleLongPress(item)}
-						/>
-					)}
-					keyExtractor={(item) => `${item.id}`}
-				/>
-			)}
+
+					return null;
+				}}
+				keyExtractor={(item) => `${item.id}`}
+			/>
+
 			{selectedMovie && (
 				<EditRankPosition
 					data={selectedMovie as any}
