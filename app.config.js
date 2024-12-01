@@ -3,7 +3,7 @@ module.exports = {
 		name: 'tmrev',
 		slug: 'tmrev',
 		owner: 'guyllk',
-		version: '1.5.0',
+		version: '1.5.2',
 		orientation: 'portrait',
 		icon: './assets/images/icon.png',
 		scheme: 'myapp',
@@ -35,7 +35,7 @@ module.exports = {
 			primaryColor: '#ffc000',
 			googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
 			package: 'com.tmrev',
-			versionCode: 5,
+			versionCode: 6,
 		},
 		web: {
 			bundler: 'metro',
