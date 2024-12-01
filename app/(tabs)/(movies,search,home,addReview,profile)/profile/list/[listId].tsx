@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unstable-nested-components */
 import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { View, Alert, RefreshControl, StyleSheet } from 'react-native';
-import { Divider, IconButton, Menu, Snackbar, Text } from 'react-native-paper';
+import { Button, Divider, IconButton, Menu, Snackbar, Text } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -419,6 +419,20 @@ const ListDetailsPage: React.FC = () => {
 
 	if (!data.success) {
 		return <Text>{(data as any).error as string}</Text>;
+	}
+
+	if (!data.body.movies.length) {
+		return (
+			<>
+				<Stack.Screen options={{ title: title || data.body.title, headerRight: () => null }} />
+				<View style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 12 }}>
+					<Text variant="headlineLarge">This list is currently empty</Text>
+					<Button mode="contained" onPress={handleOpenAddMovies}>
+						Add Movies?
+					</Button>
+				</View>
+			</>
+		);
 	}
 
 	return (
