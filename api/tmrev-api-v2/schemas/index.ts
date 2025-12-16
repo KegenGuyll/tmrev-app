@@ -11,6 +11,7 @@ export * from './actorInsight';
 export * from './advancedScore';
 export * from './createReviewDtoClass';
 export * from './createUserDto';
+export * from './createWatchListDtoClass';
 export * from './genreInsight';
 export * from './genreInsightItem';
 export * from './heatmapInsight';
