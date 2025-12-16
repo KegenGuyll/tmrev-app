@@ -7,9 +7,14 @@
  */
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
+	DataTag,
+	DefinedInitialDataOptions,
+	DefinedUseQueryResult,
 	MutationFunction,
+	QueryClient,
 	QueryFunction,
 	QueryKey,
+	UndefinedInitialDataOptions,
 	UseMutationOptions,
 	UseMutationResult,
 	UseQueryOptions,
@@ -20,6 +25,7 @@ import type {
 	ActorInsight,
 	CreateReviewDtoClass,
 	CreateUserDto,
+	CreateWatchListDtoClass,
 	GenreInsight,
 	HeatmapInsight,
 	InsightControllerGetHeatmapInsightsParams,
@@ -58,7 +64,9 @@ export const getAppControllerGetHelloQueryOptions = <
 	TData = Awaited<ReturnType<typeof appControllerGetHello>>,
 	TError = unknown,
 >(options?: {
-	query?: UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHello>>, TError, TData>;
+	query?: Partial<
+		UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHello>>, TError, TData>
+	>;
 	request?: SecondParameter<typeof axiosInstance>;
 }) => {
 	const { query: queryOptions, request: requestOptions } = options ?? {};
@@ -72,7 +80,7 @@ export const getAppControllerGetHelloQueryOptions = <
 		Awaited<ReturnType<typeof appControllerGetHello>>,
 		TError,
 		TData
-	> & { queryKey: QueryKey };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type AppControllerGetHelloQueryResult = NonNullable<
@@ -83,13 +91,73 @@ export type AppControllerGetHelloQueryError = unknown;
 export function useAppControllerGetHello<
 	TData = Awaited<ReturnType<typeof appControllerGetHello>>,
 	TError = unknown,
->(options?: {
-	query?: UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHello>>, TError, TData>;
-	request?: SecondParameter<typeof axiosInstance>;
-}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+>(
+	options: {
+		query: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHello>>, TError, TData>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof appControllerGetHello>>,
+					TError,
+					Awaited<ReturnType<typeof appControllerGetHello>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useAppControllerGetHello<
+	TData = Awaited<ReturnType<typeof appControllerGetHello>>,
+	TError = unknown,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHello>>, TError, TData>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof appControllerGetHello>>,
+					TError,
+					Awaited<ReturnType<typeof appControllerGetHello>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useAppControllerGetHello<
+	TData = Awaited<ReturnType<typeof appControllerGetHello>>,
+	TError = unknown,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHello>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+export function useAppControllerGetHello<
+	TData = Awaited<ReturnType<typeof appControllerGetHello>>,
+	TError = unknown,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof appControllerGetHello>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getAppControllerGetHelloQueryOptions(options);
 
-	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
 
 	query.queryKey = queryOptions.queryKey;
 
@@ -117,10 +185,8 @@ export const getReviewControllerFindRecentlyReviewedQueryOptions = <
 	TData = Awaited<ReturnType<typeof reviewControllerFindRecentlyReviewed>>,
 	TError = unknown,
 >(options?: {
-	query?: UseQueryOptions<
-		Awaited<ReturnType<typeof reviewControllerFindRecentlyReviewed>>,
-		TError,
-		TData
+	query?: Partial<
+		UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindRecentlyReviewed>>, TError, TData>
 	>;
 	request?: SecondParameter<typeof axiosInstance>;
 }) => {
@@ -136,7 +202,7 @@ export const getReviewControllerFindRecentlyReviewedQueryOptions = <
 		Awaited<ReturnType<typeof reviewControllerFindRecentlyReviewed>>,
 		TError,
 		TData
-	> & { queryKey: QueryKey };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type ReviewControllerFindRecentlyReviewedQueryResult = NonNullable<
@@ -144,6 +210,70 @@ export type ReviewControllerFindRecentlyReviewedQueryResult = NonNullable<
 >;
 export type ReviewControllerFindRecentlyReviewedQueryError = unknown;
 
+export function useReviewControllerFindRecentlyReviewed<
+	TData = Awaited<ReturnType<typeof reviewControllerFindRecentlyReviewed>>,
+	TError = unknown,
+>(
+	options: {
+		query: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof reviewControllerFindRecentlyReviewed>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof reviewControllerFindRecentlyReviewed>>,
+					TError,
+					Awaited<ReturnType<typeof reviewControllerFindRecentlyReviewed>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useReviewControllerFindRecentlyReviewed<
+	TData = Awaited<ReturnType<typeof reviewControllerFindRecentlyReviewed>>,
+	TError = unknown,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof reviewControllerFindRecentlyReviewed>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof reviewControllerFindRecentlyReviewed>>,
+					TError,
+					Awaited<ReturnType<typeof reviewControllerFindRecentlyReviewed>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useReviewControllerFindRecentlyReviewed<
+	TData = Awaited<ReturnType<typeof reviewControllerFindRecentlyReviewed>>,
+	TError = unknown,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof reviewControllerFindRecentlyReviewed>>,
+				TError,
+				TData
+			>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get recently reviewed movies
  */
@@ -151,17 +281,24 @@ export type ReviewControllerFindRecentlyReviewedQueryError = unknown;
 export function useReviewControllerFindRecentlyReviewed<
 	TData = Awaited<ReturnType<typeof reviewControllerFindRecentlyReviewed>>,
 	TError = unknown,
->(options?: {
-	query?: UseQueryOptions<
-		Awaited<ReturnType<typeof reviewControllerFindRecentlyReviewed>>,
-		TError,
-		TData
-	>;
-	request?: SecondParameter<typeof axiosInstance>;
-}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof reviewControllerFindRecentlyReviewed>>,
+				TError,
+				TData
+			>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getReviewControllerFindRecentlyReviewedQueryOptions(options);
 
-	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
 
 	query.queryKey = queryOptions.queryKey;
 
@@ -189,10 +326,8 @@ export const getReviewControllerFindMostReviewedQueryOptions = <
 	TData = Awaited<ReturnType<typeof reviewControllerFindMostReviewed>>,
 	TError = unknown,
 >(options?: {
-	query?: UseQueryOptions<
-		Awaited<ReturnType<typeof reviewControllerFindMostReviewed>>,
-		TError,
-		TData
+	query?: Partial<
+		UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindMostReviewed>>, TError, TData>
 	>;
 	request?: SecondParameter<typeof axiosInstance>;
 }) => {
@@ -208,7 +343,7 @@ export const getReviewControllerFindMostReviewedQueryOptions = <
 		Awaited<ReturnType<typeof reviewControllerFindMostReviewed>>,
 		TError,
 		TData
-	> & { queryKey: QueryKey };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type ReviewControllerFindMostReviewedQueryResult = NonNullable<
@@ -216,6 +351,58 @@ export type ReviewControllerFindMostReviewedQueryResult = NonNullable<
 >;
 export type ReviewControllerFindMostReviewedQueryError = unknown;
 
+export function useReviewControllerFindMostReviewed<
+	TData = Awaited<ReturnType<typeof reviewControllerFindMostReviewed>>,
+	TError = unknown,
+>(
+	options: {
+		query: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindMostReviewed>>, TError, TData>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof reviewControllerFindMostReviewed>>,
+					TError,
+					Awaited<ReturnType<typeof reviewControllerFindMostReviewed>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useReviewControllerFindMostReviewed<
+	TData = Awaited<ReturnType<typeof reviewControllerFindMostReviewed>>,
+	TError = unknown,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindMostReviewed>>, TError, TData>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof reviewControllerFindMostReviewed>>,
+					TError,
+					Awaited<ReturnType<typeof reviewControllerFindMostReviewed>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useReviewControllerFindMostReviewed<
+	TData = Awaited<ReturnType<typeof reviewControllerFindMostReviewed>>,
+	TError = unknown,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindMostReviewed>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get most reviewed movies
  */
@@ -223,17 +410,20 @@ export type ReviewControllerFindMostReviewedQueryError = unknown;
 export function useReviewControllerFindMostReviewed<
 	TData = Awaited<ReturnType<typeof reviewControllerFindMostReviewed>>,
 	TError = unknown,
->(options?: {
-	query?: UseQueryOptions<
-		Awaited<ReturnType<typeof reviewControllerFindMostReviewed>>,
-		TError,
-		TData
-	>;
-	request?: SecondParameter<typeof axiosInstance>;
-}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindMostReviewed>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getReviewControllerFindMostReviewedQueryOptions(options);
 
-	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
 
 	query.queryKey = queryOptions.queryKey;
 
@@ -262,10 +452,8 @@ export const getReviewControllerFindMostReviewedV2QueryOptions = <
 	TData = Awaited<ReturnType<typeof reviewControllerFindMostReviewedV2>>,
 	TError = unknown,
 >(options?: {
-	query?: UseQueryOptions<
-		Awaited<ReturnType<typeof reviewControllerFindMostReviewedV2>>,
-		TError,
-		TData
+	query?: Partial<
+		UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindMostReviewedV2>>, TError, TData>
 	>;
 	request?: SecondParameter<typeof axiosInstance>;
 }) => {
@@ -281,7 +469,7 @@ export const getReviewControllerFindMostReviewedV2QueryOptions = <
 		Awaited<ReturnType<typeof reviewControllerFindMostReviewedV2>>,
 		TError,
 		TData
-	> & { queryKey: QueryKey };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type ReviewControllerFindMostReviewedV2QueryResult = NonNullable<
@@ -289,6 +477,58 @@ export type ReviewControllerFindMostReviewedV2QueryResult = NonNullable<
 >;
 export type ReviewControllerFindMostReviewedV2QueryError = unknown;
 
+export function useReviewControllerFindMostReviewedV2<
+	TData = Awaited<ReturnType<typeof reviewControllerFindMostReviewedV2>>,
+	TError = unknown,
+>(
+	options: {
+		query: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindMostReviewedV2>>, TError, TData>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof reviewControllerFindMostReviewedV2>>,
+					TError,
+					Awaited<ReturnType<typeof reviewControllerFindMostReviewedV2>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useReviewControllerFindMostReviewedV2<
+	TData = Awaited<ReturnType<typeof reviewControllerFindMostReviewedV2>>,
+	TError = unknown,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindMostReviewedV2>>, TError, TData>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof reviewControllerFindMostReviewedV2>>,
+					TError,
+					Awaited<ReturnType<typeof reviewControllerFindMostReviewedV2>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useReviewControllerFindMostReviewedV2<
+	TData = Awaited<ReturnType<typeof reviewControllerFindMostReviewedV2>>,
+	TError = unknown,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindMostReviewedV2>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get most reviewed movies with full details (v2)
  */
@@ -296,17 +536,20 @@ export type ReviewControllerFindMostReviewedV2QueryError = unknown;
 export function useReviewControllerFindMostReviewedV2<
 	TData = Awaited<ReturnType<typeof reviewControllerFindMostReviewedV2>>,
 	TError = unknown,
->(options?: {
-	query?: UseQueryOptions<
-		Awaited<ReturnType<typeof reviewControllerFindMostReviewedV2>>,
-		TError,
-		TData
-	>;
-	request?: SecondParameter<typeof axiosInstance>;
-}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindMostReviewedV2>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getReviewControllerFindMostReviewedV2QueryOptions(options);
 
-	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
 
 	query.queryKey = queryOptions.queryKey;
 
@@ -378,15 +621,18 @@ export type ReviewControllerCreateMutationError = void | void;
 /**
  * @summary Create a new review
  */
-export const useReviewControllerCreate = <TError = void | void, TContext = unknown>(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof reviewControllerCreate>>,
-		TError,
-		{ data: CreateReviewDtoClass },
-		TContext
-	>;
-	request?: SecondParameter<typeof axiosInstance>;
-}): UseMutationResult<
+export const useReviewControllerCreate = <TError = void | void, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof reviewControllerCreate>>,
+			TError,
+			{ data: CreateReviewDtoClass },
+			TContext
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseMutationResult<
 	Awaited<ReturnType<typeof reviewControllerCreate>>,
 	TError,
 	{ data: CreateReviewDtoClass },
@@ -394,7 +640,7 @@ export const useReviewControllerCreate = <TError = void | void, TContext = unkno
 > => {
 	const mutationOptions = getReviewControllerCreateMutationOptions(options);
 
-	return useMutation(mutationOptions);
+	return useMutation(mutationOptions, queryClient);
 };
 
 /**
@@ -426,10 +672,8 @@ export const getReviewControllerFindByTmdbIdQueryOptions = <
 	tmdbId: number,
 	params?: ReviewControllerFindByTmdbIdParams,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof reviewControllerFindByTmdbId>>,
-			TError,
-			TData
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindByTmdbId>>, TError, TData>
 		>;
 		request?: SecondParameter<typeof axiosInstance>;
 	}
@@ -447,7 +691,7 @@ export const getReviewControllerFindByTmdbIdQueryOptions = <
 		Awaited<ReturnType<typeof reviewControllerFindByTmdbId>>,
 		TError,
 		TData
-	> & { queryKey: QueryKey };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type ReviewControllerFindByTmdbIdQueryResult = NonNullable<
@@ -455,6 +699,64 @@ export type ReviewControllerFindByTmdbIdQueryResult = NonNullable<
 >;
 export type ReviewControllerFindByTmdbIdQueryError = unknown;
 
+export function useReviewControllerFindByTmdbId<
+	TData = Awaited<ReturnType<typeof reviewControllerFindByTmdbId>>,
+	TError = unknown,
+>(
+	tmdbId: number,
+	params: undefined | ReviewControllerFindByTmdbIdParams,
+	options: {
+		query: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindByTmdbId>>, TError, TData>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof reviewControllerFindByTmdbId>>,
+					TError,
+					Awaited<ReturnType<typeof reviewControllerFindByTmdbId>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useReviewControllerFindByTmdbId<
+	TData = Awaited<ReturnType<typeof reviewControllerFindByTmdbId>>,
+	TError = unknown,
+>(
+	tmdbId: number,
+	params?: ReviewControllerFindByTmdbIdParams,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindByTmdbId>>, TError, TData>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof reviewControllerFindByTmdbId>>,
+					TError,
+					Awaited<ReturnType<typeof reviewControllerFindByTmdbId>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useReviewControllerFindByTmdbId<
+	TData = Awaited<ReturnType<typeof reviewControllerFindByTmdbId>>,
+	TError = unknown,
+>(
+	tmdbId: number,
+	params?: ReviewControllerFindByTmdbIdParams,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindByTmdbId>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get reviews by TMDB movie ID
  */
@@ -466,17 +768,18 @@ export function useReviewControllerFindByTmdbId<
 	tmdbId: number,
 	params?: ReviewControllerFindByTmdbIdParams,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof reviewControllerFindByTmdbId>>,
-			TError,
-			TData
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindByTmdbId>>, TError, TData>
 		>;
 		request?: SecondParameter<typeof axiosInstance>;
-	}
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getReviewControllerFindByTmdbIdQueryOptions(tmdbId, params, options);
 
-	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
 
 	query.queryKey = queryOptions.queryKey;
 
@@ -512,10 +815,8 @@ export const getReviewControllerFindByUserIdQueryOptions = <
 	userId: string,
 	params?: ReviewControllerFindByUserIdParams,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof reviewControllerFindByUserId>>,
-			TError,
-			TData
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindByUserId>>, TError, TData>
 		>;
 		request?: SecondParameter<typeof axiosInstance>;
 	}
@@ -533,7 +834,7 @@ export const getReviewControllerFindByUserIdQueryOptions = <
 		Awaited<ReturnType<typeof reviewControllerFindByUserId>>,
 		TError,
 		TData
-	> & { queryKey: QueryKey };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type ReviewControllerFindByUserIdQueryResult = NonNullable<
@@ -541,6 +842,64 @@ export type ReviewControllerFindByUserIdQueryResult = NonNullable<
 >;
 export type ReviewControllerFindByUserIdQueryError = unknown;
 
+export function useReviewControllerFindByUserId<
+	TData = Awaited<ReturnType<typeof reviewControllerFindByUserId>>,
+	TError = unknown,
+>(
+	userId: string,
+	params: undefined | ReviewControllerFindByUserIdParams,
+	options: {
+		query: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindByUserId>>, TError, TData>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof reviewControllerFindByUserId>>,
+					TError,
+					Awaited<ReturnType<typeof reviewControllerFindByUserId>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useReviewControllerFindByUserId<
+	TData = Awaited<ReturnType<typeof reviewControllerFindByUserId>>,
+	TError = unknown,
+>(
+	userId: string,
+	params?: ReviewControllerFindByUserIdParams,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindByUserId>>, TError, TData>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof reviewControllerFindByUserId>>,
+					TError,
+					Awaited<ReturnType<typeof reviewControllerFindByUserId>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useReviewControllerFindByUserId<
+	TData = Awaited<ReturnType<typeof reviewControllerFindByUserId>>,
+	TError = unknown,
+>(
+	userId: string,
+	params?: ReviewControllerFindByUserIdParams,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindByUserId>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get reviews by user ID
  */
@@ -552,17 +911,18 @@ export function useReviewControllerFindByUserId<
 	userId: string,
 	params?: ReviewControllerFindByUserIdParams,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof reviewControllerFindByUserId>>,
-			TError,
-			TData
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindByUserId>>, TError, TData>
 		>;
 		request?: SecondParameter<typeof axiosInstance>;
-	}
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getReviewControllerFindByUserIdQueryOptions(userId, params, options);
 
-	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
 
 	query.queryKey = queryOptions.queryKey;
 
@@ -595,10 +955,8 @@ export const getReviewControllerFindByActorIdQueryOptions = <
 	userId: string,
 	actorId: number,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof reviewControllerFindByActorId>>,
-			TError,
-			TData
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindByActorId>>, TError, TData>
 		>;
 		request?: SecondParameter<typeof axiosInstance>;
 	}
@@ -616,7 +974,7 @@ export const getReviewControllerFindByActorIdQueryOptions = <
 		Awaited<ReturnType<typeof reviewControllerFindByActorId>>,
 		TError,
 		TData
-	> & { queryKey: QueryKey };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type ReviewControllerFindByActorIdQueryResult = NonNullable<
@@ -624,6 +982,64 @@ export type ReviewControllerFindByActorIdQueryResult = NonNullable<
 >;
 export type ReviewControllerFindByActorIdQueryError = void;
 
+export function useReviewControllerFindByActorId<
+	TData = Awaited<ReturnType<typeof reviewControllerFindByActorId>>,
+	TError = void,
+>(
+	userId: string,
+	actorId: number,
+	options: {
+		query: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindByActorId>>, TError, TData>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof reviewControllerFindByActorId>>,
+					TError,
+					Awaited<ReturnType<typeof reviewControllerFindByActorId>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useReviewControllerFindByActorId<
+	TData = Awaited<ReturnType<typeof reviewControllerFindByActorId>>,
+	TError = void,
+>(
+	userId: string,
+	actorId: number,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindByActorId>>, TError, TData>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof reviewControllerFindByActorId>>,
+					TError,
+					Awaited<ReturnType<typeof reviewControllerFindByActorId>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useReviewControllerFindByActorId<
+	TData = Awaited<ReturnType<typeof reviewControllerFindByActorId>>,
+	TError = void,
+>(
+	userId: string,
+	actorId: number,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindByActorId>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get reviews by user ID and actor ID
  */
@@ -635,17 +1051,18 @@ export function useReviewControllerFindByActorId<
 	userId: string,
 	actorId: number,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof reviewControllerFindByActorId>>,
-			TError,
-			TData
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindByActorId>>, TError, TData>
 		>;
 		request?: SecondParameter<typeof axiosInstance>;
-	}
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getReviewControllerFindByActorIdQueryOptions(userId, actorId, options);
 
-	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
 
 	query.queryKey = queryOptions.queryKey;
 
@@ -673,7 +1090,9 @@ export const getReviewControllerFindOneQueryOptions = <
 >(
 	id: string,
 	options?: {
-		query?: UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindOne>>, TError, TData>;
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindOne>>, TError, TData>
+		>;
 		request?: SecondParameter<typeof axiosInstance>;
 	}
 ) => {
@@ -689,7 +1108,7 @@ export const getReviewControllerFindOneQueryOptions = <
 		Awaited<ReturnType<typeof reviewControllerFindOne>>,
 		TError,
 		TData
-	> & { queryKey: QueryKey };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type ReviewControllerFindOneQueryResult = NonNullable<
@@ -697,6 +1116,61 @@ export type ReviewControllerFindOneQueryResult = NonNullable<
 >;
 export type ReviewControllerFindOneQueryError = void;
 
+export function useReviewControllerFindOne<
+	TData = Awaited<ReturnType<typeof reviewControllerFindOne>>,
+	TError = void,
+>(
+	id: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindOne>>, TError, TData>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof reviewControllerFindOne>>,
+					TError,
+					Awaited<ReturnType<typeof reviewControllerFindOne>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useReviewControllerFindOne<
+	TData = Awaited<ReturnType<typeof reviewControllerFindOne>>,
+	TError = void,
+>(
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindOne>>, TError, TData>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof reviewControllerFindOne>>,
+					TError,
+					Awaited<ReturnType<typeof reviewControllerFindOne>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useReviewControllerFindOne<
+	TData = Awaited<ReturnType<typeof reviewControllerFindOne>>,
+	TError = void,
+>(
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindOne>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get a review by ID
  */
@@ -707,13 +1181,18 @@ export function useReviewControllerFindOne<
 >(
 	id: string,
 	options?: {
-		query?: UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindOne>>, TError, TData>;
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof reviewControllerFindOne>>, TError, TData>
+		>;
 		request?: SecondParameter<typeof axiosInstance>;
-	}
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getReviewControllerFindOneQueryOptions(id, options);
 
-	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
 
 	query.queryKey = queryOptions.queryKey;
 
@@ -784,18 +1263,18 @@ export type ReviewControllerUpdateMutationError = void | void | void | void;
 /**
  * @summary Update a review
  */
-export const useReviewControllerUpdate = <
-	TError = void | void | void | void,
-	TContext = unknown,
->(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof reviewControllerUpdate>>,
-		TError,
-		{ id: string; data: UpdateReviewDtoClass },
-		TContext
-	>;
-	request?: SecondParameter<typeof axiosInstance>;
-}): UseMutationResult<
+export const useReviewControllerUpdate = <TError = void | void | void | void, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof reviewControllerUpdate>>,
+			TError,
+			{ id: string; data: UpdateReviewDtoClass },
+			TContext
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseMutationResult<
 	Awaited<ReturnType<typeof reviewControllerUpdate>>,
 	TError,
 	{ id: string; data: UpdateReviewDtoClass },
@@ -803,7 +1282,7 @@ export const useReviewControllerUpdate = <
 > => {
 	const mutationOptions = getReviewControllerUpdateMutationOptions(options);
 
-	return useMutation(mutationOptions);
+	return useMutation(mutationOptions, queryClient);
 };
 
 /**
@@ -861,18 +1340,18 @@ export type ReviewControllerRemoveMutationError = void | void | void;
 /**
  * @summary Delete a review
  */
-export const useReviewControllerRemove = <
-	TError = void | void | void,
-	TContext = unknown,
->(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof reviewControllerRemove>>,
-		TError,
-		{ id: string },
-		TContext
-	>;
-	request?: SecondParameter<typeof axiosInstance>;
-}): UseMutationResult<
+export const useReviewControllerRemove = <TError = void | void | void, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof reviewControllerRemove>>,
+			TError,
+			{ id: string },
+			TContext
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseMutationResult<
 	Awaited<ReturnType<typeof reviewControllerRemove>>,
 	TError,
 	{ id: string },
@@ -880,7 +1359,7 @@ export const useReviewControllerRemove = <
 > => {
 	const mutationOptions = getReviewControllerRemoveMutationOptions(options);
 
-	return useMutation(mutationOptions);
+	return useMutation(mutationOptions, queryClient);
 };
 
 /**
@@ -938,15 +1417,18 @@ export type MovieControllerUpdateMutationError = void;
 /**
  * @summary Update movie details from TMDB
  */
-export const useMovieControllerUpdate = <TError = void, TContext = unknown>(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof movieControllerUpdate>>,
-		TError,
-		{ tmdbId: number },
-		TContext
-	>;
-	request?: SecondParameter<typeof axiosInstance>;
-}): UseMutationResult<
+export const useMovieControllerUpdate = <TError = void, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof movieControllerUpdate>>,
+			TError,
+			{ tmdbId: number },
+			TContext
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseMutationResult<
 	Awaited<ReturnType<typeof movieControllerUpdate>>,
 	TError,
 	{ tmdbId: number },
@@ -954,7 +1436,7 @@ export const useMovieControllerUpdate = <TError = void, TContext = unknown>(opti
 > => {
 	const mutationOptions = getMovieControllerUpdateMutationOptions(options);
 
-	return useMutation(mutationOptions);
+	return useMutation(mutationOptions, queryClient);
 };
 
 /**
@@ -981,10 +1463,8 @@ export const getInsightControllerGetActorInsightsQueryOptions = <
 >(
 	userId: string,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof insightControllerGetActorInsights>>,
-			TError,
-			TData
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof insightControllerGetActorInsights>>, TError, TData>
 		>;
 		request?: SecondParameter<typeof axiosInstance>;
 	}
@@ -1001,7 +1481,7 @@ export const getInsightControllerGetActorInsightsQueryOptions = <
 		Awaited<ReturnType<typeof insightControllerGetActorInsights>>,
 		TError,
 		TData
-	> & { queryKey: QueryKey };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type InsightControllerGetActorInsightsQueryResult = NonNullable<
@@ -1009,6 +1489,61 @@ export type InsightControllerGetActorInsightsQueryResult = NonNullable<
 >;
 export type InsightControllerGetActorInsightsQueryError = unknown;
 
+export function useInsightControllerGetActorInsights<
+	TData = Awaited<ReturnType<typeof insightControllerGetActorInsights>>,
+	TError = unknown,
+>(
+	userId: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof insightControllerGetActorInsights>>, TError, TData>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof insightControllerGetActorInsights>>,
+					TError,
+					Awaited<ReturnType<typeof insightControllerGetActorInsights>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useInsightControllerGetActorInsights<
+	TData = Awaited<ReturnType<typeof insightControllerGetActorInsights>>,
+	TError = unknown,
+>(
+	userId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof insightControllerGetActorInsights>>, TError, TData>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof insightControllerGetActorInsights>>,
+					TError,
+					Awaited<ReturnType<typeof insightControllerGetActorInsights>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useInsightControllerGetActorInsights<
+	TData = Awaited<ReturnType<typeof insightControllerGetActorInsights>>,
+	TError = unknown,
+>(
+	userId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof insightControllerGetActorInsights>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get actor insights for a user
  */
@@ -1019,17 +1554,18 @@ export function useInsightControllerGetActorInsights<
 >(
 	userId: string,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof insightControllerGetActorInsights>>,
-			TError,
-			TData
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof insightControllerGetActorInsights>>, TError, TData>
 		>;
 		request?: SecondParameter<typeof axiosInstance>;
-	}
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getInsightControllerGetActorInsightsQueryOptions(userId, options);
 
-	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
 
 	query.queryKey = queryOptions.queryKey;
 
@@ -1060,10 +1596,8 @@ export const getInsightControllerGetGenreInsightsQueryOptions = <
 >(
 	userId: string,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof insightControllerGetGenreInsights>>,
-			TError,
-			TData
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof insightControllerGetGenreInsights>>, TError, TData>
 		>;
 		request?: SecondParameter<typeof axiosInstance>;
 	}
@@ -1080,7 +1614,7 @@ export const getInsightControllerGetGenreInsightsQueryOptions = <
 		Awaited<ReturnType<typeof insightControllerGetGenreInsights>>,
 		TError,
 		TData
-	> & { queryKey: QueryKey };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type InsightControllerGetGenreInsightsQueryResult = NonNullable<
@@ -1088,6 +1622,61 @@ export type InsightControllerGetGenreInsightsQueryResult = NonNullable<
 >;
 export type InsightControllerGetGenreInsightsQueryError = unknown;
 
+export function useInsightControllerGetGenreInsights<
+	TData = Awaited<ReturnType<typeof insightControllerGetGenreInsights>>,
+	TError = unknown,
+>(
+	userId: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof insightControllerGetGenreInsights>>, TError, TData>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof insightControllerGetGenreInsights>>,
+					TError,
+					Awaited<ReturnType<typeof insightControllerGetGenreInsights>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useInsightControllerGetGenreInsights<
+	TData = Awaited<ReturnType<typeof insightControllerGetGenreInsights>>,
+	TError = unknown,
+>(
+	userId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof insightControllerGetGenreInsights>>, TError, TData>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof insightControllerGetGenreInsights>>,
+					TError,
+					Awaited<ReturnType<typeof insightControllerGetGenreInsights>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useInsightControllerGetGenreInsights<
+	TData = Awaited<ReturnType<typeof insightControllerGetGenreInsights>>,
+	TError = unknown,
+>(
+	userId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof insightControllerGetGenreInsights>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get genre insights for a user
  */
@@ -1098,17 +1687,18 @@ export function useInsightControllerGetGenreInsights<
 >(
 	userId: string,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof insightControllerGetGenreInsights>>,
-			TError,
-			TData
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof insightControllerGetGenreInsights>>, TError, TData>
 		>;
 		request?: SecondParameter<typeof axiosInstance>;
-	}
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getInsightControllerGetGenreInsightsQueryOptions(userId, options);
 
-	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
 
 	query.queryKey = queryOptions.queryKey;
 
@@ -1144,10 +1734,12 @@ export const getInsightControllerGetHeatmapInsightsQueryOptions = <
 	userId: string,
 	params?: InsightControllerGetHeatmapInsightsParams,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof insightControllerGetHeatmapInsights>>,
-			TError,
-			TData
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof insightControllerGetHeatmapInsights>>,
+				TError,
+				TData
+			>
 		>;
 		request?: SecondParameter<typeof axiosInstance>;
 	}
@@ -1165,7 +1757,7 @@ export const getInsightControllerGetHeatmapInsightsQueryOptions = <
 		Awaited<ReturnType<typeof insightControllerGetHeatmapInsights>>,
 		TError,
 		TData
-	> & { queryKey: QueryKey };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type InsightControllerGetHeatmapInsightsQueryResult = NonNullable<
@@ -1173,6 +1765,76 @@ export type InsightControllerGetHeatmapInsightsQueryResult = NonNullable<
 >;
 export type InsightControllerGetHeatmapInsightsQueryError = unknown;
 
+export function useInsightControllerGetHeatmapInsights<
+	TData = Awaited<ReturnType<typeof insightControllerGetHeatmapInsights>>,
+	TError = unknown,
+>(
+	userId: string,
+	params: undefined | InsightControllerGetHeatmapInsightsParams,
+	options: {
+		query: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof insightControllerGetHeatmapInsights>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof insightControllerGetHeatmapInsights>>,
+					TError,
+					Awaited<ReturnType<typeof insightControllerGetHeatmapInsights>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useInsightControllerGetHeatmapInsights<
+	TData = Awaited<ReturnType<typeof insightControllerGetHeatmapInsights>>,
+	TError = unknown,
+>(
+	userId: string,
+	params?: InsightControllerGetHeatmapInsightsParams,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof insightControllerGetHeatmapInsights>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof insightControllerGetHeatmapInsights>>,
+					TError,
+					Awaited<ReturnType<typeof insightControllerGetHeatmapInsights>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useInsightControllerGetHeatmapInsights<
+	TData = Awaited<ReturnType<typeof insightControllerGetHeatmapInsights>>,
+	TError = unknown,
+>(
+	userId: string,
+	params?: InsightControllerGetHeatmapInsightsParams,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof insightControllerGetHeatmapInsights>>,
+				TError,
+				TData
+			>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get review heatmap data for a user
  */
@@ -1184,17 +1846,22 @@ export function useInsightControllerGetHeatmapInsights<
 	userId: string,
 	params?: InsightControllerGetHeatmapInsightsParams,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof insightControllerGetHeatmapInsights>>,
-			TError,
-			TData
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof insightControllerGetHeatmapInsights>>,
+				TError,
+				TData
+			>
 		>;
 		request?: SecondParameter<typeof axiosInstance>;
-	}
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getInsightControllerGetHeatmapInsightsQueryOptions(userId, params, options);
 
-	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
 
 	query.queryKey = queryOptions.queryKey;
 
@@ -1230,10 +1897,12 @@ export const getWatchListControllerGetUserWatchListsQueryOptions = <
 	userId: string,
 	params?: WatchListControllerGetUserWatchListsParams,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof watchListControllerGetUserWatchLists>>,
-			TError,
-			TData
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof watchListControllerGetUserWatchLists>>,
+				TError,
+				TData
+			>
 		>;
 		request?: SecondParameter<typeof axiosInstance>;
 	}
@@ -1251,7 +1920,7 @@ export const getWatchListControllerGetUserWatchListsQueryOptions = <
 		Awaited<ReturnType<typeof watchListControllerGetUserWatchLists>>,
 		TError,
 		TData
-	> & { queryKey: QueryKey };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type WatchListControllerGetUserWatchListsQueryResult = NonNullable<
@@ -1259,6 +1928,76 @@ export type WatchListControllerGetUserWatchListsQueryResult = NonNullable<
 >;
 export type WatchListControllerGetUserWatchListsQueryError = void;
 
+export function useWatchListControllerGetUserWatchLists<
+	TData = Awaited<ReturnType<typeof watchListControllerGetUserWatchLists>>,
+	TError = void,
+>(
+	userId: string,
+	params: undefined | WatchListControllerGetUserWatchListsParams,
+	options: {
+		query: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof watchListControllerGetUserWatchLists>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof watchListControllerGetUserWatchLists>>,
+					TError,
+					Awaited<ReturnType<typeof watchListControllerGetUserWatchLists>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useWatchListControllerGetUserWatchLists<
+	TData = Awaited<ReturnType<typeof watchListControllerGetUserWatchLists>>,
+	TError = void,
+>(
+	userId: string,
+	params?: WatchListControllerGetUserWatchListsParams,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof watchListControllerGetUserWatchLists>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof watchListControllerGetUserWatchLists>>,
+					TError,
+					Awaited<ReturnType<typeof watchListControllerGetUserWatchLists>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useWatchListControllerGetUserWatchLists<
+	TData = Awaited<ReturnType<typeof watchListControllerGetUserWatchLists>>,
+	TError = void,
+>(
+	userId: string,
+	params?: WatchListControllerGetUserWatchListsParams,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof watchListControllerGetUserWatchLists>>,
+				TError,
+				TData
+			>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get user watch lists
  */
@@ -1270,17 +2009,22 @@ export function useWatchListControllerGetUserWatchLists<
 	userId: string,
 	params?: WatchListControllerGetUserWatchListsParams,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof watchListControllerGetUserWatchLists>>,
-			TError,
-			TData
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof watchListControllerGetUserWatchLists>>,
+				TError,
+				TData
+			>
 		>;
 		request?: SecondParameter<typeof axiosInstance>;
-	}
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getWatchListControllerGetUserWatchListsQueryOptions(userId, params, options);
 
-	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
 
 	query.queryKey = queryOptions.queryKey;
 
@@ -1308,7 +2052,9 @@ export const getWatchListControllerFindOneQueryOptions = <
 >(
 	id: string,
 	options?: {
-		query?: UseQueryOptions<Awaited<ReturnType<typeof watchListControllerFindOne>>, TError, TData>;
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof watchListControllerFindOne>>, TError, TData>
+		>;
 		request?: SecondParameter<typeof axiosInstance>;
 	}
 ) => {
@@ -1324,7 +2070,7 @@ export const getWatchListControllerFindOneQueryOptions = <
 		Awaited<ReturnType<typeof watchListControllerFindOne>>,
 		TError,
 		TData
-	> & { queryKey: QueryKey };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type WatchListControllerFindOneQueryResult = NonNullable<
@@ -1332,6 +2078,61 @@ export type WatchListControllerFindOneQueryResult = NonNullable<
 >;
 export type WatchListControllerFindOneQueryError = void | void;
 
+export function useWatchListControllerFindOne<
+	TData = Awaited<ReturnType<typeof watchListControllerFindOne>>,
+	TError = void | void,
+>(
+	id: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof watchListControllerFindOne>>, TError, TData>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof watchListControllerFindOne>>,
+					TError,
+					Awaited<ReturnType<typeof watchListControllerFindOne>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useWatchListControllerFindOne<
+	TData = Awaited<ReturnType<typeof watchListControllerFindOne>>,
+	TError = void | void,
+>(
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof watchListControllerFindOne>>, TError, TData>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof watchListControllerFindOne>>,
+					TError,
+					Awaited<ReturnType<typeof watchListControllerFindOne>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useWatchListControllerFindOne<
+	TData = Awaited<ReturnType<typeof watchListControllerFindOne>>,
+	TError = void | void,
+>(
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof watchListControllerFindOne>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get a watch list by ID
  */
@@ -1342,13 +2143,18 @@ export function useWatchListControllerFindOne<
 >(
 	id: string,
 	options?: {
-		query?: UseQueryOptions<Awaited<ReturnType<typeof watchListControllerFindOne>>, TError, TData>;
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof watchListControllerFindOne>>, TError, TData>
+		>;
 		request?: SecondParameter<typeof axiosInstance>;
-	}
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getWatchListControllerFindOneQueryOptions(id, options);
 
-	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
 
 	query.queryKey = queryOptions.queryKey;
 
@@ -1413,15 +2219,18 @@ export type WatchListControllerUpdateMutationError = void | void | void | void;
 export const useWatchListControllerUpdate = <
 	TError = void | void | void | void,
 	TContext = unknown,
->(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof watchListControllerUpdate>>,
-		TError,
-		{ id: string },
-		TContext
-	>;
-	request?: SecondParameter<typeof axiosInstance>;
-}): UseMutationResult<
+>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof watchListControllerUpdate>>,
+			TError,
+			{ id: string },
+			TContext
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseMutationResult<
 	Awaited<ReturnType<typeof watchListControllerUpdate>>,
 	TError,
 	{ id: string },
@@ -1429,7 +2238,7 @@ export const useWatchListControllerUpdate = <
 > => {
 	const mutationOptions = getWatchListControllerUpdateMutationOptions(options);
 
-	return useMutation(mutationOptions);
+	return useMutation(mutationOptions, queryClient);
 };
 
 /**
@@ -1487,18 +2296,18 @@ export type WatchListControllerRemoveMutationError = void | void | void;
 /**
  * @summary Delete a watch list
  */
-export const useWatchListControllerRemove = <
-	TError = void | void | void,
-	TContext = unknown,
->(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof watchListControllerRemove>>,
-		TError,
-		{ id: string },
-		TContext
-	>;
-	request?: SecondParameter<typeof axiosInstance>;
-}): UseMutationResult<
+export const useWatchListControllerRemove = <TError = void | void | void, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof watchListControllerRemove>>,
+			TError,
+			{ id: string },
+			TContext
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseMutationResult<
 	Awaited<ReturnType<typeof watchListControllerRemove>>,
 	TError,
 	{ id: string },
@@ -1506,17 +2315,27 @@ export const useWatchListControllerRemove = <
 > => {
 	const mutationOptions = getWatchListControllerRemoveMutationOptions(options);
 
-	return useMutation(mutationOptions);
+	return useMutation(mutationOptions, queryClient);
 };
 
 /**
  * @summary Create a new watch list
  */
 export const watchListControllerCreate = (
+	createWatchListDtoClass: CreateWatchListDtoClass,
 	options?: SecondParameter<typeof axiosInstance>,
 	signal?: AbortSignal
 ) => {
-	return axiosInstance<Watchlist>({ url: `/watch-list`, method: 'POST', signal }, options);
+	return axiosInstance<Watchlist>(
+		{
+			url: `/watch-list`,
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			data: createWatchListDtoClass,
+			signal,
+		},
+		options
+	);
 };
 
 export const getWatchListControllerCreateMutationOptions = <
@@ -1526,14 +2345,14 @@ export const getWatchListControllerCreateMutationOptions = <
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof watchListControllerCreate>>,
 		TError,
-		void,
+		{ data: CreateWatchListDtoClass },
 		TContext
 	>;
 	request?: SecondParameter<typeof axiosInstance>;
 }): UseMutationOptions<
 	Awaited<ReturnType<typeof watchListControllerCreate>>,
 	TError,
-	void,
+	{ data: CreateWatchListDtoClass },
 	TContext
 > => {
 	const mutationKey = ['watchListControllerCreate'];
@@ -1545,9 +2364,11 @@ export const getWatchListControllerCreateMutationOptions = <
 
 	const mutationFn: MutationFunction<
 		Awaited<ReturnType<typeof watchListControllerCreate>>,
-		void
-	> = () => {
-		return watchListControllerCreate(requestOptions);
+		{ data: CreateWatchListDtoClass }
+	> = (props) => {
+		const { data } = props ?? {};
+
+		return watchListControllerCreate(data, requestOptions);
 	};
 
 	return { mutationFn, ...mutationOptions };
@@ -1556,29 +2377,32 @@ export const getWatchListControllerCreateMutationOptions = <
 export type WatchListControllerCreateMutationResult = NonNullable<
 	Awaited<ReturnType<typeof watchListControllerCreate>>
 >;
-
+export type WatchListControllerCreateMutationBody = CreateWatchListDtoClass;
 export type WatchListControllerCreateMutationError = void | void;
 
 /**
  * @summary Create a new watch list
  */
-export const useWatchListControllerCreate = <TError = void | void, TContext = unknown>(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof watchListControllerCreate>>,
-		TError,
-		void,
-		TContext
-	>;
-	request?: SecondParameter<typeof axiosInstance>;
-}): UseMutationResult<
+export const useWatchListControllerCreate = <TError = void | void, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof watchListControllerCreate>>,
+			TError,
+			{ data: CreateWatchListDtoClass },
+			TContext
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseMutationResult<
 	Awaited<ReturnType<typeof watchListControllerCreate>>,
 	TError,
-	void,
+	{ data: CreateWatchListDtoClass },
 	TContext
 > => {
 	const mutationOptions = getWatchListControllerCreateMutationOptions(options);
 
-	return useMutation(mutationOptions);
+	return useMutation(mutationOptions, queryClient);
 };
 
 /**
@@ -1646,15 +2470,18 @@ export type UserControllerCreateMutationError = void | void;
 /**
  * @summary Create a new user
  */
-export const useUserControllerCreate = <TError = void | void, TContext = unknown>(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof userControllerCreate>>,
-		TError,
-		{ data: CreateUserDto },
-		TContext
-	>;
-	request?: SecondParameter<typeof axiosInstance>;
-}): UseMutationResult<
+export const useUserControllerCreate = <TError = void | void, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof userControllerCreate>>,
+			TError,
+			{ data: CreateUserDto },
+			TContext
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseMutationResult<
 	Awaited<ReturnType<typeof userControllerCreate>>,
 	TError,
 	{ data: CreateUserDto },
@@ -1662,7 +2489,7 @@ export const useUserControllerCreate = <TError = void | void, TContext = unknown
 > => {
 	const mutationOptions = getUserControllerCreateMutationOptions(options);
 
-	return useMutation(mutationOptions);
+	return useMutation(mutationOptions, queryClient);
 };
 
 /**
@@ -1683,7 +2510,9 @@ export const getUserControllerFindAllQueryOptions = <
 	TData = Awaited<ReturnType<typeof userControllerFindAll>>,
 	TError = unknown,
 >(options?: {
-	query?: UseQueryOptions<Awaited<ReturnType<typeof userControllerFindAll>>, TError, TData>;
+	query?: Partial<
+		UseQueryOptions<Awaited<ReturnType<typeof userControllerFindAll>>, TError, TData>
+	>;
 	request?: SecondParameter<typeof axiosInstance>;
 }) => {
 	const { query: queryOptions, request: requestOptions } = options ?? {};
@@ -1697,7 +2526,7 @@ export const getUserControllerFindAllQueryOptions = <
 		Awaited<ReturnType<typeof userControllerFindAll>>,
 		TError,
 		TData
-	> & { queryKey: QueryKey };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type UserControllerFindAllQueryResult = NonNullable<
@@ -1705,6 +2534,58 @@ export type UserControllerFindAllQueryResult = NonNullable<
 >;
 export type UserControllerFindAllQueryError = unknown;
 
+export function useUserControllerFindAll<
+	TData = Awaited<ReturnType<typeof userControllerFindAll>>,
+	TError = unknown,
+>(
+	options: {
+		query: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof userControllerFindAll>>, TError, TData>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof userControllerFindAll>>,
+					TError,
+					Awaited<ReturnType<typeof userControllerFindAll>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useUserControllerFindAll<
+	TData = Awaited<ReturnType<typeof userControllerFindAll>>,
+	TError = unknown,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof userControllerFindAll>>, TError, TData>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof userControllerFindAll>>,
+					TError,
+					Awaited<ReturnType<typeof userControllerFindAll>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useUserControllerFindAll<
+	TData = Awaited<ReturnType<typeof userControllerFindAll>>,
+	TError = unknown,
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof userControllerFindAll>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get all users
  */
@@ -1712,13 +2593,20 @@ export type UserControllerFindAllQueryError = unknown;
 export function useUserControllerFindAll<
 	TData = Awaited<ReturnType<typeof userControllerFindAll>>,
 	TError = unknown,
->(options?: {
-	query?: UseQueryOptions<Awaited<ReturnType<typeof userControllerFindAll>>, TError, TData>;
-	request?: SecondParameter<typeof axiosInstance>;
-}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+>(
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof userControllerFindAll>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getUserControllerFindAllQueryOptions(options);
 
-	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
 
 	query.queryKey = queryOptions.queryKey;
 
@@ -1746,7 +2634,9 @@ export const getUserControllerFindOneQueryOptions = <
 >(
 	id: string,
 	options?: {
-		query?: UseQueryOptions<Awaited<ReturnType<typeof userControllerFindOne>>, TError, TData>;
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof userControllerFindOne>>, TError, TData>
+		>;
 		request?: SecondParameter<typeof axiosInstance>;
 	}
 ) => {
@@ -1761,7 +2651,7 @@ export const getUserControllerFindOneQueryOptions = <
 		Awaited<ReturnType<typeof userControllerFindOne>>,
 		TError,
 		TData
-	> & { queryKey: QueryKey };
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
 };
 
 export type UserControllerFindOneQueryResult = NonNullable<
@@ -1769,6 +2659,61 @@ export type UserControllerFindOneQueryResult = NonNullable<
 >;
 export type UserControllerFindOneQueryError = void | void;
 
+export function useUserControllerFindOne<
+	TData = Awaited<ReturnType<typeof userControllerFindOne>>,
+	TError = void | void,
+>(
+	id: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof userControllerFindOne>>, TError, TData>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof userControllerFindOne>>,
+					TError,
+					Awaited<ReturnType<typeof userControllerFindOne>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useUserControllerFindOne<
+	TData = Awaited<ReturnType<typeof userControllerFindOne>>,
+	TError = void | void,
+>(
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof userControllerFindOne>>, TError, TData>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof userControllerFindOne>>,
+					TError,
+					Awaited<ReturnType<typeof userControllerFindOne>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useUserControllerFindOne<
+	TData = Awaited<ReturnType<typeof userControllerFindOne>>,
+	TError = void | void,
+>(
+	id: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof userControllerFindOne>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 /**
  * @summary Get a user by ID or Firebase UUID
  */
@@ -1779,13 +2724,18 @@ export function useUserControllerFindOne<
 >(
 	id: string,
 	options?: {
-		query?: UseQueryOptions<Awaited<ReturnType<typeof userControllerFindOne>>, TError, TData>;
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof userControllerFindOne>>, TError, TData>
+		>;
 		request?: SecondParameter<typeof axiosInstance>;
-	}
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getUserControllerFindOneQueryOptions(id, options);
 
-	const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
 
 	query.queryKey = queryOptions.queryKey;
 
@@ -1856,18 +2806,18 @@ export type UserControllerUpdateMutationError = void | void | void | void;
 /**
  * @summary Update a user
  */
-export const useUserControllerUpdate = <
-	TError = void | void | void | void,
-	TContext = unknown,
->(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof userControllerUpdate>>,
-		TError,
-		{ id: string; data: UpdateUserDto },
-		TContext
-	>;
-	request?: SecondParameter<typeof axiosInstance>;
-}): UseMutationResult<
+export const useUserControllerUpdate = <TError = void | void | void | void, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof userControllerUpdate>>,
+			TError,
+			{ id: string; data: UpdateUserDto },
+			TContext
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseMutationResult<
 	Awaited<ReturnType<typeof userControllerUpdate>>,
 	TError,
 	{ id: string; data: UpdateUserDto },
@@ -1875,7 +2825,7 @@ export const useUserControllerUpdate = <
 > => {
 	const mutationOptions = getUserControllerUpdateMutationOptions(options);
 
-	return useMutation(mutationOptions);
+	return useMutation(mutationOptions, queryClient);
 };
 
 /**
@@ -1933,15 +2883,18 @@ export type UserControllerRemoveMutationError = void | void | void;
 /**
  * @summary Delete a user
  */
-export const useUserControllerRemove = <TError = void | void | void, TContext = unknown>(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof userControllerRemove>>,
-		TError,
-		{ id: string },
-		TContext
-	>;
-	request?: SecondParameter<typeof axiosInstance>;
-}): UseMutationResult<
+export const useUserControllerRemove = <TError = void | void | void, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof userControllerRemove>>,
+			TError,
+			{ id: string },
+			TContext
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseMutationResult<
 	Awaited<ReturnType<typeof userControllerRemove>>,
 	TError,
 	{ id: string },
@@ -1949,5 +2902,5 @@ export const useUserControllerRemove = <TError = void | void | void, TContext = 
 > => {
 	const mutationOptions = getUserControllerRemoveMutationOptions(options);
 
-	return useMutation(mutationOptions);
+	return useMutation(mutationOptions, queryClient);
 };
