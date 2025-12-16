@@ -16,6 +16,7 @@ import * as Sentry from '@sentry/react-native';
 import { store } from '@/redux/store';
 import { useAppDispatch, useAppSelector } from '@/hooks/reduxHooks';
 import { hideSnackbar } from '@/redux/slice/globalSnackbar';
+import QueryClientProvider from '@/providers/QueryClient';
 
 Sentry.init({
 	dsn: 'https://9c8c84585fb730b65ab416d6f989e981@o4508169060745216.ingest.us.sentry.io/4508169062055936',
@@ -110,32 +111,34 @@ const RootLayoutNav = () => {
 		<GestureHandlerRootView style={{ flex: 1 }}>
 			<StatusBar barStyle="light-content" />
 			<PaperProvider theme={MD3DarkTheme}>
-				<BottomSheetModalProvider>
-					<ThemeProvider value={DarkTheme}>
-						<View style={{ height: '100%', width: '100%' }}>
-							<Stack
-								screenOptions={{
-									headerTintColor: 'white',
-								}}
-							>
-								<Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'Home' }} />
-								<Stack.Screen name="login" />
-								<Stack.Screen name="signup" />
-								<Stack.Screen name="forgotPassword" />
-							</Stack>
-							<Snackbar
-								action={{
-									label: 'Dismiss',
-									onPress: () => dispatch(hideSnackbar()),
-								}}
-								onDismiss={() => dispatch(hideSnackbar())}
-								visible={visible}
-							>
-								{message}
-							</Snackbar>
-						</View>
-					</ThemeProvider>
-				</BottomSheetModalProvider>
+				<QueryClientProvider>
+					<BottomSheetModalProvider>
+						<ThemeProvider value={DarkTheme}>
+							<View style={{ height: '100%', width: '100%' }}>
+								<Stack
+									screenOptions={{
+										headerTintColor: 'white',
+									}}
+								>
+									<Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'Home' }} />
+									<Stack.Screen name="login" />
+									<Stack.Screen name="signup" />
+									<Stack.Screen name="forgotPassword" />
+								</Stack>
+								<Snackbar
+									action={{
+										label: 'Dismiss',
+										onPress: () => dispatch(hideSnackbar()),
+									}}
+									onDismiss={() => dispatch(hideSnackbar())}
+									visible={visible}
+								>
+									{message}
+								</Snackbar>
+							</View>
+						</ThemeProvider>
+					</BottomSheetModalProvider>
+				</QueryClientProvider>
 			</PaperProvider>
 		</GestureHandlerRootView>
 	);
