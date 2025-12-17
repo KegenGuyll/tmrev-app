@@ -14,7 +14,6 @@ import { Link, useRouter } from 'expo-router';
 import useAuth from '@/hooks/useAuth';
 import { numberShortHand } from '@/utils/common';
 import { useFollowUserV2Mutation, useUnfollowUserV2Mutation } from '@/redux/api/tmrev';
-import { UserV2 } from '@/models/tmrev/user';
 import { FromLocation } from '@/models';
 import {
 	allListsRoute,
@@ -24,9 +23,10 @@ import {
 	profileFollowingRoute,
 } from '@/constants/routes';
 import { followUserLoginPrompt } from '@/constants/messages';
+import { UserProfile } from '@/api/tmrev-api-v2';
 
 type ProfileHeaderProps = {
-	user: UserV2;
+	user: UserProfile;
 	from?: FromLocation;
 	favoriteGenres?: string[];
 	setLoginMessage?: (message: string | null) => void;
@@ -111,10 +111,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 							<Text variant="labelLarge">following</Text>
 						</View>
 					</Link>
-					{user.listCount > 0 ? (
+					{user.watchListCount > 0 ? (
 						<Link href={allListsRoute(from || 'profile', user.uuid)}>
 							<View style={styles.statDisplay}>
-								<Text>{numberShortHand(user.listCount)}</Text>
+								<Text>{numberShortHand(user.watchListCount)}</Text>
 								<Text variant="labelLarge">lists</Text>
 							</View>
 						</Link>
