@@ -42,12 +42,6 @@ const Profile = () => {
 		},
 	});
 
-	// const {
-	// 	data: profileData,
-	// 	isLoading: isProfileLoading,
-	// 	refetch,
-	// } = useGetV2UserQuery({ uid: profileId }, { skip: !profileId });
-
 	const { data: heatmapData, refetch: refetchHeatMap } = useInsightControllerGetHeatmapInsights(
 		profileId,
 		{ days },
@@ -67,22 +61,11 @@ const Profile = () => {
 		}
 	);
 
-	// const { data: insightData, refetch: refetchInsights } = useGetGenreInsightsQuery(profileId, {
-	// 	skip: !profileId,
-	// });
-
-	// const { data: heatmapData, refetch: refetchHeatMap } = useGetUserMovieActivityInsightsQuery(
-	// 	{ userId: profileId, days },
-	// 	{ skip: !profileId }
-	// );
-
 	const [visible, setVisible] = useState(false);
 
 	const handleRefresh = async () => {
 		setRefreshing(true);
-		await refetchInsights();
-		await refetchHeatMap();
-		await refetch();
+		await Promise.all([refetchInsights(), refetchHeatMap(), refetch()]);
 		setRefreshing(false);
 	};
 
