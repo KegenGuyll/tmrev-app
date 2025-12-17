@@ -31,6 +31,7 @@ import type {
 	InsightControllerGetHeatmapInsightsParams,
 	Movie,
 	ReviewAggregated,
+	ReviewControllerFindByActorId200,
 	ReviewControllerFindByTmdbId200,
 	ReviewControllerFindByTmdbIdParams,
 	ReviewControllerFindByUserId200,
@@ -938,7 +939,7 @@ export const reviewControllerFindByActorId = (
 	options?: SecondParameter<typeof axiosInstance>,
 	signal?: AbortSignal
 ) => {
-	return axiosInstance<ReviewAggregated[]>(
+	return axiosInstance<ReviewControllerFindByActorId200>(
 		{ url: `/review/user/${userId}/actor/${actorId}`, method: 'GET', signal },
 		options
 	);

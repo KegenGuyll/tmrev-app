@@ -5,17 +5,8 @@
  * Review aggregation and movie database API
  * OpenAPI spec version: 2.0.0
  */
-import type { ReviewAggregated } from './reviewAggregated';
+import type { ReviewControllerFindByTmdbId200AllOf } from './reviewControllerFindByTmdbId200AllOf';
+import type { ReviewControllerFindByTmdbId200AllOfTwo } from './reviewControllerFindByTmdbId200AllOfTwo';
 
-export type ReviewControllerFindByTmdbId200 = {
-	/** Current page number (1-indexed) */
-	pageNumber?: number;
-	/** Number of items per page */
-	pageSize?: number;
-	/** Total number of pages */
-	totalNumberOfPages?: number;
-	/** Total number of documents matching the query */
-	totalCount?: number;
-	/** Array of results in the current page */
-	results?: ReviewAggregated[];
-};
+export type ReviewControllerFindByTmdbId200 = ReviewControllerFindByTmdbId200AllOf &
+	ReviewControllerFindByTmdbId200AllOfTwo;
