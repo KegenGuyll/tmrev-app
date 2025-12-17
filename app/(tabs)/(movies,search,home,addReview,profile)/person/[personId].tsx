@@ -22,8 +22,8 @@ import {
 import ActorPlaceholderImage from '@/components/ActorPlacholderImage';
 import { PosterPath } from '@/models';
 import imageUrl from '@/utils/imageUrl';
-import { useGetReviewsByActorQuery } from '@/redux/api/tmrev';
 import MovieHorizontalGrid from '@/components/MovieHorizontalGrid';
+import { useReviewControllerFindByActorId } from '@/api/tmrev-api-v2';
 
 type PersonDetailsParams = {
 	personId: string;
@@ -51,9 +51,14 @@ const PersonDetails: React.FC = () => {
 
 	const { currentUser } = useAuth({});
 
-	const { data: reviewData, refetch: reviewRefresh } = useGetReviewsByActorQuery(
-		{ actorId: Number(slug.personId), userId: currentUser?.uid ?? '' },
-		{ skip: !currentUser }
+	const { data: reviewData, refetch: reviewRefresh } = useReviewControllerFindByActorId(
+		currentUser?.uid ?? '',
+		Number(slug.personId),
+		{
+			query: {
+				enabled: !!currentUser,
+			},
+		}
 	);
 
 	const { data: personMovieData, refetch: personMovieRefresh } = useGetPersonMostPopularMoviesQuery(
@@ -136,12 +141,12 @@ const PersonDetails: React.FC = () => {
 						{personData.biography}
 					</Text>
 				</Surface>
-				{currentUser && reviewData && reviewData?.reviews.length > 0 && (
+				{currentUser && reviewData && reviewData?.results && (
 					<View style={{ gap: 8 }}>
 						<Text variant="headlineMedium">Reviewed Movies</Text>
 						<MovieHorizontalGrid
 							data={
-								reviewData.reviews?.map((m) => ({
+								reviewData.results?.map((m) => ({
 									uniqueId: m._id,
 									movieId: m.tmdbID,
 									moviePoster: m.movieDetails.poster_path,
