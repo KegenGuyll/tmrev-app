@@ -8,6 +8,10 @@
 
 export type WatchListControllerGetUserWatchListsParams = {
 	/**
+	 * Sort results by field. Format: "field.order" or "field.order.category" where order is "asc" or "desc". Examples: "title.asc", "updatedAt.desc".
+	 */
+	sortBy?: string;
+	/**
 	 * Comma-separated TMDB movie IDs to filter by
 	 */
 	tmdbId?: string;
