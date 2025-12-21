@@ -8,6 +8,10 @@
 
 export type ReviewControllerFindByTmdbIdParams = {
 	/**
+	 * Sort results by field. Format: "field.order" or "field.order.category" where order is "asc" or "desc". Examples: "createdAt.desc", "averagedAdvancedScore.asc".
+	 */
+	sortBy?: string;
+	/**
 	 * Items per page (default: 10)
 	 */
 	pageSize?: number;
