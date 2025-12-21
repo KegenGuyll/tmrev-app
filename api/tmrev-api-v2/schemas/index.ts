@@ -44,6 +44,7 @@ export * from './reviewControllerFindMostReviewedV2200ItemAllOf';
 export * from './reviewVotes';
 export * from './updateReviewDtoClass';
 export * from './updateUserDto';
+export * from './updateWatchListDtoClass';
 export * from './user';
 export * from './userProfile';
 export * from './watchListControllerGetUserWatchLists200';

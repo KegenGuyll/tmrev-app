@@ -39,6 +39,7 @@ import type {
 	ReviewControllerFindMostReviewedV2200Item,
 	UpdateReviewDtoClass,
 	UpdateUserDto,
+	UpdateWatchListDtoClass,
 	User,
 	UserProfile,
 	WatchListControllerGetUserWatchLists200,
@@ -2167,9 +2168,18 @@ export function useWatchListControllerFindOne<
  */
 export const watchListControllerUpdate = (
 	id: string,
+	updateWatchListDtoClass: UpdateWatchListDtoClass,
 	options?: SecondParameter<typeof axiosInstance>
 ) => {
-	return axiosInstance<Watchlist>({ url: `/watch-list/${id}`, method: 'PATCH' }, options);
+	return axiosInstance<Watchlist>(
+		{
+			url: `/watch-list/${id}`,
+			method: 'PATCH',
+			headers: { 'Content-Type': 'application/json' },
+			data: updateWatchListDtoClass,
+		},
+		options
+	);
 };
 
 export const getWatchListControllerUpdateMutationOptions = <
@@ -2179,14 +2189,14 @@ export const getWatchListControllerUpdateMutationOptions = <
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof watchListControllerUpdate>>,
 		TError,
-		{ id: string },
+		{ id: string; data: UpdateWatchListDtoClass },
 		TContext
 	>;
 	request?: SecondParameter<typeof axiosInstance>;
 }): UseMutationOptions<
 	Awaited<ReturnType<typeof watchListControllerUpdate>>,
 	TError,
-	{ id: string },
+	{ id: string; data: UpdateWatchListDtoClass },
 	TContext
 > => {
 	const mutationKey = ['watchListControllerUpdate'];
@@ -2198,11 +2208,11 @@ export const getWatchListControllerUpdateMutationOptions = <
 
 	const mutationFn: MutationFunction<
 		Awaited<ReturnType<typeof watchListControllerUpdate>>,
-		{ id: string }
+		{ id: string; data: UpdateWatchListDtoClass }
 	> = (props) => {
-		const { id } = props ?? {};
+		const { id, data } = props ?? {};
 
-		return watchListControllerUpdate(id, requestOptions);
+		return watchListControllerUpdate(id, data, requestOptions);
 	};
 
 	return { mutationFn, ...mutationOptions };
@@ -2211,7 +2221,7 @@ export const getWatchListControllerUpdateMutationOptions = <
 export type WatchListControllerUpdateMutationResult = NonNullable<
 	Awaited<ReturnType<typeof watchListControllerUpdate>>
 >;
-
+export type WatchListControllerUpdateMutationBody = UpdateWatchListDtoClass;
 export type WatchListControllerUpdateMutationError = void | void | void | void;
 
 /**
@@ -2225,7 +2235,7 @@ export const useWatchListControllerUpdate = <
 		mutation?: UseMutationOptions<
 			Awaited<ReturnType<typeof watchListControllerUpdate>>,
 			TError,
-			{ id: string },
+			{ id: string; data: UpdateWatchListDtoClass },
 			TContext
 		>;
 		request?: SecondParameter<typeof axiosInstance>;
@@ -2234,7 +2244,7 @@ export const useWatchListControllerUpdate = <
 ): UseMutationResult<
 	Awaited<ReturnType<typeof watchListControllerUpdate>>,
 	TError,
-	{ id: string },
+	{ id: string; data: UpdateWatchListDtoClass },
 	TContext
 > => {
 	const mutationOptions = getWatchListControllerUpdateMutationOptions(options);
