@@ -42,10 +42,11 @@ import type {
 	UpdateWatchListDtoClass,
 	User,
 	UserProfile,
+	WatchListControllerFindOneParams,
 	WatchListControllerGetUserWatchLists200,
 	WatchListControllerGetUserWatchListsParams,
 	Watchlist,
-	WatchlistAggregated,
+	WatchlistAggregatedDetail,
 } from './schemas';
 
 import { axiosInstance } from './mutator/axiosInstance';
@@ -2039,17 +2040,21 @@ export function useWatchListControllerGetUserWatchLists<
  */
 export const watchListControllerFindOne = (
 	id: string,
+	params?: WatchListControllerFindOneParams,
 	options?: SecondParameter<typeof axiosInstance>,
 	signal?: AbortSignal
 ) => {
-	return axiosInstance<WatchlistAggregated>(
-		{ url: `/watch-list/${id}`, method: 'GET', signal },
+	return axiosInstance<WatchlistAggregatedDetail>(
+		{ url: `/watch-list/${id}`, method: 'GET', params, signal },
 		options
 	);
 };
 
-export const getWatchListControllerFindOneQueryKey = (id?: string) => {
-	return [`/watch-list/${id}`] as const;
+export const getWatchListControllerFindOneQueryKey = (
+	id?: string,
+	params?: WatchListControllerFindOneParams
+) => {
+	return [`/watch-list/${id}`, ...(params ? [params] : [])] as const;
 };
 
 export const getWatchListControllerFindOneQueryOptions = <
@@ -2057,6 +2062,7 @@ export const getWatchListControllerFindOneQueryOptions = <
 	TError = void | void,
 >(
 	id: string,
+	params?: WatchListControllerFindOneParams,
 	options?: {
 		query?: Partial<
 			UseQueryOptions<Awaited<ReturnType<typeof watchListControllerFindOne>>, TError, TData>
@@ -2066,11 +2072,11 @@ export const getWatchListControllerFindOneQueryOptions = <
 ) => {
 	const { query: queryOptions, request: requestOptions } = options ?? {};
 
-	const queryKey = queryOptions?.queryKey ?? getWatchListControllerFindOneQueryKey(id);
+	const queryKey = queryOptions?.queryKey ?? getWatchListControllerFindOneQueryKey(id, params);
 
 	const queryFn: QueryFunction<Awaited<ReturnType<typeof watchListControllerFindOne>>> = ({
 		signal,
-	}) => watchListControllerFindOne(id, requestOptions, signal);
+	}) => watchListControllerFindOne(id, params, requestOptions, signal);
 
 	return { queryKey, queryFn, enabled: !!id, ...queryOptions } as UseQueryOptions<
 		Awaited<ReturnType<typeof watchListControllerFindOne>>,
@@ -2089,6 +2095,7 @@ export function useWatchListControllerFindOne<
 	TError = void | void,
 >(
 	id: string,
+	params: undefined | WatchListControllerFindOneParams,
 	options: {
 		query: Partial<
 			UseQueryOptions<Awaited<ReturnType<typeof watchListControllerFindOne>>, TError, TData>
@@ -2110,6 +2117,7 @@ export function useWatchListControllerFindOne<
 	TError = void | void,
 >(
 	id: string,
+	params?: WatchListControllerFindOneParams,
 	options?: {
 		query?: Partial<
 			UseQueryOptions<Awaited<ReturnType<typeof watchListControllerFindOne>>, TError, TData>
@@ -2131,6 +2139,7 @@ export function useWatchListControllerFindOne<
 	TError = void | void,
 >(
 	id: string,
+	params?: WatchListControllerFindOneParams,
 	options?: {
 		query?: Partial<
 			UseQueryOptions<Awaited<ReturnType<typeof watchListControllerFindOne>>, TError, TData>
@@ -2148,6 +2157,7 @@ export function useWatchListControllerFindOne<
 	TError = void | void,
 >(
 	id: string,
+	params?: WatchListControllerFindOneParams,
 	options?: {
 		query?: Partial<
 			UseQueryOptions<Awaited<ReturnType<typeof watchListControllerFindOne>>, TError, TData>
@@ -2156,7 +2166,7 @@ export function useWatchListControllerFindOne<
 	},
 	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-	const queryOptions = getWatchListControllerFindOneQueryOptions(id, options);
+	const queryOptions = getWatchListControllerFindOneQueryOptions(id, params, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
 		queryKey: DataTag<QueryKey, TData, TError>;

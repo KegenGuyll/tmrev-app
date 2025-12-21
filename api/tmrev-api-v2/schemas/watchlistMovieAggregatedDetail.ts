@@ -7,7 +7,7 @@
  */
 import type { MovieWatchProviders } from './movieWatchProviders';
 
-export interface WatchlistMovieAggregated {
+export interface WatchlistMovieAggregatedDetail {
 	order: number;
 	tmdbID: number;
 	id: number;
@@ -16,7 +16,7 @@ export interface WatchlistMovieAggregated {
 	backdrop_path: string;
 	release_date: string;
 	overview: string;
-	watchProviders?: MovieWatchProviders;
 	/** Number of reviews the user has for this movie */
 	reviewCount: number;
+	watchProviders?: MovieWatchProviders;
 }

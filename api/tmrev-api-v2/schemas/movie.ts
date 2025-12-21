@@ -12,7 +12,7 @@ import type { MovieProductionCountry } from './movieProductionCountry';
 import type { MovieSpokenLanguage } from './movieSpokenLanguage';
 import type { MovieCredits } from './movieCredits';
 import type { MovieReleaseDates } from './movieReleaseDates';
-import type { MovieWatchProviders } from './movieWatchProviders';
+import type { Map } from './map';
 
 export interface Movie {
 	id: number;
@@ -44,5 +44,5 @@ export interface Movie {
 	credits: MovieCredits;
 	release_dates: MovieReleaseDates;
 	updatedAt: string;
-	watchProviders: MovieWatchProviders;
+	watchProviders: Map;
 }

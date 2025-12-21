@@ -5,7 +5,11 @@
  * Review aggregation and movie database API
  * OpenAPI spec version: 2.0.0
  */
+import type { MovieWatchProvider } from './movieWatchProvider';
 
 export interface MovieWatchProviders {
 	link: string;
+	flatrate?: MovieWatchProvider[];
+	rent?: MovieWatchProvider[];
+	buy?: MovieWatchProvider[];
 }
