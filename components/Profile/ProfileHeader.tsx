@@ -23,12 +23,12 @@ import {
 	profileFollowingRoute,
 } from '@/constants/routes';
 import { followUserLoginPrompt } from '@/constants/messages';
-import { UserProfile } from '@/api/tmrev-api-v2';
+import { GenreInsightItem, UserProfile } from '@/api/tmrev-api-v2';
 
 type ProfileHeaderProps = {
 	user: UserProfile;
 	from?: FromLocation;
-	favoriteGenres?: string[];
+	favoriteGenres?: GenreInsightItem[];
 	setLoginMessage?: (message: string | null) => void;
 };
 
@@ -135,7 +135,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 						<Text variant="labelSmall">Favorite Genres:</Text>
 						<View style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
 							{favoriteGenres.map((genre) => (
-								<Chip key={genre}>{genre}</Chip>
+								<Chip key={genre.value}>{genre.label}</Chip>
 							))}
 						</View>
 					</View>
