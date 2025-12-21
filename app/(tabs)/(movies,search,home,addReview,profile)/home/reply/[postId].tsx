@@ -4,12 +4,8 @@ import { View, Image, TextInput, KeyboardAvoidingView, ScrollView, Platform } fr
 import { ActivityIndicator, Button, Text, useTheme } from 'react-native-paper';
 import React, { useEffect, useRef, useState } from 'react';
 import useAuth from '@/hooks/useAuth';
-import {
-	useAddCommentMutation,
-	useGetCommentDetailsQuery,
-	useGetSingleReviewQuery,
-	useGetV2UserQuery,
-} from '@/redux/api/tmrev';
+import { useAddCommentMutation, useGetCommentDetailsQuery } from '@/redux/api/tmrev';
+import { useReviewControllerFindOne, useUserControllerFindOne } from '@/api/tmrev-api-v2/endpoints';
 import MultiLineInput from '@/components/Inputs/MultiLineInput';
 import { FeedReviewContentTypes, feedReviewRoute } from '@/constants/routes';
 import ReviewCard from '@/features/feed/reviewCard';
@@ -34,10 +30,9 @@ const ReplyPost: React.FC = () => {
 	const { data: commentData, isLoading: isCommentLoading } = useGetCommentDetailsQuery(postId!, {
 		skip: !postId || contentType !== 'comments',
 	});
-	const { data: reviewData } = useGetSingleReviewQuery(
-		{ reviewId: postId! },
-		{ skip: !postId || contentType !== 'reviews' }
-	);
+	const { data: reviewData } = useReviewControllerFindOne(postId!, {
+		query: { enabled: !!postId && contentType === 'reviews' },
+	});
 
 	const [addComment] = useAddCommentMutation();
 
@@ -59,10 +54,9 @@ const ReplyPost: React.FC = () => {
 		router.replace(feedReviewRoute(postId!, contentType, from!));
 	};
 
-	const { data: currentUserData } = useGetV2UserQuery(
-		{ uid: currentUser?.uid || '' },
-		{ skip: !currentUser }
-	);
+	const { data: currentUserData } = useUserControllerFindOne(currentUser?.uid || '', {
+		query: { enabled: !!currentUser },
+	});
 
 	if ((contentType === 'comments' && !commentData) || isCommentLoading) {
 		return (
@@ -107,14 +101,14 @@ const ReplyPost: React.FC = () => {
 						style={{ display: 'flex', flexDirection: 'row', gap: 16, alignItems: 'flex-start' }}
 					>
 						<Image
-							source={{ uri: currentUserData?.body.photoUrl }}
+							source={{ uri: currentUserData?.photoUrl }}
 							height={50}
 							width={50}
 							style={{ borderRadius: 100 }}
 						/>
 						<View style={{ gap: 16, width: '100%', flex: 1 }}>
 							<View>
-								<Text variant="labelLarge">{currentUserData?.body.username}</Text>
+								<Text variant="labelLarge">{currentUserData?.username}</Text>
 							</View>
 							<View>
 								<MultiLineInput

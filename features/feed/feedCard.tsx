@@ -26,12 +26,7 @@ import { useVoteTmrevReviewMutation } from '@/redux/api/tmrev';
 import { formatDate } from '@/utils/common';
 import { FromLocation } from '@/models';
 import BarChart from '@/components/CustomCharts/BarChart';
-import {
-	commentLoginPrompt,
-	dislikeLoginPrompt,
-	errorPrompt,
-	likeLoginPrompt,
-} from '@/constants/messages';
+import { commentLoginPrompt } from '@/constants/messages';
 
 type FeedCardProps = {
 	review: FeedReviews;
@@ -108,7 +103,7 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from, setLoginMessage }: Fe
 		setHasDisliked(review.votes.downVote.includes(currentUser.uid));
 	}, [review.votes, currentUser]);
 
-	const [voteReview] = useVoteTmrevReviewMutation();
+	// const [voteReview] = useVoteTmrevReviewMutation();
 
 	const handleComment = () => {
 		if (!currentUser) {
@@ -122,6 +117,9 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from, setLoginMessage }: Fe
 	};
 
 	const handleUpVote = async () => {
+		// BLOCKED: V2 API missing vote
+		console.log('Voting blocked in V2 migration');
+		/*
 		if (!currentUser) {
 			if (setLoginMessage) {
 				setLoginMessage(likeLoginPrompt);
@@ -135,9 +133,13 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from, setLoginMessage }: Fe
 		} catch (error) {
 			setSnackBarMessage(errorPrompt);
 		}
+		*/
 	};
 
 	const handleDownVote = async () => {
+		// BLOCKED: V2 API missing vote
+		console.log('Voting blocked in V2 migration');
+		/*
 		if (!currentUser) {
 			if (setLoginMessage) {
 				setLoginMessage(dislikeLoginPrompt);
@@ -151,6 +153,7 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from, setLoginMessage }: Fe
 		} catch (error) {
 			setSnackBarMessage(errorPrompt);
 		}
+		*/
 	};
 
 	const handleShowFullReview = () => {

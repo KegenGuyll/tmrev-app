@@ -18,9 +18,9 @@ import { numberShortHand } from '@/utils/common';
 import {
 	useDeleteCommentMutation,
 	useGetCommentDetailsQuery,
-	useGetSingleReviewQuery,
 	useVoteCommentMutation,
 } from '@/redux/api/tmrev';
+import { useReviewControllerFindOne } from '@/api/tmrev-api-v2/endpoints';
 import { FromLocation } from '@/models';
 import ReviewCard from './reviewCard';
 import {
@@ -53,10 +53,9 @@ const CommentCard: React.FC<CommentCardProps> = ({
 	const [deleteComment] = useDeleteCommentMutation();
 	const { currentUser } = useAuth({});
 
-	const { data: reviewData } = useGetSingleReviewQuery(
-		{ reviewId: comment.post.id },
-		{ skip: !comment.post.id || comment.post.type !== 'reviews' }
-	);
+	const { data: reviewData } = useReviewControllerFindOne(comment.post.id!, {
+		query: { enabled: !!comment.post.id && comment.post.type === 'reviews' },
+	});
 
 	const { data: commentDetails } = useGetCommentDetailsQuery(comment.post.id!, {
 		skip: !comment.post.id || comment.post.type !== 'comments',

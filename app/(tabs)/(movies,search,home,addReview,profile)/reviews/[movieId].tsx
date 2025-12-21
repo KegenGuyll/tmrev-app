@@ -3,7 +3,7 @@ import { List, TouchableRipple } from 'react-native-paper';
 import { useCallback, useState } from 'react';
 import { FlatGrid } from 'react-native-super-grid';
 import { RefreshControl } from 'react-native-gesture-handler';
-import { useGetReviewsByMovieIdQuery } from '@/redux/api/tmrev';
+import { useReviewControllerFindByTmdbId } from '@/api/tmrev-api-v2/endpoints';
 import MovieReview from '@/components/MovieReview';
 import { FromLocation } from '@/models';
 import { feedReviewRoute } from '@/constants/routes';
@@ -22,29 +22,26 @@ const MovieReviewsPage = () => {
 	const [page, setPage] = useState(0);
 	const { movieId, from, title } = useLocalSearchParams<SearchParams>();
 
-	const { data: movieReviewsData, refetch } = useGetReviewsByMovieIdQuery({
-		movieId: Number(movieId),
-		query: {
-			pageNumber: page,
-			pageSize,
-			sort_by: 'createdAt.desc',
-		},
+	const { data: movieReviewsData, refetch } = useReviewControllerFindByTmdbId(Number(movieId), {
+		pageNumber: page,
+		pageSize,
+		sortBy: 'createdAt.desc',
 	});
 
 	const onRefresh = useCallback(async () => {
 		setRefreshing(true);
 		setPage(0);
-		await refetch().unwrap();
+		await refetch();
 		setRefreshing(false);
-	}, []);
+	}, [refetch]);
 
 	const incrementPage = useCallback(() => {
-		if (page === movieReviewsData?.body.totalNumberOfPages) {
+		if (page === movieReviewsData?.totalNumberOfPages) {
 			return;
 		}
 
 		setPage(page + 1);
-	}, [movieReviewsData]);
+	}, [movieReviewsData, page]);
 
 	if (!movieReviewsData) return null;
 
@@ -58,7 +55,7 @@ const MovieReviewsPage = () => {
 				onEndReached={incrementPage}
 				itemDimension={800}
 				spacing={0}
-				data={movieReviewsData?.body.reviews}
+				data={movieReviewsData?.results || []}
 				keyExtractor={(item) => item._id}
 				renderItem={({ item }) => (
 					<List.Section>

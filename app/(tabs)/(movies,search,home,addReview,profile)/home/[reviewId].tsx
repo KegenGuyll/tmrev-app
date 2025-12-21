@@ -10,11 +10,8 @@ import {
 import { Text, useTheme, MD3Theme, Divider, ActivityIndicator, Snackbar } from 'react-native-paper';
 import React, { useMemo, useState } from 'react';
 import { FlatList } from 'react-native-gesture-handler';
-import {
-	useGetCommentDetailsQuery,
-	useGetCommentsQuery,
-	useGetSingleReviewQuery,
-} from '@/redux/api/tmrev';
+import { useGetCommentDetailsQuery, useGetCommentsQuery } from '@/redux/api/tmrev';
+import { useReviewControllerFindOne } from '@/api/tmrev-api-v2/endpoints';
 import CommentCard from '@/features/feed/commentCard';
 import { FeedReviewContentTypes, feedReviewDetailsRoute, loginRoute } from '@/constants/routes';
 import ReviewCard from '@/features/feed/reviewCard';
@@ -42,10 +39,9 @@ const ReviewPage: React.FC = () => {
 		data: reviewData,
 		isLoading: isReviewDataLoading,
 		refetch: refetchReview,
-	} = useGetSingleReviewQuery(
-		{ reviewId: reviewId! },
-		{ skip: !reviewId || contentType !== 'reviews' }
-	);
+	} = useReviewControllerFindOne(reviewId!, {
+		query: { enabled: !!reviewId && contentType === 'reviews' },
+	});
 
 	const {
 		data: commentData,
@@ -69,7 +65,7 @@ const ReviewPage: React.FC = () => {
 		try {
 			setIsRefreshing(true);
 			if (contentType === 'reviews') {
-				await refetchReview().unwrap();
+				await refetchReview();
 			}
 			if (contentType === 'comments') {
 				await refetchCommentDetails().unwrap();

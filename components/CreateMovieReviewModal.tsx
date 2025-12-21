@@ -4,13 +4,20 @@ import { View, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { Divider, Snackbar, Switch, Text } from 'react-native-paper';
 import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import dayjs from 'dayjs';
+import { useQueryClient } from '@tanstack/react-query';
+import useAuth from '@/hooks/useAuth';
 import { MoviePosterImage } from '@/components/MoviePoster';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import CustomBottomSheetBackground from '@/components/CustomBottomSheetBackground';
 import formatDateYear from '@/utils/formatDateYear';
 import RatingSliderList, { Ratings } from '@/components/AddReview/RatingSliderList';
-import { useAddTmrevReviewMutation, useUpdateTmrevReviewMutation } from '@/redux/api/tmrev';
-import { CreateTmrevReviewQuery, TmrevReview } from '@/models/tmrev';
+import {
+	getReviewControllerFindByTmdbIdQueryKey,
+	getUserControllerFindOneQueryKey,
+	useReviewControllerCreate,
+	useReviewControllerUpdate,
+} from '@/api/tmrev-api-v2/endpoints';
+import { CreateReviewDtoClass, ReviewAggregated, UpdateReviewDtoClass } from '@/api/tmrev-api-v2';
 import { movieDetailsRoute } from '@/constants/routes';
 import TitledHandledComponent from './BottomSheetModal/TitledHandledComponent';
 import TextInput from './Inputs/TextInput';
@@ -36,7 +43,7 @@ type CreateMovieReviewModalProps = {
 	visible: boolean;
 	onDismiss: () => void;
 	selectedMovie: MovieGeneral | null;
-	reviewData?: TmrevReview;
+	reviewData?: ReviewAggregated;
 };
 
 // deprecated
@@ -52,8 +59,11 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 	const [reviewedSuccess, setReviewedSuccess] = useState(false);
 	const [title, setTitle] = useState('');
 	const [isPublic, setIsPublic] = useState(true);
-	const [createReview] = useAddTmrevReviewMutation();
-	const [updateReview] = useUpdateTmrevReviewMutation();
+	const queryClient = useQueryClient();
+	const { mutateAsync: createReview } = useReviewControllerCreate();
+	const { mutateAsync: updateReview } = useReviewControllerUpdate();
+	const { currentUser } = useAuth({});
+
 	const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 	const [ratings, setRatings] = useState<Ratings>(defaultRatings);
 	const [note, setNote] = useState('');
@@ -121,7 +131,7 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 	const handleCreateMovieReview = async () => {
 		try {
 			if (selectedMovieData) {
-				const review: CreateTmrevReviewQuery = {
+				const review: CreateReviewDtoClass | UpdateReviewDtoClass = {
 					tmdbID: selectedMovieData.id,
 					advancedScore: {
 						plot: ratings.plot,
@@ -142,9 +152,21 @@ const CreateMovieReviewModal: React.FC<CreateMovieReviewModalProps> = ({
 				};
 
 				if (reviewData) {
-					await updateReview(review).unwrap();
+					await updateReview({ id: reviewData._id, data: review });
+					await queryClient.invalidateQueries({
+						queryKey: getReviewControllerFindByTmdbIdQueryKey(selectedMovieData.id),
+					});
+					await queryClient.invalidateQueries({
+						queryKey: getUserControllerFindOneQueryKey(currentUser?.uid),
+					});
 				} else {
-					await createReview(review).unwrap();
+					await createReview({ data: review });
+					await queryClient.invalidateQueries({
+						queryKey: getReviewControllerFindByTmdbIdQueryKey(selectedMovieData.id),
+					});
+					await queryClient.invalidateQueries({
+						queryKey: getUserControllerFindOneQueryKey(currentUser?.uid),
+					});
 				}
 
 				setLastReview(selectedMovieData);
