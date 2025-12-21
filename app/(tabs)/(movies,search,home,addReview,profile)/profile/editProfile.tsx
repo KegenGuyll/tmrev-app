@@ -2,8 +2,13 @@ import { Stack, useRouter } from 'expo-router';
 import { View, StyleSheet } from 'react-native';
 import { Button, Divider, TextInput, Text } from 'react-native-paper';
 import React, { useEffect, useMemo, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import useAuth from '@/hooks/useAuth';
-import { useUserControllerFindOne, useUserControllerUpdate } from '@/api/tmrev-api-v2/endpoints';
+import {
+	getUserControllerFindOneQueryKey,
+	useUserControllerFindOne,
+	useUserControllerUpdate,
+} from '@/api/tmrev-api-v2/endpoints';
 
 const EditProfile = () => {
 	const { currentUser } = useAuth({});
@@ -12,7 +17,16 @@ const EditProfile = () => {
 	});
 
 	const router = useRouter();
-	const { mutateAsync: updateUser } = useUserControllerUpdate();
+	const queryClient = useQueryClient();
+	const { mutateAsync: updateUser } = useUserControllerUpdate({
+		mutation: {
+			onSuccess: () => {
+				queryClient.invalidateQueries({
+					queryKey: getUserControllerFindOneQueryKey(currentUser?.uid),
+				});
+			},
+		},
+	});
 
 	const [form, setForm] = useState({
 		username: data?.username || '',
