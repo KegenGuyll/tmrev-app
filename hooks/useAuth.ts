@@ -1,37 +1,17 @@
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { appleAuth } from '@invertase/react-native-apple-authentication';
-import { GOOGLE_WEB_CLIENT_ID, TMREV_API_URL } from '@env';
+import { GOOGLE_WEB_CLIENT_ID } from '@env';
 import { useCallback, useEffect, useState } from 'react';
 import * as Sentry from '@sentry/react-native';
-import { UserV2 } from '@/models/tmrev/user';
-import { tmrevApi } from '@/redux/api/tmrev';
-import { useAppDispatch } from './reduxHooks';
-
-type CreateTMREVUser = {
-	bio: string;
-	email: string;
-	username: string;
-	link: string | null;
-	location: string;
-	photoUrl: string | null;
-	public: boolean;
-	uuid: string;
-};
-
-const findUserByUid = async (uid?: string) => {
-	try {
-		if (!uid) {
-			return undefined;
-		}
-		const res = await fetch(`${TMREV_API_URL}/user/isUser/${uid}`);
-		const data = await res.json();
-
-		return data;
-	} catch (error) {
-		return undefined;
-	}
-};
+import { useQueryClient } from '@tanstack/react-query';
+import {
+	getUserControllerFindOneQueryKey,
+	useUserControllerCreate,
+	useUserControllerFindOne,
+	userControllerFindOne,
+} from '@/api/tmrev-api-v2/endpoints';
+import { CreateUserDto, UserProfile } from '@/api/tmrev-api-v2';
 
 type UseGoogleAuthInitialValues = {
 	onSuccessfulSignIn?: () => void;
@@ -39,32 +19,18 @@ type UseGoogleAuthInitialValues = {
 };
 
 const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) => {
-	const dispatch = useAppDispatch();
 	const [initializing, setInitializing] = useState(true);
 	const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
-	const [tmrevUser, setTMREVUser] = useState<UserV2 | null>(null);
+	const queryClient = useQueryClient();
 
-	// const { data: V2UserData } = useGetV2UserQuery(
-	// 	{ uid: user?.uid || '' },
-	// 	{ skip: !user || !user.uid }
-	// );
+	const { data: tmrevUser } = useUserControllerFindOne(user?.uid || '', {
+		query: { enabled: !!user?.uid },
+	});
 
-	// useEffect(() => {
-	// 	if (V2UserData) {
-	// 		setTMREVUser(V2UserData.body);
-	// 	}
-	// }, [V2UserData]);
+	const { mutateAsync: createUser } = useUserControllerCreate();
 
 	const onAuthStateChanged = useCallback((u: FirebaseAuthTypes.User | null) => {
 		setUser(u);
-		const promise = dispatch(tmrevApi.endpoints.getV2User.initiate({ uid: u?.uid || '' }));
-
-		promise.unwrap().then((res) => {
-			if (res.success) {
-				setTMREVUser(res.body);
-			}
-		});
-
 		if (initializing) setInitializing(false);
 	}, []);
 
@@ -74,41 +40,36 @@ const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) =>
 	}, []);
 
 	const checkIfUserExists = async (uid: string) => {
-		const result = await findUserByUid(uid);
-
-		if (!result) {
+		try {
+			if (!uid) return false;
+			await userControllerFindOne(uid);
+			return true;
+		} catch (error) {
 			return false;
 		}
-
-		return true;
 	};
 
 	const createTMREVUser = async (currentUser: FirebaseAuthTypes.User, username?: string) => {
-		const createdUsername = currentUser.displayName || username;
+		const createdUsername = currentUser.displayName || username || '';
 
-		const token = await currentUser.getIdToken();
-		const response = await fetch(`${TMREV_API_URL}/user`, {
-			method: 'POST',
-			headers: {
-				authorization: token,
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				uuid: currentUser.uid,
-				email: currentUser.email,
-				username: createdUsername,
-				photoUrl:
-					currentUser.photoURL || `https://api.dicebear.com/8.x/thumbs/png?seed=${currentUser.uid}`,
-				bio: '',
-				location: '',
-				link: null,
-				public: true,
-			} as CreateTMREVUser),
+		const dto: CreateUserDto = {
+			email: currentUser.email || '',
+			username: createdUsername,
+			photoUrl:
+				currentUser.photoURL || `https://api.dicebear.com/8.x/thumbs/png?seed=${currentUser.uid}`,
+			bio: '',
+			location: '',
+			link: '',
+			public: true,
+		};
+
+		const result = await createUser({ data: dto });
+
+		await queryClient.invalidateQueries({
+			queryKey: getUserControllerFindOneQueryKey(currentUser.uid),
 		});
 
-		const data = await response.json();
-
-		return data;
+		return result;
 	};
 
 	const onGoogleSignInButtonPress = async () => {
@@ -135,13 +96,8 @@ const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) =>
 			const doesUserExist = await checkIfUserExists(currentUser?.uid);
 
 			if (!doesUserExist) {
-				const result = await createTMREVUser(currentUser);
-
-				if (!result.success) {
-					if (onError) onError('Failed to create user');
-
-					currentUser.delete();
-				} else if (onSuccessfulSignIn) onSuccessfulSignIn();
+				await createTMREVUser(currentUser);
+				if (onSuccessfulSignIn) onSuccessfulSignIn();
 			} else if (onSuccessfulSignIn) onSuccessfulSignIn();
 		} catch (error: any) {
 			Sentry.captureException(error);
@@ -191,11 +147,8 @@ const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) =>
 			const doesUserExist = await checkIfUserExists(currentUser?.uid);
 
 			if (!doesUserExist) {
-				const result = await createTMREVUser(currentUser);
-				if (!result.success) {
-					if (onError) onError('Failed to create user');
-					currentUser.delete();
-				} else if (onSuccessfulSignIn) onSuccessfulSignIn();
+				await createTMREVUser(currentUser);
+				if (onSuccessfulSignIn) onSuccessfulSignIn();
 			} else if (onSuccessfulSignIn) onSuccessfulSignIn();
 		} catch (error: any) {
 			Sentry.captureException(error);
@@ -234,12 +187,8 @@ const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) =>
 				photoURL: `https://api.dicebear.com/8.x/thumbs/png?seed=${currentUser.uid}`,
 			});
 
-			const result = await createTMREVUser(currentUser, username);
-
-			if (!result.success) {
-				if (onError) onError('Failed to create user');
-				currentUser.delete();
-			} else if (onSuccessfulSignIn) onSuccessfulSignIn();
+			await createTMREVUser(currentUser, username);
+			if (onSuccessfulSignIn) onSuccessfulSignIn();
 		} catch (error: any) {
 			if (error.message && typeof error.message === 'string') {
 				const message = error.message.split(']')[1];
@@ -255,7 +204,7 @@ const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) =>
 		emailSignIn,
 		emailSignUp,
 		currentUser: user,
-		tmrevUser,
+		tmrevUser: tmrevUser as UserProfile | undefined,
 	};
 };
 
