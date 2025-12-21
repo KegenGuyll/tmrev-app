@@ -5,14 +5,14 @@
  * Review aggregation and movie database API
  * OpenAPI spec version: 2.0.0
  */
-import type { WatchlistAggregatedMoviesItem } from './watchlistAggregatedMoviesItem';
+import type { WatchlistMovieAggregated } from './watchlistMovieAggregated';
 
 export interface WatchlistAggregated {
 	_id: string;
 	createdAt: string;
 	description: string;
 	/** Array of movies with full TMDB details */
-	movies: WatchlistAggregatedMoviesItem[];
+	movies: WatchlistMovieAggregated[];
 	public: boolean;
 	tags: string[];
 	title: string;

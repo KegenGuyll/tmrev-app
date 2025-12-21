@@ -10,7 +10,7 @@ import useDebounce from '@/hooks/useDebounce';
 import { createListRoute } from '@/constants/routes';
 import {
 	useWatchListControllerGetUserWatchLists,
-	Watchlist,
+	WatchlistAggregated,
 	WatchListControllerGetUserWatchListsParams,
 } from '@/api/tmrev-api-v2';
 
@@ -44,7 +44,7 @@ const ListFooter: React.FC<{ isLoading: boolean; isFetching: boolean }> = ({
 };
 
 const AllListsPage: React.FC = () => {
-	const [fullData, setFullData] = useState<Watchlist[]>([]);
+	const [fullData, setFullData] = useState<WatchlistAggregated[]>([]);
 	const { profileId, from } = useLocalSearchParams<AllListsSearchParams>();
 	const [page, setPage] = useState(1);
 	const [searchValue, setSearchValue] = useState('');
@@ -92,10 +92,8 @@ const AllListsPage: React.FC = () => {
 			} else {
 				// Append data for subsequent pages
 				setFullData((prev) => {
-					const existingIds = new Set(prev.map((item: Watchlist) => item._id));
-					const newItems = (data.results || []).filter(
-						(item: Watchlist) => !existingIds.has(item._id)
-					);
+					const existingIds = new Set(prev.map((item) => item._id));
+					const newItems = (data.results || []).filter((item) => !existingIds.has(item._id));
 					return [...prev, ...newItems];
 				});
 			}
@@ -151,7 +149,7 @@ const AllListsPage: React.FC = () => {
 				renderItem={({ item }) => (
 					<MovieListItem
 						touchableRippleStyle={{ marginTop: 8 }}
-						item={item as any}
+						item={item}
 						profileId={profileId!}
 						from={from!}
 					/>

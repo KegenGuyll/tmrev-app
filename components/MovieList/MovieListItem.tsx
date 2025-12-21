@@ -3,13 +3,13 @@ import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { GestureResponderEvent, StyleProp, View, ViewStyle } from 'react-native';
 import { TouchableRipple, Surface, Text } from 'react-native-paper';
-import { WatchList } from '@/models/tmrev';
 import { FromLocation } from '@/models';
 import { listDetailsRoute } from '@/constants/routes';
 import { MoviePosterImage } from '../MoviePoster';
+import { WatchlistAggregated } from '@/api/tmrev-api-v2';
 
 type WatchListItemProps = {
-	item: WatchList;
+	item: WatchlistAggregated;
 	onPress?: (e: GestureResponderEvent) => void;
 	profileId?: string;
 	from?: FromLocation;

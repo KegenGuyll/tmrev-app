@@ -53,3 +53,4 @@ export * from './watchListMovie';
 export * from './watchlist';
 export * from './watchlistAggregated';
 export * from './watchlistAggregatedMoviesItem';
+export * from './watchlistMovieAggregated';
