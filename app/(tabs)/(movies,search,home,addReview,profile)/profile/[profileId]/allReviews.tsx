@@ -11,15 +11,19 @@ import {
 } from 'react-native-paper';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { FlatGrid } from 'react-native-super-grid';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { FlatList, RefreshControl } from 'react-native-gesture-handler';
-import { useGetUserMovieReviewsQuery } from '@/redux/api/tmrev';
 import MovieReviewCard, { MovieReviewDisplayChip } from '@/components/MovieReviewCard';
 import { GetMovieReviewSortBy, TmrevReview } from '@/models/tmrev';
 import AllMovieReviewsFilters from '@/components/AllMovieReviewFilters';
 import { camelCaseToWords } from '@/utils/common';
 import { FromLocation } from '@/models';
 import useDebounce from '@/hooks/useDebounce';
+import {
+	useReviewControllerFindByUserId,
+	ReviewAggregated,
+	ReviewControllerFindByUserIdParams,
+} from '@/api/tmrev-api-v2';
 
 const pageSize = 15;
 
@@ -52,11 +56,27 @@ const convertSortToDisplayChip = (sort: GetMovieReviewSortBy): MovieReviewDispla
 	}
 };
 
+// Extract footer component to avoid inline component definition
+const ListFooter: React.FC<{ isLoading: boolean; isFetching: boolean }> = ({
+	isLoading,
+	isFetching,
+}) => {
+	if (isLoading || isFetching) {
+		return (
+			<View>
+				<ActivityIndicator />
+			</View>
+		);
+	}
+	return null;
+};
+
 const AllReviews = () => {
+	const [fullData, setFullData] = useState<ReviewAggregated[]>([]);
 	const [refreshing, setRefreshing] = useState(false);
 	const [showAdvancedScoreFilter, setShowAdvancedScoreFilter] = useState(true);
 	const [sort, setSort] = useState<GetMovieReviewSortBy>('reviewedDate.desc');
-	const [page, setPage] = useState(0);
+	const [page, setPage] = useState(1);
 	const [openFilters, setOpenFilters] = useState(false);
 	const flatListRef = useRef<FlatList<TmrevReview>>(null);
 	const [search, setSearch] = useState<string>('');
@@ -75,16 +95,22 @@ const AllReviews = () => {
 
 	const { profileId, advancedScore, from } = useLocalSearchParams<AllReviewsSearchParams>();
 
-	const query = useMemo(() => {
+	// Reset fullData when search term or sort changes
+	useEffect(() => {
+		setFullData([]);
+		setPage(1);
+	}, [debouncedSearchTerm, sort]);
+
+	const query: ReviewControllerFindByUserIdParams = useMemo(() => {
 		if (advancedScore && showAdvancedScoreFilter) {
-			return { sort_by: sort, pageNumber: page, pageSize, advancedScore };
+			return { sortBy: sort, pageNumber: page, pageSize, advancedScore };
 		}
 
 		if (debouncedSearchTerm) {
-			return { sort_by: sort, pageNumber: page, pageSize, textSearch: debouncedSearchTerm };
+			return { sortBy: sort, pageNumber: page, pageSize, textSearch: debouncedSearchTerm };
 		}
 
-		return { sort_by: sort, pageNumber: page, pageSize };
+		return { sortBy: sort, pageNumber: page, pageSize };
 	}, [sort, page, showAdvancedScoreFilter, debouncedSearchTerm]);
 
 	const {
@@ -92,36 +118,67 @@ const AllReviews = () => {
 		refetch,
 		isLoading,
 		isFetching,
-	} = useGetUserMovieReviewsQuery({ userId: profileId!, query }, { skip: !profileId });
+	} = useReviewControllerFindByUserId(profileId!, query, {
+		query: {
+			enabled: !!profileId,
+		},
+	});
+
+	// Update fullData when new data arrives
+	useEffect(() => {
+		if (userMovieReviewResponse?.results) {
+			if (page === 1) {
+				// Replace data on first page or after search/sort change
+				setFullData(userMovieReviewResponse.results);
+			} else {
+				// Append data for subsequent pages
+				setFullData((prev) => {
+					const existingIds = new Set(prev.map((item: ReviewAggregated) => item._id));
+					const newItems = (userMovieReviewResponse.results || []).filter(
+						(item: ReviewAggregated) => !existingIds.has(item._id)
+					);
+					return [...prev, ...newItems];
+				});
+			}
+		}
+	}, [userMovieReviewResponse, page]);
 
 	const theme = useTheme();
 	const styles = makeStyles(theme);
 
 	const onRefresh = useCallback(async () => {
 		setRefreshing(true);
-		setPage(0);
-		await refetch().unwrap();
+		setFullData([]);
+		setPage(1);
+		await refetch();
 		setRefreshing(false);
 	}, []);
 
-	const incrementPage = useCallback(() => {
-		if (page === userMovieReviewResponse?.body.totalNumberOfPages) {
-			return;
+	const loadNextPage = useCallback(() => {
+		if (
+			!isFetching &&
+			userMovieReviewResponse &&
+			userMovieReviewResponse.totalNumberOfPages &&
+			page < userMovieReviewResponse.totalNumberOfPages
+		) {
+			setPage((prevPage) => prevPage + 1);
 		}
+	}, [userMovieReviewResponse, page, isFetching]);
 
-		setPage(page + 1);
-	}, [userMovieReviewResponse]);
+	const handleOpenFilters = useCallback(() => {
+		setOpenFilters(true);
+	}, []);
 
-	if (isLoading || !userMovieReviewResponse) {
-		return <ActivityIndicator />;
-	}
+	const headerRight = useCallback(() => {
+		return <IconButton icon="filter" onPress={handleOpenFilters} />;
+	}, [handleOpenFilters]);
 
 	return (
 		<>
 			<Stack.Screen
 				options={{
 					title: `Reviews`,
-					headerRight: () => <IconButton icon="filter" onPress={() => setOpenFilters(true)} />,
+					headerRight,
 				}}
 			/>
 			<View style={{ marginTop: 8 }}>
@@ -172,7 +229,7 @@ const AllReviews = () => {
 					ref={flatListRef}
 					itemDimension={400}
 					style={styles.list}
-					data={userMovieReviewResponse.body.reviews}
+					data={fullData as any}
 					contentContainerStyle={{ alignItems: 'stretch', width: '100%' }}
 					itemContainerStyle={{ maxHeight: 170 }}
 					spacing={8}
@@ -215,18 +272,9 @@ const AllReviews = () => {
 					refreshControl={
 						<RefreshControl tintColor="white" refreshing={refreshing} onRefresh={onRefresh} />
 					}
-					onEndReached={incrementPage}
-					ListFooterComponent={() => {
-						if (isLoading || isFetching) {
-							return (
-								<View>
-									<ActivityIndicator />
-								</View>
-							);
-						}
-
-						return null;
-					}}
+					onEndReached={loadNextPage}
+					onEndReachedThreshold={0.5}
+					ListFooterComponent={<ListFooter isLoading={isLoading} isFetching={isFetching} />}
 				/>
 			</View>
 			<AllMovieReviewsFilters
