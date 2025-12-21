@@ -8,6 +8,7 @@
 import type { WatchListMovie } from './watchListMovie';
 
 export interface Watchlist {
+	_id: string;
 	createdAt: string;
 	description: string;
 	/** Array of movies in the watch list */
