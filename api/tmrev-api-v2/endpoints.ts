@@ -45,6 +45,7 @@ import type {
 	WatchListControllerGetUserWatchLists200,
 	WatchListControllerGetUserWatchListsParams,
 	Watchlist,
+	WatchlistAggregated,
 } from './schemas';
 
 import { axiosInstance } from './mutator/axiosInstance';
@@ -2041,7 +2042,10 @@ export const watchListControllerFindOne = (
 	options?: SecondParameter<typeof axiosInstance>,
 	signal?: AbortSignal
 ) => {
-	return axiosInstance<Watchlist>({ url: `/watch-list/${id}`, method: 'GET', signal }, options);
+	return axiosInstance<WatchlistAggregated>(
+		{ url: `/watch-list/${id}`, method: 'GET', signal },
+		options
+	);
 };
 
 export const getWatchListControllerFindOneQueryKey = (id?: string) => {

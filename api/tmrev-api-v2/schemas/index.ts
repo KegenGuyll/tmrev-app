@@ -51,3 +51,5 @@ export * from './watchListControllerGetUserWatchLists200';
 export * from './watchListControllerGetUserWatchListsParams';
 export * from './watchListMovie';
 export * from './watchlist';
+export * from './watchlistAggregated';
+export * from './watchlistAggregatedMoviesItem';

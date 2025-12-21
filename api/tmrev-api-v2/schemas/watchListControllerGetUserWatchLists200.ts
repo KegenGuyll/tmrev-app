@@ -5,7 +5,7 @@
  * Review aggregation and movie database API
  * OpenAPI spec version: 2.0.0
  */
-import type { Watchlist } from './watchlist';
+import type { WatchlistAggregated } from './watchlistAggregated';
 
 export type WatchListControllerGetUserWatchLists200 = {
 	/** Current page number (1-indexed) */
@@ -17,5 +17,5 @@ export type WatchListControllerGetUserWatchLists200 = {
 	/** Total number of documents matching the query */
 	totalCount?: number;
 	/** Array of results in the current page */
-	results?: Watchlist[];
+	results?: WatchlistAggregated[];
 };
