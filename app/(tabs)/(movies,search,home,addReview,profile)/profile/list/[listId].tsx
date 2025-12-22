@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unstable-nested-components */
 import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { View, Alert, RefreshControl, StyleSheet } from 'react-native';
+import type { NavigationAction } from '@react-navigation/native';
 import { Button, Divider, IconButton, Menu, Snackbar, Text } from 'react-native-paper';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -285,6 +286,50 @@ const ListDetailsPage: React.FC = () => {
 		[data, description, listId, rankedList, title, updateWatchList]
 	);
 
+	// prompt to save changes when navigating away (after save handler exists)
+	useEffect(() => {
+		const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+			if (!hasUnsavedChanges || !isCurrentUser) {
+				return;
+			}
+
+			e.preventDefault();
+
+			Alert.alert(
+				'Unsaved changes',
+				'You have unsaved changes. Would you like to save before leaving?',
+				[
+					{ text: 'Cancel', style: 'cancel' },
+					{
+						text: 'Discard',
+						style: 'destructive',
+						onPress: () => {
+							const {
+								data: { action },
+							} = e as { data: { action: NavigationAction } };
+							navigation.dispatch(action);
+						},
+					},
+					{
+						text: 'Save',
+						onPress: async () => {
+							try {
+								await handleUpdateWatchList();
+							} finally {
+								const {
+									data: { action },
+								} = e as { data: { action: NavigationAction } };
+								navigation.dispatch(action);
+							}
+						},
+					},
+				]
+			);
+		});
+
+		return unsubscribe;
+	}, [navigation, hasUnsavedChanges, isCurrentUser, handleUpdateWatchList]);
+
 	// clone watchlist
 	const handleCloneWatchList = async () => {
 		if (!data) return;
@@ -313,7 +358,9 @@ const ListDetailsPage: React.FC = () => {
 				})
 			);
 
-			router.push(listDetailsRoute(from || 'profile', response._id, currentUser?.uid || ''));
+			router.push(
+				listDetailsRoute(from || 'profile', (response as any)._id, currentUser?.uid || '')
+			);
 		} catch (error) {
 			dispatch(showSnackbar({ message: `Error Cloning ${title || data!.title}`, type: 'error' }));
 		}
