@@ -44,7 +44,7 @@ import type {
 	UpdateWatchListDtoClass,
 	UpdateWatchedDtoClass,
 	User,
-	UserProfile,
+	UserProfileWithWatchedCount,
 	WatchListControllerFindOneParams,
 	WatchListControllerGetUserWatchLists200,
 	WatchListControllerGetUserWatchListsParams,
@@ -2652,7 +2652,10 @@ export const userControllerFindOne = (
 	options?: SecondParameter<typeof axiosInstance>,
 	signal?: AbortSignal
 ) => {
-	return axiosInstance<UserProfile>({ url: `/user/${id}`, method: 'GET', signal }, options);
+	return axiosInstance<UserProfileWithWatchedCount>(
+		{ url: `/user/${id}`, method: 'GET', signal },
+		options
+	);
 };
 
 export const getUserControllerFindOneQueryKey = (id?: string) => {

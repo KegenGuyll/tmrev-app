@@ -53,6 +53,7 @@ export * from './updateWatchListDtoClass';
 export * from './updateWatchedDtoClass';
 export * from './user';
 export * from './userProfile';
+export * from './userProfileWithWatchedCount';
 export * from './watchListControllerFindOneParams';
 export * from './watchListControllerGetUserWatchLists200';
 export * from './watchListControllerGetUserWatchListsParams';
