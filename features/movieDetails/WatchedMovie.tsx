@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { IconButton, Text } from 'react-native-paper';
+import { useQueryClient } from '@tanstack/react-query';
 import useAuth from '@/hooks/useAuth';
 import {
-	useCreateWatchedMutation,
-	useGetSingleWatchedQuery,
-	useUpdateWatchedMutation,
-} from '@/redux/api/tmrev';
+	getWatchedControllerFindByUserIdQueryKey,
+	useWatchedControllerCreate,
+	useWatchedControllerFindOneByUserAndTmdbId,
+	useWatchedControllerUpdate,
+} from '@/api/tmrev-api-v2';
 import { likeMovieLoginPrompt } from '@/constants/messages';
 
 type WatchedMovieProps = {
@@ -26,18 +28,23 @@ const WatchedMovie: React.FC<WatchedMovieProps> = ({
 	const [hasWatched, setHasWatched] = useState(false);
 	const [hasLiked, setHasLiked] = useState(false);
 
-	const [updateWatched] = useUpdateWatchedMutation();
-	const [createWatched] = useCreateWatchedMutation();
+	const queryClient = useQueryClient();
 
-	const { data: singleWatched } = useGetSingleWatchedQuery(
-		{ userId: currentUser?.uid || '', tmdbID: Number(movieId!) },
-		{ skip: !currentUser || !movieId }
+	const { mutateAsync: updateWatched } = useWatchedControllerUpdate();
+	const { mutateAsync: createWatched } = useWatchedControllerCreate();
+
+	const { data: singleWatched } = useWatchedControllerFindOneByUserAndTmdbId(
+		currentUser?.uid || '',
+		Number(movieId!),
+		{
+			query: { enabled: !!currentUser && !!movieId },
+		}
 	);
 
 	useEffect(() => {
-		if (singleWatched?.body) {
+		if (singleWatched) {
 			setHasWatched(true);
-			if (singleWatched.body.liked) {
+			if (singleWatched.liked) {
 				setHasLiked(true);
 			}
 		}
@@ -51,20 +58,31 @@ const WatchedMovie: React.FC<WatchedMovieProps> = ({
 			return;
 		}
 
-		if (hasWatched && singleWatched?.body) {
-			await updateWatched({
-				tmdbID: Number(movieId),
-				liked,
-				_id: singleWatched?.body?._id,
-			}).unwrap();
-			setHasLiked(liked);
-		} else {
-			await createWatched({
-				liked,
-				tmdbID: Number(movieId),
-			}).unwrap();
-			setHasLiked(liked);
-			setHasWatched(true);
+		try {
+			if (hasWatched && singleWatched) {
+				await updateWatched({
+					id: singleWatched._id,
+					data: {
+						liked,
+					},
+				});
+				setHasLiked(liked);
+			} else {
+				await createWatched({
+					data: {
+						liked,
+						tmdbId: Number(movieId),
+					},
+				});
+				setHasLiked(liked);
+				setHasWatched(true);
+			}
+
+			await queryClient.invalidateQueries({
+				queryKey: getWatchedControllerFindByUserIdQueryKey(currentUser.uid),
+			});
+		} catch (error) {
+			// error
 		}
 	};
 

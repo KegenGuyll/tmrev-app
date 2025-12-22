@@ -2,10 +2,13 @@ import { View, StyleSheet, RefreshControl } from 'react-native';
 import { ActivityIndicator, Icon, Text, useTheme } from 'react-native-paper';
 import { FlatGrid } from 'react-native-super-grid';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useGetWatchedQuery } from '@/redux/api/tmrev';
+import {
+	useWatchedControllerFindByUserId,
+	WatchedAggregated,
+	WatchedControllerFindByUserIdParams,
+} from '@/api/tmrev-api-v2';
 import { FromLocation } from '@/models';
 import MoviePoster from './MoviePoster';
-import { Watched } from '@/models/tmrev/watched';
 
 type WatchedMovieListProps = {
 	userId?: string;
@@ -13,7 +16,7 @@ type WatchedMovieListProps = {
 };
 
 type WatchedMovieItemProps = {
-	item: Watched;
+	item: WatchedAggregated;
 	from: FromLocation;
 };
 
@@ -38,7 +41,7 @@ const WatchedMovieItem: React.FC<WatchedMovieItemProps> = ({
 				{item.liked ? <Icon source="thumb-up" size={24} /> : <Icon source="thumb-down" size={24} />}
 			</View>
 			<MoviePoster
-				movieId={item.tmdbID}
+				movieId={item.tmdbId}
 				moviePoster={item.movieDetails.poster_path}
 				location={from}
 			/>
@@ -56,32 +59,43 @@ const WatchedMovieList: React.FC<WatchedMovieListProps> = ({
 
 	const [isRefreshing, setIsRefreshing] = useState(false);
 
-	const [page, setPage] = useState(0);
+	const [page, setPage] = useState(1);
 
-	const query = useMemo(() => {
-		return { pageNumber: page, pageSize };
+	const query = useMemo<WatchedControllerFindByUserIdParams>(() => {
+		return { pageNumber: page, pageSize, sortBy: 'watchedDate.desc' };
 	}, [page]);
 
-	const { data, isLoading, isFetching, refetch } = useGetWatchedQuery(
-		{ userId, query },
-		{ skip: !userId }
-	);
+	const { data, isLoading, isFetching, refetch } = useWatchedControllerFindByUserId(userId, query, {
+		query: { enabled: !!userId },
+	});
 
 	const incrementPage = useCallback(() => {
 		if (!data) return;
 
-		if (page >= data?.body.totalNumberOfPages) {
+		if (page >= (data.totalNumberOfPages || 0)) {
 			return;
 		}
 
 		setPage(page + 1);
-	}, [data]);
+	}, [data, page]);
 
 	const handleRefresh = useCallback(async () => {
 		setIsRefreshing(true);
-		await refetch().unwrap();
+		await refetch();
 		setIsRefreshing(false);
 	}, [setIsRefreshing, refetch]);
+
+	const renderFooter = useCallback(() => {
+		if (isLoading || isFetching) {
+			return (
+				<View>
+					<ActivityIndicator />
+				</View>
+			);
+		}
+
+		return null;
+	}, [isLoading, isFetching]);
 
 	if (isLoading && !data) {
 		return <Text>Loading...</Text>;
@@ -97,22 +111,12 @@ const WatchedMovieList: React.FC<WatchedMovieListProps> = ({
 				}
 				itemDimension={100}
 				style={styles.list}
-				data={data.body.watched}
+				data={data.results || []}
 				spacing={8}
 				renderItem={({ item }) => <WatchedMovieItem item={item} from={from} />}
 				keyExtractor={(item) => item._id}
 				onEndReached={incrementPage}
-				ListFooterComponent={() => {
-					if (isLoading || isFetching) {
-						return (
-							<View>
-								<ActivityIndicator />
-							</View>
-						);
-					}
-
-					return null;
-				}}
+				ListFooterComponent={renderFooter}
 			/>
 		</View>
 	);
