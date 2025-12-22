@@ -23,9 +23,11 @@ import type {
 
 import type {
 	ActorInsight,
+	BatchWatchedDtoClass,
 	CreateReviewDtoClass,
 	CreateUserDto,
 	CreateWatchListDtoClass,
+	CreateWatchedDtoClass,
 	GenreInsight,
 	HeatmapInsight,
 	InsightControllerGetHeatmapInsightsParams,
@@ -40,11 +42,15 @@ import type {
 	UpdateReviewDtoClass,
 	UpdateUserDto,
 	UpdateWatchListDtoClass,
+	UpdateWatchedDtoClass,
 	User,
 	UserProfile,
 	WatchListControllerFindOneParams,
 	WatchListControllerGetUserWatchLists200,
 	WatchListControllerGetUserWatchListsParams,
+	WatchedAggregated,
+	WatchedControllerFindByUserId200,
+	WatchedControllerFindByUserIdParams,
 	Watchlist,
 	WatchlistAggregatedDetail,
 } from './schemas';
@@ -2926,6 +2932,654 @@ export const useUserControllerRemove = <TError = void | void | void, TContext = 
 	TContext
 > => {
 	const mutationOptions = getUserControllerRemoveMutationOptions(options);
+
+	return useMutation(mutationOptions, queryClient);
+};
+
+/**
+ * @summary Get user's watched history
+ */
+export const watchedControllerFindByUserId = (
+	userId: string,
+	params?: WatchedControllerFindByUserIdParams,
+	options?: SecondParameter<typeof axiosInstance>,
+	signal?: AbortSignal
+) => {
+	return axiosInstance<WatchedControllerFindByUserId200>(
+		{ url: `/watched/${userId}`, method: 'GET', params, signal },
+		options
+	);
+};
+
+export const getWatchedControllerFindByUserIdQueryKey = (
+	userId?: string,
+	params?: WatchedControllerFindByUserIdParams
+) => {
+	return [`/watched/${userId}`, ...(params ? [params] : [])] as const;
+};
+
+export const getWatchedControllerFindByUserIdQueryOptions = <
+	TData = Awaited<ReturnType<typeof watchedControllerFindByUserId>>,
+	TError = unknown,
+>(
+	userId: string,
+	params?: WatchedControllerFindByUserIdParams,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerFindByUserId>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	}
+) => {
+	const { query: queryOptions, request: requestOptions } = options ?? {};
+
+	const queryKey =
+		queryOptions?.queryKey ?? getWatchedControllerFindByUserIdQueryKey(userId, params);
+
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof watchedControllerFindByUserId>>> = ({
+		signal,
+	}) => watchedControllerFindByUserId(userId, params, requestOptions, signal);
+
+	return { queryKey, queryFn, enabled: !!userId, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof watchedControllerFindByUserId>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type WatchedControllerFindByUserIdQueryResult = NonNullable<
+	Awaited<ReturnType<typeof watchedControllerFindByUserId>>
+>;
+export type WatchedControllerFindByUserIdQueryError = unknown;
+
+export function useWatchedControllerFindByUserId<
+	TData = Awaited<ReturnType<typeof watchedControllerFindByUserId>>,
+	TError = unknown,
+>(
+	userId: string,
+	params: undefined | WatchedControllerFindByUserIdParams,
+	options: {
+		query: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerFindByUserId>>, TError, TData>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof watchedControllerFindByUserId>>,
+					TError,
+					Awaited<ReturnType<typeof watchedControllerFindByUserId>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useWatchedControllerFindByUserId<
+	TData = Awaited<ReturnType<typeof watchedControllerFindByUserId>>,
+	TError = unknown,
+>(
+	userId: string,
+	params?: WatchedControllerFindByUserIdParams,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerFindByUserId>>, TError, TData>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof watchedControllerFindByUserId>>,
+					TError,
+					Awaited<ReturnType<typeof watchedControllerFindByUserId>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useWatchedControllerFindByUserId<
+	TData = Awaited<ReturnType<typeof watchedControllerFindByUserId>>,
+	TError = unknown,
+>(
+	userId: string,
+	params?: WatchedControllerFindByUserIdParams,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerFindByUserId>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Get user's watched history
+ */
+
+export function useWatchedControllerFindByUserId<
+	TData = Awaited<ReturnType<typeof watchedControllerFindByUserId>>,
+	TError = unknown,
+>(
+	userId: string,
+	params?: WatchedControllerFindByUserIdParams,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerFindByUserId>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+	const queryOptions = getWatchedControllerFindByUserIdQueryOptions(userId, params, options);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
+
+	query.queryKey = queryOptions.queryKey;
+
+	return query;
+}
+
+/**
+ * @summary Check single watched item
+ */
+export const watchedControllerFindOneByUserAndTmdbId = (
+	userId: string,
+	tmdbId: number,
+	options?: SecondParameter<typeof axiosInstance>,
+	signal?: AbortSignal
+) => {
+	return axiosInstance<WatchedAggregated>(
+		{ url: `/watched/${userId}/${tmdbId}`, method: 'GET', signal },
+		options
+	);
+};
+
+export const getWatchedControllerFindOneByUserAndTmdbIdQueryKey = (
+	userId?: string,
+	tmdbId?: number
+) => {
+	return [`/watched/${userId}/${tmdbId}`] as const;
+};
+
+export const getWatchedControllerFindOneByUserAndTmdbIdQueryOptions = <
+	TData = Awaited<ReturnType<typeof watchedControllerFindOneByUserAndTmdbId>>,
+	TError = void,
+>(
+	userId: string,
+	tmdbId: number,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof watchedControllerFindOneByUserAndTmdbId>>,
+				TError,
+				TData
+			>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	}
+) => {
+	const { query: queryOptions, request: requestOptions } = options ?? {};
+
+	const queryKey =
+		queryOptions?.queryKey ?? getWatchedControllerFindOneByUserAndTmdbIdQueryKey(userId, tmdbId);
+
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof watchedControllerFindOneByUserAndTmdbId>>
+	> = ({ signal }) =>
+		watchedControllerFindOneByUserAndTmdbId(userId, tmdbId, requestOptions, signal);
+
+	return { queryKey, queryFn, enabled: !!(userId && tmdbId), ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof watchedControllerFindOneByUserAndTmdbId>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type WatchedControllerFindOneByUserAndTmdbIdQueryResult = NonNullable<
+	Awaited<ReturnType<typeof watchedControllerFindOneByUserAndTmdbId>>
+>;
+export type WatchedControllerFindOneByUserAndTmdbIdQueryError = void;
+
+export function useWatchedControllerFindOneByUserAndTmdbId<
+	TData = Awaited<ReturnType<typeof watchedControllerFindOneByUserAndTmdbId>>,
+	TError = void,
+>(
+	userId: string,
+	tmdbId: number,
+	options: {
+		query: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof watchedControllerFindOneByUserAndTmdbId>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof watchedControllerFindOneByUserAndTmdbId>>,
+					TError,
+					Awaited<ReturnType<typeof watchedControllerFindOneByUserAndTmdbId>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useWatchedControllerFindOneByUserAndTmdbId<
+	TData = Awaited<ReturnType<typeof watchedControllerFindOneByUserAndTmdbId>>,
+	TError = void,
+>(
+	userId: string,
+	tmdbId: number,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof watchedControllerFindOneByUserAndTmdbId>>,
+				TError,
+				TData
+			>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof watchedControllerFindOneByUserAndTmdbId>>,
+					TError,
+					Awaited<ReturnType<typeof watchedControllerFindOneByUserAndTmdbId>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useWatchedControllerFindOneByUserAndTmdbId<
+	TData = Awaited<ReturnType<typeof watchedControllerFindOneByUserAndTmdbId>>,
+	TError = void,
+>(
+	userId: string,
+	tmdbId: number,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof watchedControllerFindOneByUserAndTmdbId>>,
+				TError,
+				TData
+			>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Check single watched item
+ */
+
+export function useWatchedControllerFindOneByUserAndTmdbId<
+	TData = Awaited<ReturnType<typeof watchedControllerFindOneByUserAndTmdbId>>,
+	TError = void,
+>(
+	userId: string,
+	tmdbId: number,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<
+				Awaited<ReturnType<typeof watchedControllerFindOneByUserAndTmdbId>>,
+				TError,
+				TData
+			>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+	const queryOptions = getWatchedControllerFindOneByUserAndTmdbIdQueryOptions(
+		userId,
+		tmdbId,
+		options
+	);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
+
+	query.queryKey = queryOptions.queryKey;
+
+	return query;
+}
+
+/**
+ * @summary Mark movie as watched
+ */
+export const watchedControllerCreate = (
+	createWatchedDtoClass: CreateWatchedDtoClass,
+	options?: SecondParameter<typeof axiosInstance>,
+	signal?: AbortSignal
+) => {
+	return axiosInstance<WatchedAggregated>(
+		{
+			url: `/watched`,
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			data: createWatchedDtoClass,
+			signal,
+		},
+		options
+	);
+};
+
+export const getWatchedControllerCreateMutationOptions = <
+	TError = unknown,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof watchedControllerCreate>>,
+		TError,
+		{ data: CreateWatchedDtoClass },
+		TContext
+	>;
+	request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+	Awaited<ReturnType<typeof watchedControllerCreate>>,
+	TError,
+	{ data: CreateWatchedDtoClass },
+	TContext
+> => {
+	const mutationKey = ['watchedControllerCreate'];
+	const { mutation: mutationOptions, request: requestOptions } = options
+		? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey }, request: undefined };
+
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof watchedControllerCreate>>,
+		{ data: CreateWatchedDtoClass }
+	> = (props) => {
+		const { data } = props ?? {};
+
+		return watchedControllerCreate(data, requestOptions);
+	};
+
+	return { mutationFn, ...mutationOptions };
+};
+
+export type WatchedControllerCreateMutationResult = NonNullable<
+	Awaited<ReturnType<typeof watchedControllerCreate>>
+>;
+export type WatchedControllerCreateMutationBody = CreateWatchedDtoClass;
+export type WatchedControllerCreateMutationError = unknown;
+
+/**
+ * @summary Mark movie as watched
+ */
+export const useWatchedControllerCreate = <TError = unknown, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof watchedControllerCreate>>,
+			TError,
+			{ data: CreateWatchedDtoClass },
+			TContext
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseMutationResult<
+	Awaited<ReturnType<typeof watchedControllerCreate>>,
+	TError,
+	{ data: CreateWatchedDtoClass },
+	TContext
+> => {
+	const mutationOptions = getWatchedControllerCreateMutationOptions(options);
+
+	return useMutation(mutationOptions, queryClient);
+};
+
+/**
+ * @summary Update watched item
+ */
+export const watchedControllerUpdate = (
+	id: string,
+	updateWatchedDtoClass: UpdateWatchedDtoClass,
+	options?: SecondParameter<typeof axiosInstance>
+) => {
+	return axiosInstance<WatchedAggregated>(
+		{
+			url: `/watched/${id}`,
+			method: 'PATCH',
+			headers: { 'Content-Type': 'application/json' },
+			data: updateWatchedDtoClass,
+		},
+		options
+	);
+};
+
+export const getWatchedControllerUpdateMutationOptions = <
+	TError = void,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof watchedControllerUpdate>>,
+		TError,
+		{ id: string; data: UpdateWatchedDtoClass },
+		TContext
+	>;
+	request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+	Awaited<ReturnType<typeof watchedControllerUpdate>>,
+	TError,
+	{ id: string; data: UpdateWatchedDtoClass },
+	TContext
+> => {
+	const mutationKey = ['watchedControllerUpdate'];
+	const { mutation: mutationOptions, request: requestOptions } = options
+		? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey }, request: undefined };
+
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof watchedControllerUpdate>>,
+		{ id: string; data: UpdateWatchedDtoClass }
+	> = (props) => {
+		const { id, data } = props ?? {};
+
+		return watchedControllerUpdate(id, data, requestOptions);
+	};
+
+	return { mutationFn, ...mutationOptions };
+};
+
+export type WatchedControllerUpdateMutationResult = NonNullable<
+	Awaited<ReturnType<typeof watchedControllerUpdate>>
+>;
+export type WatchedControllerUpdateMutationBody = UpdateWatchedDtoClass;
+export type WatchedControllerUpdateMutationError = void;
+
+/**
+ * @summary Update watched item
+ */
+export const useWatchedControllerUpdate = <TError = void, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof watchedControllerUpdate>>,
+			TError,
+			{ id: string; data: UpdateWatchedDtoClass },
+			TContext
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseMutationResult<
+	Awaited<ReturnType<typeof watchedControllerUpdate>>,
+	TError,
+	{ id: string; data: UpdateWatchedDtoClass },
+	TContext
+> => {
+	const mutationOptions = getWatchedControllerUpdateMutationOptions(options);
+
+	return useMutation(mutationOptions, queryClient);
+};
+
+/**
+ * @summary Remove from watched
+ */
+export const watchedControllerRemove = (
+	id: string,
+	options?: SecondParameter<typeof axiosInstance>
+) => {
+	return axiosInstance<void>({ url: `/watched/${id}`, method: 'DELETE' }, options);
+};
+
+export const getWatchedControllerRemoveMutationOptions = <
+	TError = unknown,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof watchedControllerRemove>>,
+		TError,
+		{ id: string },
+		TContext
+	>;
+	request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+	Awaited<ReturnType<typeof watchedControllerRemove>>,
+	TError,
+	{ id: string },
+	TContext
+> => {
+	const mutationKey = ['watchedControllerRemove'];
+	const { mutation: mutationOptions, request: requestOptions } = options
+		? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey }, request: undefined };
+
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof watchedControllerRemove>>,
+		{ id: string }
+	> = (props) => {
+		const { id } = props ?? {};
+
+		return watchedControllerRemove(id, requestOptions);
+	};
+
+	return { mutationFn, ...mutationOptions };
+};
+
+export type WatchedControllerRemoveMutationResult = NonNullable<
+	Awaited<ReturnType<typeof watchedControllerRemove>>
+>;
+
+export type WatchedControllerRemoveMutationError = unknown;
+
+/**
+ * @summary Remove from watched
+ */
+export const useWatchedControllerRemove = <TError = unknown, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof watchedControllerRemove>>,
+			TError,
+			{ id: string },
+			TContext
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseMutationResult<
+	Awaited<ReturnType<typeof watchedControllerRemove>>,
+	TError,
+	{ id: string },
+	TContext
+> => {
+	const mutationOptions = getWatchedControllerRemoveMutationOptions(options);
+
+	return useMutation(mutationOptions, queryClient);
+};
+
+/**
+ * @summary Batch mark as watched
+ */
+export const watchedControllerBatchCreate = (
+	batchWatchedDtoClass: BatchWatchedDtoClass,
+	options?: SecondParameter<typeof axiosInstance>,
+	signal?: AbortSignal
+) => {
+	return axiosInstance<void>(
+		{
+			url: `/watched/batch`,
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			data: batchWatchedDtoClass,
+			signal,
+		},
+		options
+	);
+};
+
+export const getWatchedControllerBatchCreateMutationOptions = <
+	TError = unknown,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof watchedControllerBatchCreate>>,
+		TError,
+		{ data: BatchWatchedDtoClass },
+		TContext
+	>;
+	request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+	Awaited<ReturnType<typeof watchedControllerBatchCreate>>,
+	TError,
+	{ data: BatchWatchedDtoClass },
+	TContext
+> => {
+	const mutationKey = ['watchedControllerBatchCreate'];
+	const { mutation: mutationOptions, request: requestOptions } = options
+		? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey }, request: undefined };
+
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof watchedControllerBatchCreate>>,
+		{ data: BatchWatchedDtoClass }
+	> = (props) => {
+		const { data } = props ?? {};
+
+		return watchedControllerBatchCreate(data, requestOptions);
+	};
+
+	return { mutationFn, ...mutationOptions };
+};
+
+export type WatchedControllerBatchCreateMutationResult = NonNullable<
+	Awaited<ReturnType<typeof watchedControllerBatchCreate>>
+>;
+export type WatchedControllerBatchCreateMutationBody = BatchWatchedDtoClass;
+export type WatchedControllerBatchCreateMutationError = unknown;
+
+/**
+ * @summary Batch mark as watched
+ */
+export const useWatchedControllerBatchCreate = <TError = unknown, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof watchedControllerBatchCreate>>,
+			TError,
+			{ data: BatchWatchedDtoClass },
+			TContext
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseMutationResult<
+	Awaited<ReturnType<typeof watchedControllerBatchCreate>>,
+	TError,
+	{ data: BatchWatchedDtoClass },
+	TContext
+> => {
+	const mutationOptions = getWatchedControllerBatchCreateMutationOptions(options);
 
 	return useMutation(mutationOptions, queryClient);
 };
