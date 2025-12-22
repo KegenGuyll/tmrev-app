@@ -3,10 +3,14 @@ import { View } from 'react-native';
 import { Divider, Badge, Searchbar, Button, Text, Switch } from 'react-native-paper';
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
 import CustomBackground from './CustomBottomSheetBackground';
 import MovieGrid from './MovieGrid';
 import MoviePoster from './MoviePoster';
-import { useCreateWatchListMutation } from '@/redux/api/tmrev';
+import {
+	getWatchListControllerGetUserWatchListsQueryKey,
+	useWatchListControllerCreate,
+} from '@/api/tmrev-api-v2/endpoints';
 import { profileRoute } from '@/constants/routes';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import { useFindMoviesQuery } from '@/redux/api/tmdb/searchApi';
@@ -35,7 +39,8 @@ const CreateWatchListModal: React.FC<CreateWatchListModalProps> = ({
 	const [searchQuery, setSearchQuery] = useState('');
 	const bottomSheetModalCreateListRef = useRef<BottomSheetModal>(null);
 	const bottomSheetModalAddMoviesRef = useRef<BottomSheetModal>(null);
-	const [createWatchList] = useCreateWatchListMutation();
+	const queryClient = useQueryClient();
+	const { mutateAsync: createWatchList } = useWatchListControllerCreate();
 	const router = useRouter();
 
 	const resetValues = () => {
@@ -90,27 +95,37 @@ const CreateWatchListModal: React.FC<CreateWatchListModalProps> = ({
 	};
 
 	const handleCreateWatchList = async () => {
-		const response = await createWatchList({
-			description,
-			title,
-			public: publicList,
-			tags: [],
-			movies: movies.map((movie, i) => ({
-				order: i,
-				tmdbID: movie.id,
-			})),
-		}).unwrap();
+		try {
+			const response = await createWatchList({
+				data: {
+					description,
+					title,
+					public: publicList,
+					tags: [],
+					movies: movies.map((movie, i) => ({
+						order: i,
+						tmdbID: movie.id,
+					})),
+				},
+			});
 
-		handleCloseBottomSheet();
-		if (response) {
-			resetValues();
-			if (onSuccess) {
-				onSuccess();
-			} else if (router.canDismiss()) {
-				router.dismiss();
-			} else {
-				router.navigate(profileRoute('profile', response.userId));
+			await queryClient.invalidateQueries({
+				queryKey: getWatchListControllerGetUserWatchListsQueryKey(response.userId),
+			});
+
+			handleCloseBottomSheet();
+			if (response) {
+				resetValues();
+				if (onSuccess) {
+					onSuccess();
+				} else if (router.canDismiss()) {
+					router.dismiss();
+				} else {
+					router.navigate(profileRoute('profile', response.userId));
+				}
 			}
+		} catch (error) {
+			console.error(error);
 		}
 	};
 

@@ -17,6 +17,7 @@ import DatePicker from '@/components/Date/DatePicker';
 import {
 	getReviewControllerFindByTmdbIdQueryKey,
 	getReviewControllerFindOneQueryKey,
+	getWatchListControllerFindOneQueryKey,
 	useReviewControllerCreate,
 	useReviewControllerFindByTmdbId,
 	useReviewControllerFindOne,
@@ -59,12 +60,15 @@ const CreateReview = () => {
 	const createReviewMutation = useReviewControllerCreate({
 		mutation: {
 			onSuccess: async () => {
-				console.log('Review created successfully');
 				queryClient.invalidateQueries({
 					queryKey: getReviewControllerFindByTmdbIdQueryKey(Number(movieId) || 0),
 				});
 				queryClient.invalidateQueries({
 					queryKey: getReviewControllerFindOneQueryKey(reviewId),
+				});
+				queryClient.invalidateQueries({
+					queryKey: getWatchListControllerFindOneQueryKey(),
+					exact: false,
 				});
 			},
 		},

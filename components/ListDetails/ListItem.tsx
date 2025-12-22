@@ -1,10 +1,10 @@
 import { View } from 'react-native';
 import { Surface, IconButton, Text } from 'react-native-paper';
 import { MoviePosterImage } from '../MoviePoster';
-import { GetWatchListMovie } from '@/models/tmrev/watchList';
+import { WatchlistMovieAggregated } from '@/api/tmrev-api-v2';
 
 type ListMovieItemProps = {
-	item: GetWatchListMovie;
+	item: WatchlistMovieAggregated;
 	index: number;
 	handleMoveUpInRank: (index: number) => void;
 	handleMoveDownInRank: (index: number) => void;

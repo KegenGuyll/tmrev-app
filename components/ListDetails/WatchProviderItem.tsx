@@ -1,15 +1,15 @@
 import { Image, Linking, View } from 'react-native';
 import { Divider, Text, TouchableRipple } from 'react-native-paper';
 import { MovieBuy } from '@/models/tmdb/movie/movieWatchProviders';
-import { GetWatchListMovie } from '@/models/tmrev/watchList';
 import imageUrl from '@/utils/imageUrl';
 import MoviePoster from '../MoviePoster';
 import { FromLocation } from '@/models';
+import { WatchlistMovieAggregated } from '@/api/tmrev-api-v2/schemas/watchlistMovieAggregated';
 
 type WatchProviderItemProps = {
 	link?: string;
 	availableFlatrates: Record<string, MovieBuy>;
-	items: { [key: string]: GetWatchListMovie[] };
+	items: { [key: string]: WatchlistMovieAggregated[] };
 	from: FromLocation;
 };
 

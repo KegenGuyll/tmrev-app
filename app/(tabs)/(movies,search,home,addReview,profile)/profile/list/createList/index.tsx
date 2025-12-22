@@ -4,13 +4,16 @@ import { View } from 'react-native';
 import { Badge, Button, Divider, Searchbar, Switch, Text, useTheme } from 'react-native-paper';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { FlatGrid } from 'react-native-super-grid';
+import { useQueryClient } from '@tanstack/react-query';
 import TextInput from '@/components/Inputs/TextInput';
 import MultiLineInput from '@/components/Inputs/MultiLineInput';
 import {
-	useCreateWatchListMutation,
-	useGetWatchListDetailsQuery,
-	useUpdateWatchListMutation,
-} from '@/redux/api/tmrev';
+	getWatchListControllerFindOneQueryKey,
+	getWatchListControllerGetUserWatchListsQueryKey,
+	useWatchListControllerCreate,
+	useWatchListControllerFindOne,
+	useWatchListControllerUpdate,
+} from '@/api/tmrev-api-v2/endpoints';
 import { listDetailsRoute } from '@/constants/routes';
 import { FromLocation } from '@/models';
 import { useFindMoviesQuery } from '@/redux/api/tmdb/searchApi';
@@ -19,7 +22,8 @@ import MoviePoster from '@/components/MoviePoster';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import MovieHorizontalGrid from '@/components/MovieHorizontalGrid';
 import { useGetManyMovieDetailsQuery } from '@/redux/api/tmdb/movieApi';
-import { WatchList } from '@/models/tmrev';
+import { Watchlist } from '@/api/tmrev-api-v2';
+import useAuth from '@/hooks/useAuth';
 
 type CreateListSearchParams = {
 	from: FromLocation;
@@ -29,10 +33,13 @@ type CreateListSearchParams = {
 
 const CreateList = () => {
 	const { movieIds, from, listId } = useLocalSearchParams<CreateListSearchParams>();
-	const [createWatchList] = useCreateWatchListMutation();
-	const [updateWatchList] = useUpdateWatchListMutation();
+	const { mutateAsync: createWatchList } = useWatchListControllerCreate();
 	const theme = useTheme();
 	const router = useRouter();
+	const queryClient = useQueryClient();
+	const { currentUser } = useAuth({});
+
+	const { mutateAsync: updateWatchList } = useWatchListControllerUpdate();
 
 	const [title, setTitle] = useState('');
 	const [description, setDescription] = useState('');
@@ -41,7 +48,9 @@ const CreateList = () => {
 	const [selectedMovies, setSelectedMovies] = useState<MovieGeneral[]>([]);
 	const [isUpdating, setIsUpdating] = useState(false);
 
-	const { data: listData } = useGetWatchListDetailsQuery({ listId: listId! }, { skip: !listId });
+	const { data: listData } = useWatchListControllerFindOne(listId!, {
+		query: { enabled: !!listId },
+	});
 
 	useEffect(() => {
 		if (!listId) return;
@@ -83,11 +92,12 @@ const CreateList = () => {
 	useEffect(() => {
 		if (!listData) return;
 
-		setTitle(listData.body.title);
-		setDescription(listData.body.description);
-		setPublicList(listData.body.public);
+		setTitle(listData.title);
+		setDescription(listData.description);
+		setPublicList(listData.public);
 
-		handleAddMoviesToSelection(listData.body.movies as MovieGeneral[]);
+		// Assuming V2 listData.movies has similar structure or compatible
+		handleAddMoviesToSelection(listData.movies as unknown as MovieGeneral[]);
 	}, [listData]);
 
 	// Add selected movies to selection, from movieId in params
@@ -100,34 +110,53 @@ const CreateList = () => {
 	const handleCreateWatchList = async () => {
 		if (!title) return;
 
-		let response: WatchList | undefined;
+		let response: Watchlist | undefined;
 
 		try {
 			if (!isUpdating) {
 				response = await createWatchList({
-					title,
-					description,
-					public: publicList,
-					tags: [],
-					movies:
-						selectedMovies?.map((movie, index) => ({
-							order: index,
-							tmdbID: movie.id,
-						})) || [],
-				}).unwrap();
+					data: {
+						title,
+						description,
+						public: publicList,
+						tags: [],
+						movies:
+							selectedMovies?.map((movie, index) => ({
+								order: index,
+								tmdbID: movie.id,
+							})) || [],
+					},
+				});
+
+				await queryClient.invalidateQueries({
+					queryKey: getWatchListControllerGetUserWatchListsQueryKey(currentUser?.uid),
+				});
 			} else {
 				await updateWatchList({
-					watchListId: listId!,
-					title,
-					description,
-					public: publicList,
-					tags: [],
-					movies:
-						selectedMovies?.map((movie, index) => ({
-							order: index,
-							tmdbID: movie.id,
-						})) || [],
-				}).unwrap();
+					id: listId!,
+					data: {
+						title,
+						description,
+						public: publicList,
+						tags: [],
+						movies:
+							selectedMovies?.map((movie, index) => ({
+								order: index,
+								tmdbID: movie.id,
+							})) || [],
+					},
+				});
+
+				if (listId) {
+					await queryClient.invalidateQueries({
+						queryKey: getWatchListControllerFindOneQueryKey(listId),
+					});
+				}
+				if (currentUser) {
+					await queryClient.invalidateQueries({
+						queryKey: getWatchListControllerGetUserWatchListsQueryKey(currentUser.uid),
+					});
+				}
 
 				router.dismiss();
 			}
