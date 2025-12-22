@@ -122,7 +122,7 @@ const Profile = () => {
 								profileId={currentUser.uid}
 								listCount={data.watchListCount}
 								reviewCount={data.reviewCount}
-								watchedCount={0}
+								watchedCount={data.watchedCount}
 							/>
 						</View>
 						<View
