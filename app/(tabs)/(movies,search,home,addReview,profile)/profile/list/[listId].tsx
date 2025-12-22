@@ -2,12 +2,10 @@
 import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { View, Alert, RefreshControl, StyleSheet } from 'react-native';
 import { Button, Divider, IconButton, Menu, Snackbar, Text } from 'react-native-paper';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatGrid } from 'react-native-super-grid';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
-import dayjs from 'dayjs';
 import { useQueryClient } from '@tanstack/react-query';
 import useAuth from '@/hooks/useAuth';
 import { FromLocation } from '@/models';
@@ -21,7 +19,6 @@ import {
 } from '@/api/tmrev-api-v2/endpoints';
 import { MovieDetails } from '@/models/tmrev/review';
 import EditRankPosition from '@/features/listDetails/EditRankPosition';
-import useDebounce from '@/hooks/useDebounce';
 import { createListRoute, listDetailsRoute } from '@/constants/routes';
 import { useAppDispatch } from '@/hooks/reduxHooks';
 import { showSnackbar } from '@/redux/slice/globalSnackbar';
@@ -30,17 +27,12 @@ import ListGridItem from '@/components/ListDetails/GridItem';
 import ListDetailItem from '@/components/ListDetails/ListItem';
 import { MovieBuy } from '@/models/tmdb/movie/movieWatchProviders';
 import WatchProviderItem from '@/components/ListDetails/WatchProviderItem';
-import { WatchlistAggregated, WatchlistMovieAggregated } from '@/api/tmrev-api-v2';
+import { WatchlistMovieAggregated } from '@/api/tmrev-api-v2';
 
 type ListDetailsPageSearchParams = {
 	listId: string;
 	profileId: string;
 	from: FromLocation;
-};
-
-type CachedData = {
-	data: WatchlistAggregated;
-	date: Date;
 };
 
 type ListDisplays = 'grid' | 'list' | 'watchProvider';
@@ -57,31 +49,23 @@ const ListDetailsPage: React.FC = () => {
 	const [title, setTitle] = useState('');
 	const [description, setDescription] = useState('');
 	const navigation = useNavigation();
-	const [hasSaved, setHasSaved] = useState(false);
 	const [menuVisible, setMenuVisible] = useState(false);
 	const [snackBarMessage, setSnackBarMessage] = useState('');
 	const [isRefreshing, setIsRefreshing] = useState(false);
 	const router = useRouter();
 	const dispatch = useAppDispatch();
 
-	const debounceRankedList = useDebounce(JSON.stringify(rankedList), 1500);
-
 	const { currentUser, tmrevUser } = useAuth({});
 
 	const isCurrentUser = useMemo(() => currentUser?.uid === profileId, [currentUser, profileId]);
 
-	const { data, isLoading, refetch, error, isEnabled } = useWatchListControllerFindOne(
+	const { data, isLoading, refetch } = useWatchListControllerFindOne(
 		listId!,
 		{ countryCode: 'US' },
 		{
 			query: { enabled: !!listId },
 		}
 	);
-
-	console.log('listId:', listId);
-	console.log('isEnabled:', isEnabled);
-	console.log('isLoading:', isLoading);
-	console.log('Fetched List Details Data:', data, error);
 
 	const availableFlatrates = useMemo(() => {
 		const flatrates: Record<string, MovieBuy> = {};
@@ -154,54 +138,6 @@ const ListDetailsPage: React.FC = () => {
 	const { mutateAsync: createWatchList } = useWatchListControllerCreate();
 	const { mutateAsync: deleteWatchList } = useWatchListControllerRemove();
 
-	// check if there is any unsaved data in storage
-	const checkStorage = useCallback(async () => {
-		if (!data) return;
-		try {
-			const storedData = await AsyncStorage.getItem(data!._id);
-
-			if (!storedData) return;
-
-			const parsedData: CachedData = JSON.parse(storedData);
-
-			Alert.alert(
-				'Unsaved Changes found!',
-				`Would you like to load your last known data? ${dayjs(parsedData.date).format('MM/DD/YYYY hh:mm a')}`,
-				[
-					{
-						text: 'Cancel',
-						onPress: async () => {
-							await AsyncStorage.removeItem(data!._id);
-						},
-						style: 'cancel',
-					},
-					{
-						text: 'OK',
-						onPress: async () => {
-							handleLoadStoredData(parsedData.data);
-							await AsyncStorage.removeItem(data!._id);
-						},
-					},
-				]
-			);
-		} catch (error) {
-			console.error(error);
-		}
-	}, [data]);
-
-	const handleLoadStoredData = (cachedData: WatchlistAggregated) => {
-		if (cachedData) {
-			setTitle(cachedData.title);
-			setDescription(cachedData.description);
-			setRankedList(cachedData.movies);
-		}
-	};
-
-	// check for unsaved changes on unmount
-	useEffect(() => {
-		checkStorage();
-	}, [data]);
-
 	// check if there are unsaved changes
 	const hasUnsavedChanges = useMemo(() => {
 		if (!listId) return false;
@@ -225,28 +161,6 @@ const ListDetailsPage: React.FC = () => {
 
 		return false;
 	}, [rankedList, title, description]);
-
-	// handle unsaved changes
-	useEffect(
-		() =>
-			navigation.addListener('beforeRemove', async () => {
-				if (hasUnsavedChanges && data && !hasSaved) {
-					await AsyncStorage.setItem(
-						data._id,
-						JSON.stringify({
-							data: {
-								...data,
-								title,
-								description,
-								movies: rankedList,
-							},
-							date: new Date(),
-						})
-					);
-				}
-			}),
-		[navigation, hasUnsavedChanges, rankedList, data, hasSaved, title, description]
-	);
 
 	// update ranked list if data is fetched
 	useEffect(() => {
@@ -362,7 +276,6 @@ const ListDetailsPage: React.FC = () => {
 					});
 				}
 
-				setHasSaved(true);
 				setSnackBarMessage(`Saved ${title || data!.title}`);
 			} catch (error) {
 				console.error(error);
@@ -423,16 +336,6 @@ const ListDetailsPage: React.FC = () => {
 		}
 	};
 
-	// update watchlist if there are any position changes
-	useEffect(() => {
-		if (debounceRankedList) {
-			const parsedData: MovieDetails[] = JSON.parse(debounceRankedList);
-			if (parsedData.length && hasUnsavedChanges) {
-				handleUpdateWatchList(parsedData);
-			}
-		}
-	}, [debounceRankedList, hasUnsavedChanges, handleUpdateWatchList]);
-
 	const handleOpenEditModal = () => {
 		setMenuVisible(false);
 		router.push(createListRoute(from || 'profile', '', listId));
@@ -454,7 +357,6 @@ const ListDetailsPage: React.FC = () => {
 		setDisplay(newDisplay);
 	};
 
-	console.log('Rerendering List Details Page', data);
 	if (isLoading || !data) {
 		return <Text>Loading...</Text>;
 	}
