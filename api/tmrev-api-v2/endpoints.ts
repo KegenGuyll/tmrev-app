@@ -46,6 +46,7 @@ import type {
 	UpdateWatchedDtoClass,
 	User,
 	UserProfileWithWatchedCount,
+	UsernameAvailableDto,
 	WatchListControllerFindOneParams,
 	WatchListControllerGetUserWatchLists200,
 	WatchListControllerGetUserWatchListsParams,
@@ -2636,6 +2637,139 @@ export function useUserControllerFindAll<
 	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getUserControllerFindAllQueryOptions(options);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
+
+	query.queryKey = queryOptions.queryKey;
+
+	return query;
+}
+
+/**
+ * @summary Check if a username is available
+ */
+export const userControllerIsUsernameAvailable = (
+	username: string,
+	options?: SecondParameter<typeof axiosInstance>,
+	signal?: AbortSignal
+) => {
+	return axiosInstance<UsernameAvailableDto>(
+		{ url: `/user/username/${username}/available`, method: 'GET', signal },
+		options
+	);
+};
+
+export const getUserControllerIsUsernameAvailableQueryKey = (username?: string) => {
+	return [`/user/username/${username}/available`] as const;
+};
+
+export const getUserControllerIsUsernameAvailableQueryOptions = <
+	TData = Awaited<ReturnType<typeof userControllerIsUsernameAvailable>>,
+	TError = unknown,
+>(
+	username: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof userControllerIsUsernameAvailable>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	}
+) => {
+	const { query: queryOptions, request: requestOptions } = options ?? {};
+
+	const queryKey = queryOptions?.queryKey ?? getUserControllerIsUsernameAvailableQueryKey(username);
+
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof userControllerIsUsernameAvailable>>> = ({
+		signal,
+	}) => userControllerIsUsernameAvailable(username, requestOptions, signal);
+
+	return { queryKey, queryFn, enabled: !!username, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof userControllerIsUsernameAvailable>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type UserControllerIsUsernameAvailableQueryResult = NonNullable<
+	Awaited<ReturnType<typeof userControllerIsUsernameAvailable>>
+>;
+export type UserControllerIsUsernameAvailableQueryError = unknown;
+
+export function useUserControllerIsUsernameAvailable<
+	TData = Awaited<ReturnType<typeof userControllerIsUsernameAvailable>>,
+	TError = unknown,
+>(
+	username: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof userControllerIsUsernameAvailable>>, TError, TData>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof userControllerIsUsernameAvailable>>,
+					TError,
+					Awaited<ReturnType<typeof userControllerIsUsernameAvailable>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useUserControllerIsUsernameAvailable<
+	TData = Awaited<ReturnType<typeof userControllerIsUsernameAvailable>>,
+	TError = unknown,
+>(
+	username: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof userControllerIsUsernameAvailable>>, TError, TData>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof userControllerIsUsernameAvailable>>,
+					TError,
+					Awaited<ReturnType<typeof userControllerIsUsernameAvailable>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useUserControllerIsUsernameAvailable<
+	TData = Awaited<ReturnType<typeof userControllerIsUsernameAvailable>>,
+	TError = unknown,
+>(
+	username: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof userControllerIsUsernameAvailable>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Check if a username is available
+ */
+
+export function useUserControllerIsUsernameAvailable<
+	TData = Awaited<ReturnType<typeof userControllerIsUsernameAvailable>>,
+	TError = unknown,
+>(
+	username: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof userControllerIsUsernameAvailable>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+	const queryOptions = getUserControllerIsUsernameAvailableQueryOptions(username, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
 		queryKey: DataTag<QueryKey, TData, TError>;
