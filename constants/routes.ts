@@ -1,3 +1,4 @@
+import { NotificationContentType } from '@/api/tmrev-api-v2';
 import { FromLocation } from '@/models';
 
 const baseTabUrl = '/(tabs)';
@@ -12,13 +13,13 @@ export const allReviewsRoute = (from: FromLocation, profileId: string, advancedS
 	return `${baseUrl}?from=${from}`;
 };
 
-export type FeedReviewContentTypes = 'comments' | 'reviews';
+export type FeedReviewContentTypes = NotificationContentType;
 
 export type ReviewFunction = 'edit' | 'create';
 
 export const feedReviewRoute = (
 	reviewId: string,
-	contentType: FeedReviewContentTypes,
+	contentType: NotificationContentType,
 	from: FromLocation
 ) => {
 	return `${baseTabUrl}/(${from})/home/${reviewId}?contentType=${contentType}&from=${from}`;
@@ -26,7 +27,7 @@ export const feedReviewRoute = (
 
 export const feedReviewDetailsRoute = (
 	postId: string,
-	contentType: FeedReviewContentTypes,
+	contentType: NotificationContentType,
 	from: FromLocation
 ) => {
 	return `${baseTabUrl}/(${from})/home/reply/${postId}?contentType=${contentType}&from=${from}`;

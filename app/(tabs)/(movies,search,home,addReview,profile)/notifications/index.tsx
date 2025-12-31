@@ -4,23 +4,24 @@ import { ActivityIndicator, Text, TouchableRipple } from 'react-native-paper';
 import React, { useEffect, useMemo, useState } from 'react';
 import { FlatList } from 'react-native-gesture-handler';
 import dayjs from 'dayjs';
-import {
-	useGetNotificationsV2Query,
-	useReadAllNotificationsMutation,
-	useReadNotificationMutation,
-} from '@/redux/api/tmrev';
 import { feedReviewRoute, profileRoute } from '@/constants/routes';
 import { FromLocation } from '@/models';
 import { MoviePosterImage } from '@/components/MoviePoster';
-import { NotificationComment, NotificationReview } from '@/models/tmrev/notifications';
 import AvatarWithIcon from '@/components/AvatarWithIcon';
+import {
+	MovieDetails,
+	NotificationAggregated,
+	useNotificationControllerFindAll,
+	useNotificationControllerRead,
+	useNotificationControllerReadAll,
+} from '@/api/tmrev-api-v2';
 
 type NotificationsSearchParams = {
 	from: FromLocation;
 };
 
 type NotificationItemProps = {
-	item: NotificationReview | NotificationComment;
+	item: NotificationAggregated;
 	from: FromLocation;
 };
 
@@ -30,10 +31,12 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 }: NotificationItemProps) => {
 	const router = useRouter();
 
-	const [readNotification] = useReadNotificationMutation();
+	const { mutateAsync: readNotification } = useNotificationControllerRead();
 
 	const handleNavigation = async () => {
-		await readNotification({ notificationId: item._id }).unwrap();
+		await readNotification({
+			id: item._id,
+		});
 		router.navigate(feedReviewRoute(item.contentId, item.contentType, from));
 	};
 
@@ -86,7 +89,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 						<MoviePosterImage
 							width={50}
 							height={75}
-							moviePoster={item.content.movieDetails.poster_path}
+							moviePoster={(item.content as MovieDetails).poster_path}
 						/>
 					</View>
 				)}
@@ -98,7 +101,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 const Notifications: React.FC = () => {
 	const { from } = useLocalSearchParams<NotificationsSearchParams>();
 	const [isRefreshing, setIsRefreshing] = useState(false);
-	const [readAll] = useReadAllNotificationsMutation();
+	const { mutateAsync: readAll } = useNotificationControllerReadAll();
 
 	useEffect(() => {
 		if (from) {
@@ -110,16 +113,16 @@ const Notifications: React.FC = () => {
 		data: reviewNotificationData,
 		isLoading: isReviewNotificationDataLoading,
 		refetch: refetchReviewNotification,
-	} = useGetNotificationsV2Query({ contentType: 'reviews' });
+	} = useNotificationControllerFindAll({ contentType: 'reviews', isRead: true });
 
 	const { data: commentNotificationData, refetch: refetchCommentNotification } =
-		useGetNotificationsV2Query({ contentType: 'comments' });
+		useNotificationControllerFindAll({ contentType: 'comments', isRead: false });
 
 	const allNotifications = useMemo(() => {
 		if (!reviewNotificationData || !commentNotificationData) return [];
 
-		const reviewNotifications = reviewNotificationData.body as NotificationReview[];
-		const commentNotifications = commentNotificationData.body as NotificationComment[];
+		const reviewNotifications = reviewNotificationData.results || [];
+		const commentNotifications = commentNotificationData.results || [];
 
 		return [...reviewNotifications, ...commentNotifications].sort(
 			(a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)
@@ -128,8 +131,8 @@ const Notifications: React.FC = () => {
 
 	const handleRefresh = async () => {
 		setIsRefreshing(true);
-		await refetchReviewNotification().unwrap();
-		await refetchCommentNotification().unwrap();
+		await refetchReviewNotification();
+		await refetchCommentNotification();
 		setIsRefreshing(false);
 	};
 	return (
@@ -142,7 +145,7 @@ const Notifications: React.FC = () => {
 				contentContainerStyle={{ gap: 32 }}
 			>
 				{isReviewNotificationDataLoading && <ActivityIndicator />}
-				{reviewNotificationData?.body && (
+				{reviewNotificationData?.results && (
 					<View style={{ padding: 8, gap: 8 }}>
 						<FlatList
 							scrollEnabled={false}
