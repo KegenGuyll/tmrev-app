@@ -2,11 +2,8 @@ import { View, StyleSheet, RefreshControl } from 'react-native';
 import { ActivityIndicator, Icon, Text, useTheme } from 'react-native-paper';
 import { FlatGrid } from 'react-native-super-grid';
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-	useWatchedControllerFindByUserId,
-	WatchedAggregated,
-	WatchedControllerFindByUserIdParams,
-} from '@/api/tmrev-api-v2';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { watchedControllerFindByUserId, WatchedAggregated } from '@/api/tmrev-api-v2';
 import { FromLocation } from '@/models';
 import MoviePoster from './MoviePoster';
 
@@ -59,43 +56,49 @@ const WatchedMovieList: React.FC<WatchedMovieListProps> = ({
 
 	const [isRefreshing, setIsRefreshing] = useState(false);
 
-	const [page, setPage] = useState(1);
-
-	const query = useMemo<WatchedControllerFindByUserIdParams>(() => {
-		return { pageNumber: page, pageSize, sortBy: 'watchedDate.desc' };
-	}, [page]);
-
-	const { data, isLoading, isFetching, refetch } = useWatchedControllerFindByUserId(userId, query, {
-		query: { enabled: !!userId },
-	});
-
-	const incrementPage = useCallback(() => {
-		if (!data) return;
-
-		if (page >= (data.totalNumberOfPages || 0)) {
-			return;
-		}
-
-		setPage(page + 1);
-	}, [data, page]);
+	const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage, refetch } =
+		useInfiniteQuery({
+			queryKey: ['watched', userId],
+			queryFn: ({ pageParam = 1 }) =>
+				watchedControllerFindByUserId(userId, {
+					pageNumber: pageParam as number,
+					pageSize,
+					sortBy: 'watchedDate.desc',
+				}),
+			getNextPageParam: (lastPage) => {
+				if (
+					lastPage.pageNumber !== undefined &&
+					lastPage.pageNumber < (lastPage.totalNumberOfPages || 0)
+				) {
+					return lastPage.pageNumber + 1;
+				}
+				return undefined;
+			},
+			initialPageParam: 1,
+			enabled: !!userId,
+		});
 
 	const handleRefresh = useCallback(async () => {
 		setIsRefreshing(true);
 		await refetch();
 		setIsRefreshing(false);
-	}, [setIsRefreshing, refetch]);
+	}, [refetch]);
 
 	const renderFooter = useCallback(() => {
-		if (isLoading || isFetching) {
+		if (isFetchingNextPage) {
 			return (
-				<View>
+				<View style={{ paddingVertical: 20 }}>
 					<ActivityIndicator />
 				</View>
 			);
 		}
 
 		return null;
-	}, [isLoading, isFetching]);
+	}, [isFetchingNextPage]);
+
+	const flatData = useMemo(() => {
+		return data?.pages.flatMap((page) => page.results || []) || [];
+	}, [data]);
 
 	if (isLoading && !data) {
 		return <Text>Loading...</Text>;
@@ -111,11 +114,16 @@ const WatchedMovieList: React.FC<WatchedMovieListProps> = ({
 				}
 				itemDimension={100}
 				style={styles.list}
-				data={data.results || []}
+				data={flatData}
 				spacing={8}
-				renderItem={({ item }) => <WatchedMovieItem item={item} from={from} />}
+				renderItem={({ item }) => <WatchedMovieItem item={item as WatchedAggregated} from={from} />}
 				keyExtractor={(item) => item._id}
-				onEndReached={incrementPage}
+				onEndReached={() => {
+					if (hasNextPage && !isFetchingNextPage) {
+						fetchNextPage();
+					}
+				}}
+				onEndReachedThreshold={0.5}
 				ListFooterComponent={renderFooter}
 			/>
 		</View>
