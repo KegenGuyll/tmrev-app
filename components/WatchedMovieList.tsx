@@ -3,7 +3,11 @@ import { ActivityIndicator, Icon, Text, useTheme } from 'react-native-paper';
 import { FlatGrid } from 'react-native-super-grid';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { watchedControllerFindByUserId, WatchedAggregated } from '@/api/tmrev-api-v2';
+import {
+	watchedControllerFindByUserId,
+	WatchedAggregated,
+	getWatchedControllerFindByUserIdQueryKey,
+} from '@/api/tmrev-api-v2';
 import { FromLocation } from '@/models';
 import MoviePoster from './MoviePoster';
 
@@ -58,7 +62,7 @@ const WatchedMovieList: React.FC<WatchedMovieListProps> = ({
 
 	const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage, refetch } =
 		useInfiniteQuery({
-			queryKey: ['watched', userId],
+			queryKey: getWatchedControllerFindByUserIdQueryKey(userId),
 			queryFn: ({ pageParam = 1 }) =>
 				watchedControllerFindByUserId(userId, {
 					pageNumber: pageParam as number,

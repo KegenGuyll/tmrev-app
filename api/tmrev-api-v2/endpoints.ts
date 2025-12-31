@@ -32,6 +32,7 @@ import type {
 	HeatmapInsight,
 	InsightControllerGetHeatmapInsightsParams,
 	Movie,
+	MovieWatchedStatsDto,
 	ReviewAggregated,
 	ReviewControllerFindByActorId200,
 	ReviewControllerFindByTmdbId200,
@@ -51,6 +52,7 @@ import type {
 	WatchedAggregated,
 	WatchedControllerFindByUserId200,
 	WatchedControllerFindByUserIdParams,
+	WatchedStatusDto,
 	Watchlist,
 	WatchlistAggregatedDetail,
 } from './schemas';
@@ -2938,6 +2940,272 @@ export const useUserControllerRemove = <TError = void | void | void, TContext = 
 
 	return useMutation(mutationOptions, queryClient);
 };
+
+/**
+ * @summary Get movie watched stats (likes/dislikes)
+ */
+export const watchedControllerGetMovieStats = (
+	tmdbId: number,
+	options?: SecondParameter<typeof axiosInstance>,
+	signal?: AbortSignal
+) => {
+	return axiosInstance<MovieWatchedStatsDto>(
+		{ url: `/watched/movie/${tmdbId}/stats`, method: 'GET', signal },
+		options
+	);
+};
+
+export const getWatchedControllerGetMovieStatsQueryKey = (tmdbId?: number) => {
+	return [`/watched/movie/${tmdbId}/stats`] as const;
+};
+
+export const getWatchedControllerGetMovieStatsQueryOptions = <
+	TData = Awaited<ReturnType<typeof watchedControllerGetMovieStats>>,
+	TError = unknown,
+>(
+	tmdbId: number,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerGetMovieStats>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	}
+) => {
+	const { query: queryOptions, request: requestOptions } = options ?? {};
+
+	const queryKey = queryOptions?.queryKey ?? getWatchedControllerGetMovieStatsQueryKey(tmdbId);
+
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof watchedControllerGetMovieStats>>> = ({
+		signal,
+	}) => watchedControllerGetMovieStats(tmdbId, requestOptions, signal);
+
+	return { queryKey, queryFn, enabled: !!tmdbId, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof watchedControllerGetMovieStats>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type WatchedControllerGetMovieStatsQueryResult = NonNullable<
+	Awaited<ReturnType<typeof watchedControllerGetMovieStats>>
+>;
+export type WatchedControllerGetMovieStatsQueryError = unknown;
+
+export function useWatchedControllerGetMovieStats<
+	TData = Awaited<ReturnType<typeof watchedControllerGetMovieStats>>,
+	TError = unknown,
+>(
+	tmdbId: number,
+	options: {
+		query: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerGetMovieStats>>, TError, TData>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof watchedControllerGetMovieStats>>,
+					TError,
+					Awaited<ReturnType<typeof watchedControllerGetMovieStats>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useWatchedControllerGetMovieStats<
+	TData = Awaited<ReturnType<typeof watchedControllerGetMovieStats>>,
+	TError = unknown,
+>(
+	tmdbId: number,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerGetMovieStats>>, TError, TData>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof watchedControllerGetMovieStats>>,
+					TError,
+					Awaited<ReturnType<typeof watchedControllerGetMovieStats>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useWatchedControllerGetMovieStats<
+	TData = Awaited<ReturnType<typeof watchedControllerGetMovieStats>>,
+	TError = unknown,
+>(
+	tmdbId: number,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerGetMovieStats>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Get movie watched stats (likes/dislikes)
+ */
+
+export function useWatchedControllerGetMovieStats<
+	TData = Awaited<ReturnType<typeof watchedControllerGetMovieStats>>,
+	TError = unknown,
+>(
+	tmdbId: number,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerGetMovieStats>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+	const queryOptions = getWatchedControllerGetMovieStatsQueryOptions(tmdbId, options);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
+
+	query.queryKey = queryOptions.queryKey;
+
+	return query;
+}
+
+/**
+ * @summary Get current user watched status for a movie
+ */
+export const watchedControllerGetWatchedStatus = (
+	tmdbId: number,
+	options?: SecondParameter<typeof axiosInstance>,
+	signal?: AbortSignal
+) => {
+	return axiosInstance<WatchedStatusDto>(
+		{ url: `/watched/movie/${tmdbId}/status`, method: 'GET', signal },
+		options
+	);
+};
+
+export const getWatchedControllerGetWatchedStatusQueryKey = (tmdbId?: number) => {
+	return [`/watched/movie/${tmdbId}/status`] as const;
+};
+
+export const getWatchedControllerGetWatchedStatusQueryOptions = <
+	TData = Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>,
+	TError = unknown,
+>(
+	tmdbId: number,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	}
+) => {
+	const { query: queryOptions, request: requestOptions } = options ?? {};
+
+	const queryKey = queryOptions?.queryKey ?? getWatchedControllerGetWatchedStatusQueryKey(tmdbId);
+
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>> = ({
+		signal,
+	}) => watchedControllerGetWatchedStatus(tmdbId, requestOptions, signal);
+
+	return { queryKey, queryFn, enabled: !!tmdbId, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type WatchedControllerGetWatchedStatusQueryResult = NonNullable<
+	Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>
+>;
+export type WatchedControllerGetWatchedStatusQueryError = unknown;
+
+export function useWatchedControllerGetWatchedStatus<
+	TData = Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>,
+	TError = unknown,
+>(
+	tmdbId: number,
+	options: {
+		query: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>, TError, TData>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>,
+					TError,
+					Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useWatchedControllerGetWatchedStatus<
+	TData = Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>,
+	TError = unknown,
+>(
+	tmdbId: number,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>, TError, TData>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>,
+					TError,
+					Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useWatchedControllerGetWatchedStatus<
+	TData = Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>,
+	TError = unknown,
+>(
+	tmdbId: number,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Get current user watched status for a movie
+ */
+
+export function useWatchedControllerGetWatchedStatus<
+	TData = Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>,
+	TError = unknown,
+>(
+	tmdbId: number,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+	const queryOptions = getWatchedControllerGetWatchedStatusQueryOptions(tmdbId, options);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
+
+	query.queryKey = queryOptions.queryKey;
+
+	return query;
+}
 
 /**
  * @summary Get user's watched history

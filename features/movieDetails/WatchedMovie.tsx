@@ -5,8 +5,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import useAuth from '@/hooks/useAuth';
 import {
 	getWatchedControllerFindByUserIdQueryKey,
+	getWatchedControllerGetMovieStatsQueryKey,
+	getWatchedControllerGetWatchedStatusQueryKey,
 	useWatchedControllerCreate,
-	useWatchedControllerFindOneByUserAndTmdbId,
+	useWatchedControllerGetWatchedStatus,
 	useWatchedControllerUpdate,
 } from '@/api/tmrev-api-v2';
 import { likeMovieLoginPrompt } from '@/constants/messages';
@@ -30,26 +32,48 @@ const WatchedMovie: React.FC<WatchedMovieProps> = ({
 
 	const queryClient = useQueryClient();
 
-	const { mutateAsync: updateWatched } = useWatchedControllerUpdate();
-	const { mutateAsync: createWatched } = useWatchedControllerCreate();
+	const invalidateQueries = async () => {
+		await Promise.all([
+			queryClient.invalidateQueries({
+				queryKey: getWatchedControllerGetMovieStatsQueryKey(movieId),
+			}),
+			queryClient.invalidateQueries({
+				queryKey: getWatchedControllerGetWatchedStatusQueryKey(movieId),
+			}),
+			queryClient.invalidateQueries({
+				queryKey: getWatchedControllerFindByUserIdQueryKey(currentUser?.uid || ''),
+				exact: false,
+			}),
+		]);
+	};
 
-	const { data: singleWatched } = useWatchedControllerFindOneByUserAndTmdbId(
-		currentUser?.uid || '',
-		Number(movieId!),
-		{
-			query: { enabled: !!currentUser && !!movieId },
-		}
-	);
+	const { mutateAsync: updateWatched } = useWatchedControllerUpdate({
+		mutation: {
+			onSuccess: () => {
+				invalidateQueries();
+			},
+		},
+	});
+	const { mutateAsync: createWatched } = useWatchedControllerCreate({
+		mutation: {
+			onSuccess: () => {
+				invalidateQueries();
+			},
+		},
+	});
+
+	const { data: watchedStatus } = useWatchedControllerGetWatchedStatus(Number(movieId!), {
+		query: { enabled: !!movieId },
+	});
 
 	useEffect(() => {
-		if (singleWatched) {
+		if (watchedStatus) {
 			setHasWatched(true);
-			if (singleWatched.liked) {
+			if (watchedStatus.liked) {
 				setHasLiked(true);
 			}
 		}
-	}, [singleWatched]);
-
+	}, [watchedStatus]);
 	const handleOnPress = async (liked: boolean) => {
 		if (!currentUser) {
 			if (setLoginMessage) {
@@ -59,9 +83,9 @@ const WatchedMovie: React.FC<WatchedMovieProps> = ({
 		}
 
 		try {
-			if (hasWatched && singleWatched) {
+			if (hasWatched && watchedStatus && watchedStatus._id) {
 				await updateWatched({
-					id: singleWatched._id,
+					id: watchedStatus._id,
 					data: {
 						liked,
 					},
@@ -77,10 +101,6 @@ const WatchedMovie: React.FC<WatchedMovieProps> = ({
 				setHasLiked(liked);
 				setHasWatched(true);
 			}
-
-			await queryClient.invalidateQueries({
-				queryKey: getWatchedControllerFindByUserIdQueryKey(currentUser.uid),
-			});
 		} catch (error) {
 			// error
 		}

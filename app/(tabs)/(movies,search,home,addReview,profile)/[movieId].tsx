@@ -21,6 +21,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useBottomSheetModal } from '@gorhom/bottom-sheet';
+import { useQueryClient } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -57,7 +58,13 @@ import useAuth from '@/hooks/useAuth';
 import MovieHorizontalGrid from '@/components/MovieHorizontalGrid';
 import { MovieCollectionPart } from '@/models/tmdb/movie/movieCollection';
 import WatchProviders from '@/components/MovieDetails/WatchProviders';
-import { useReviewControllerFindByTmdbId, useWatchListControllerCreate } from '@/api/tmrev-api-v2';
+import {
+	getReviewControllerFindByTmdbIdQueryKey,
+	getWatchedControllerGetMovieStatsQueryKey,
+	useReviewControllerFindByTmdbId,
+	useWatchedControllerGetMovieStats,
+	useWatchListControllerCreate,
+} from '@/api/tmrev-api-v2';
 
 type MovieDetailsParams = {
 	movieId: string;
@@ -74,10 +81,10 @@ const MovieDetails = () => {
 	const { movieId, from } = useLocalSearchParams<MovieDetailsParams>();
 	const router = useRouter();
 	const theme = useTheme();
+	const queryClient = useQueryClient();
 	const { dismissAll } = useBottomSheetModal();
-	const { data: movieReviews, refetch: movieReviewsRefetch } = useReviewControllerFindByTmdbId(
-		Number(movieId)
-	);
+	const { data: movieReviews } = useReviewControllerFindByTmdbId(Number(movieId));
+	const { data: watchedStats } = useWatchedControllerGetMovieStats(Number(movieId));
 	const [selectedMovie, setSelectedMovie] = useState<MovieGeneral | null>(null);
 	const [showAddMovieToListModal, setShowAddMovieToListModal] = useState(false);
 	const [snackBarMessage, setSnackBarMessage] = useState<string | null>(null);
@@ -124,13 +131,22 @@ const MovieDetails = () => {
 
 	const onRefresh = async () => {
 		setIsRefreshing(true);
+
 		await Promise.all([
 			movieDataRefetch(),
-			movieCollectionRefetch(),
-			movieReviewsRefetch(),
 			movieReleaseDatesRefetch(),
 			movieCreditsRefetch(),
+			queryClient.invalidateQueries({
+				queryKey: getReviewControllerFindByTmdbIdQueryKey(Number(movieId)),
+				type: 'active',
+			}),
+			queryClient.invalidateQueries({
+				queryKey: getWatchedControllerGetMovieStatsQueryKey(Number(movieId)),
+				type: 'active',
+			}),
+			movieData?.belongs_to_collection?.id ? movieCollectionRefetch() : Promise.resolve(),
 		]);
+
 		setIsRefreshing(false);
 	};
 
@@ -264,11 +280,11 @@ const MovieDetails = () => {
 							WatchList
 						</Button>
 					</View>
-					{movieReviews && (
+					{watchedStats && (
 						<WatchedMovie
 							movieId={Number(movieId!)}
-							likes={0}
-							dislikes={0}
+							likes={watchedStats.totalLikes}
+							dislikes={watchedStats.totalDislikes}
 							setLoginMessage={setLoginMessage}
 						/>
 					)}
