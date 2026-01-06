@@ -9,7 +9,7 @@
 export interface Watched {
 	userId: string;
 	/** TMDB movie ID */
-	tmdbId: number;
+	tmdbID: number;
 	liked: boolean;
 	watchedDate: string;
 	createdAt: string;

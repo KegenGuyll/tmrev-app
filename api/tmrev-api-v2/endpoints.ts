@@ -3083,25 +3083,25 @@ export const useUserControllerRemove = <TError = void | void | void, TContext = 
  * @summary Get movie watched stats (likes/dislikes)
  */
 export const watchedControllerGetMovieStats = (
-	tmdbId: number,
+	tmdbID: number,
 	options?: SecondParameter<typeof axiosInstance>,
 	signal?: AbortSignal
 ) => {
 	return axiosInstance<MovieWatchedStatsDto>(
-		{ url: `/watched/movie/${tmdbId}/stats`, method: 'GET', signal },
+		{ url: `/watched/movie/${tmdbID}/stats`, method: 'GET', signal },
 		options
 	);
 };
 
-export const getWatchedControllerGetMovieStatsQueryKey = (tmdbId?: number) => {
-	return [`/watched/movie/${tmdbId}/stats`] as const;
+export const getWatchedControllerGetMovieStatsQueryKey = (tmdbID?: number) => {
+	return [`/watched/movie/${tmdbID}/stats`] as const;
 };
 
 export const getWatchedControllerGetMovieStatsQueryOptions = <
 	TData = Awaited<ReturnType<typeof watchedControllerGetMovieStats>>,
 	TError = unknown,
 >(
-	tmdbId: number,
+	tmdbID: number,
 	options?: {
 		query?: Partial<
 			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerGetMovieStats>>, TError, TData>
@@ -3111,13 +3111,13 @@ export const getWatchedControllerGetMovieStatsQueryOptions = <
 ) => {
 	const { query: queryOptions, request: requestOptions } = options ?? {};
 
-	const queryKey = queryOptions?.queryKey ?? getWatchedControllerGetMovieStatsQueryKey(tmdbId);
+	const queryKey = queryOptions?.queryKey ?? getWatchedControllerGetMovieStatsQueryKey(tmdbID);
 
 	const queryFn: QueryFunction<Awaited<ReturnType<typeof watchedControllerGetMovieStats>>> = ({
 		signal,
-	}) => watchedControllerGetMovieStats(tmdbId, requestOptions, signal);
+	}) => watchedControllerGetMovieStats(tmdbID, requestOptions, signal);
 
-	return { queryKey, queryFn, enabled: !!tmdbId, ...queryOptions } as UseQueryOptions<
+	return { queryKey, queryFn, enabled: !!tmdbID, ...queryOptions } as UseQueryOptions<
 		Awaited<ReturnType<typeof watchedControllerGetMovieStats>>,
 		TError,
 		TData
@@ -3133,7 +3133,7 @@ export function useWatchedControllerGetMovieStats<
 	TData = Awaited<ReturnType<typeof watchedControllerGetMovieStats>>,
 	TError = unknown,
 >(
-	tmdbId: number,
+	tmdbID: number,
 	options: {
 		query: Partial<
 			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerGetMovieStats>>, TError, TData>
@@ -3154,7 +3154,7 @@ export function useWatchedControllerGetMovieStats<
 	TData = Awaited<ReturnType<typeof watchedControllerGetMovieStats>>,
 	TError = unknown,
 >(
-	tmdbId: number,
+	tmdbID: number,
 	options?: {
 		query?: Partial<
 			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerGetMovieStats>>, TError, TData>
@@ -3175,7 +3175,7 @@ export function useWatchedControllerGetMovieStats<
 	TData = Awaited<ReturnType<typeof watchedControllerGetMovieStats>>,
 	TError = unknown,
 >(
-	tmdbId: number,
+	tmdbID: number,
 	options?: {
 		query?: Partial<
 			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerGetMovieStats>>, TError, TData>
@@ -3192,7 +3192,7 @@ export function useWatchedControllerGetMovieStats<
 	TData = Awaited<ReturnType<typeof watchedControllerGetMovieStats>>,
 	TError = unknown,
 >(
-	tmdbId: number,
+	tmdbID: number,
 	options?: {
 		query?: Partial<
 			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerGetMovieStats>>, TError, TData>
@@ -3201,7 +3201,7 @@ export function useWatchedControllerGetMovieStats<
 	},
 	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-	const queryOptions = getWatchedControllerGetMovieStatsQueryOptions(tmdbId, options);
+	const queryOptions = getWatchedControllerGetMovieStatsQueryOptions(tmdbID, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
 		queryKey: DataTag<QueryKey, TData, TError>;
@@ -3216,25 +3216,25 @@ export function useWatchedControllerGetMovieStats<
  * @summary Get current user watched status for a movie
  */
 export const watchedControllerGetWatchedStatus = (
-	tmdbId: number,
+	tmdbID: number,
 	options?: SecondParameter<typeof axiosInstance>,
 	signal?: AbortSignal
 ) => {
 	return axiosInstance<WatchedStatusDto>(
-		{ url: `/watched/movie/${tmdbId}/status`, method: 'GET', signal },
+		{ url: `/watched/movie/${tmdbID}/status`, method: 'GET', signal },
 		options
 	);
 };
 
-export const getWatchedControllerGetWatchedStatusQueryKey = (tmdbId?: number) => {
-	return [`/watched/movie/${tmdbId}/status`] as const;
+export const getWatchedControllerGetWatchedStatusQueryKey = (tmdbID?: number) => {
+	return [`/watched/movie/${tmdbID}/status`] as const;
 };
 
 export const getWatchedControllerGetWatchedStatusQueryOptions = <
 	TData = Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>,
 	TError = unknown,
 >(
-	tmdbId: number,
+	tmdbID: number,
 	options?: {
 		query?: Partial<
 			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>, TError, TData>
@@ -3244,13 +3244,13 @@ export const getWatchedControllerGetWatchedStatusQueryOptions = <
 ) => {
 	const { query: queryOptions, request: requestOptions } = options ?? {};
 
-	const queryKey = queryOptions?.queryKey ?? getWatchedControllerGetWatchedStatusQueryKey(tmdbId);
+	const queryKey = queryOptions?.queryKey ?? getWatchedControllerGetWatchedStatusQueryKey(tmdbID);
 
 	const queryFn: QueryFunction<Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>> = ({
 		signal,
-	}) => watchedControllerGetWatchedStatus(tmdbId, requestOptions, signal);
+	}) => watchedControllerGetWatchedStatus(tmdbID, requestOptions, signal);
 
-	return { queryKey, queryFn, enabled: !!tmdbId, ...queryOptions } as UseQueryOptions<
+	return { queryKey, queryFn, enabled: !!tmdbID, ...queryOptions } as UseQueryOptions<
 		Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>,
 		TError,
 		TData
@@ -3266,7 +3266,7 @@ export function useWatchedControllerGetWatchedStatus<
 	TData = Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>,
 	TError = unknown,
 >(
-	tmdbId: number,
+	tmdbID: number,
 	options: {
 		query: Partial<
 			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>, TError, TData>
@@ -3287,7 +3287,7 @@ export function useWatchedControllerGetWatchedStatus<
 	TData = Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>,
 	TError = unknown,
 >(
-	tmdbId: number,
+	tmdbID: number,
 	options?: {
 		query?: Partial<
 			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>, TError, TData>
@@ -3308,7 +3308,7 @@ export function useWatchedControllerGetWatchedStatus<
 	TData = Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>,
 	TError = unknown,
 >(
-	tmdbId: number,
+	tmdbID: number,
 	options?: {
 		query?: Partial<
 			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>, TError, TData>
@@ -3325,7 +3325,7 @@ export function useWatchedControllerGetWatchedStatus<
 	TData = Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>,
 	TError = unknown,
 >(
-	tmdbId: number,
+	tmdbID: number,
 	options?: {
 		query?: Partial<
 			UseQueryOptions<Awaited<ReturnType<typeof watchedControllerGetWatchedStatus>>, TError, TData>
@@ -3334,7 +3334,7 @@ export function useWatchedControllerGetWatchedStatus<
 	},
 	queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-	const queryOptions = getWatchedControllerGetWatchedStatusQueryOptions(tmdbId, options);
+	const queryOptions = getWatchedControllerGetWatchedStatusQueryOptions(tmdbID, options);
 
 	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
 		queryKey: DataTag<QueryKey, TData, TError>;
@@ -3493,21 +3493,21 @@ export function useWatchedControllerFindByUserId<
  */
 export const watchedControllerFindOneByUserAndTmdbId = (
 	userId: string,
-	tmdbId: number,
+	tmdbID: number,
 	options?: SecondParameter<typeof axiosInstance>,
 	signal?: AbortSignal
 ) => {
 	return axiosInstance<WatchedAggregated>(
-		{ url: `/watched/${userId}/${tmdbId}`, method: 'GET', signal },
+		{ url: `/watched/${userId}/${tmdbID}`, method: 'GET', signal },
 		options
 	);
 };
 
 export const getWatchedControllerFindOneByUserAndTmdbIdQueryKey = (
 	userId?: string,
-	tmdbId?: number
+	tmdbID?: number
 ) => {
-	return [`/watched/${userId}/${tmdbId}`] as const;
+	return [`/watched/${userId}/${tmdbID}`] as const;
 };
 
 export const getWatchedControllerFindOneByUserAndTmdbIdQueryOptions = <
@@ -3515,7 +3515,7 @@ export const getWatchedControllerFindOneByUserAndTmdbIdQueryOptions = <
 	TError = void,
 >(
 	userId: string,
-	tmdbId: number,
+	tmdbID: number,
 	options?: {
 		query?: Partial<
 			UseQueryOptions<
@@ -3530,14 +3530,14 @@ export const getWatchedControllerFindOneByUserAndTmdbIdQueryOptions = <
 	const { query: queryOptions, request: requestOptions } = options ?? {};
 
 	const queryKey =
-		queryOptions?.queryKey ?? getWatchedControllerFindOneByUserAndTmdbIdQueryKey(userId, tmdbId);
+		queryOptions?.queryKey ?? getWatchedControllerFindOneByUserAndTmdbIdQueryKey(userId, tmdbID);
 
 	const queryFn: QueryFunction<
 		Awaited<ReturnType<typeof watchedControllerFindOneByUserAndTmdbId>>
 	> = ({ signal }) =>
-		watchedControllerFindOneByUserAndTmdbId(userId, tmdbId, requestOptions, signal);
+		watchedControllerFindOneByUserAndTmdbId(userId, tmdbID, requestOptions, signal);
 
-	return { queryKey, queryFn, enabled: !!(userId && tmdbId), ...queryOptions } as UseQueryOptions<
+	return { queryKey, queryFn, enabled: !!(userId && tmdbID), ...queryOptions } as UseQueryOptions<
 		Awaited<ReturnType<typeof watchedControllerFindOneByUserAndTmdbId>>,
 		TError,
 		TData
@@ -3554,7 +3554,7 @@ export function useWatchedControllerFindOneByUserAndTmdbId<
 	TError = void,
 >(
 	userId: string,
-	tmdbId: number,
+	tmdbID: number,
 	options: {
 		query: Partial<
 			UseQueryOptions<
@@ -3580,7 +3580,7 @@ export function useWatchedControllerFindOneByUserAndTmdbId<
 	TError = void,
 >(
 	userId: string,
-	tmdbId: number,
+	tmdbID: number,
 	options?: {
 		query?: Partial<
 			UseQueryOptions<
@@ -3606,7 +3606,7 @@ export function useWatchedControllerFindOneByUserAndTmdbId<
 	TError = void,
 >(
 	userId: string,
-	tmdbId: number,
+	tmdbID: number,
 	options?: {
 		query?: Partial<
 			UseQueryOptions<
@@ -3628,7 +3628,7 @@ export function useWatchedControllerFindOneByUserAndTmdbId<
 	TError = void,
 >(
 	userId: string,
-	tmdbId: number,
+	tmdbID: number,
 	options?: {
 		query?: Partial<
 			UseQueryOptions<
@@ -3643,7 +3643,7 @@ export function useWatchedControllerFindOneByUserAndTmdbId<
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 	const queryOptions = getWatchedControllerFindOneByUserAndTmdbIdQueryOptions(
 		userId,
-		tmdbId,
+		tmdbID,
 		options
 	);
 

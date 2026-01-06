@@ -95,7 +95,7 @@ const WatchedMovie: React.FC<WatchedMovieProps> = ({
 				await createWatched({
 					data: {
 						liked,
-						tmdbId: Number(movieId),
+						tmdbID: Number(movieId),
 					},
 				});
 				setHasLiked(liked);

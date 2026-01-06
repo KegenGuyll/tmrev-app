@@ -10,7 +10,7 @@ import type { WatchedMovieDetails } from './watchedMovieDetails';
 export interface WatchedAggregated {
 	_id: string;
 	userId: string;
-	tmdbId: number;
+	tmdbID: number;
 	liked: boolean;
 	watchedDate: string;
 	createdAt: string;

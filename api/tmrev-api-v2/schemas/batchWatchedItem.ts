@@ -8,7 +8,7 @@
 
 export interface BatchWatchedItem {
 	/** TMDB movie ID */
-	tmdbId: number;
+	tmdbID: number;
 	liked?: boolean;
 	watchedDate?: string;
 }
