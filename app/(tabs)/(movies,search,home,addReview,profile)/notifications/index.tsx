@@ -113,10 +113,10 @@ const Notifications: React.FC = () => {
 		data: reviewNotificationData,
 		isLoading: isReviewNotificationDataLoading,
 		refetch: refetchReviewNotification,
-	} = useNotificationControllerFindAll({ contentType: 'reviews', isRead: true });
+	} = useNotificationControllerFindAll({ contentType: 'reviews' });
 
 	const { data: commentNotificationData, refetch: refetchCommentNotification } =
-		useNotificationControllerFindAll({ contentType: 'comments', isRead: false });
+		useNotificationControllerFindAll({ contentType: 'comments' });
 
 	const allNotifications = useMemo(() => {
 		if (!reviewNotificationData || !commentNotificationData) return [];
