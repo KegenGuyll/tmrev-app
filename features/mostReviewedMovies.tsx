@@ -2,8 +2,8 @@ import { Text } from 'react-native-paper';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import MovieHorizontalGrid, { MovieHorizontalGridData } from '@/components/MovieHorizontalGrid';
-import { useGetTopReviewedQuery } from '@/redux/api/tmrev';
 import { PosterPath } from '@/models';
+import { useReviewControllerFindMostReviewed } from '@/api/tmrev-api-v2';
 
 type MostReviewedMoviesProps = {
 	posterSelectionLocation: PosterPath;
@@ -13,13 +13,13 @@ const MostReviewedMovies: React.FC<MostReviewedMoviesProps> = ({
 	posterSelectionLocation,
 }: MostReviewedMoviesProps) => {
 	const [formattedData, setFormattedData] = useState<MovieHorizontalGridData[]>([]);
-	const { data, isLoading } = useGetTopReviewedQuery();
+	const { data, isLoading } = useReviewControllerFindMostReviewed();
 
 	useEffect(() => {
 		if (data) {
-			const newlyFormattedData: MovieHorizontalGridData[] = data.body.map((movie) => ({
-				movieId: movie._id,
-				moviePoster: movie.moviePoster,
+			const newlyFormattedData: MovieHorizontalGridData[] = data.map((movie) => ({
+				movieId: movie.tmdbID,
+				moviePoster: movie.movieDetails.poster_path,
 				uniqueId: Math.random().toString(36).substring(7),
 			}));
 			setFormattedData(newlyFormattedData);
