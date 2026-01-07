@@ -49,6 +49,7 @@ import type {
 	UpdateWatchListDtoClass,
 	UpdateWatchedDtoClass,
 	User,
+	UserControllerAddPinnedReviewBody,
 	UserProfileWithWatchedCount,
 	UsernameAvailableDto,
 	WatchListControllerFindOneParams,
@@ -3075,6 +3076,307 @@ export const useUserControllerRemove = <TError = void | void | void, TContext = 
 	TContext
 > => {
 	const mutationOptions = getUserControllerRemoveMutationOptions(options);
+
+	return useMutation(mutationOptions, queryClient);
+};
+
+/**
+ * Retrieves all pinned reviews for the specified user. The userId can be either a MongoDB ObjectId or a Firebase UUID. Returns enriched review data with movie details.
+ * @summary Get pinned reviews for a user
+ */
+export const userControllerGetPinnedReviews = (
+	userId: string,
+	options?: SecondParameter<typeof axiosInstance>,
+	signal?: AbortSignal
+) => {
+	return axiosInstance<ReviewAggregated[]>(
+		{ url: `/user/pinned/${userId}`, method: 'GET', signal },
+		options
+	);
+};
+
+export const getUserControllerGetPinnedReviewsQueryKey = (userId?: string) => {
+	return [`/user/pinned/${userId}`] as const;
+};
+
+export const getUserControllerGetPinnedReviewsQueryOptions = <
+	TData = Awaited<ReturnType<typeof userControllerGetPinnedReviews>>,
+	TError = void,
+>(
+	userId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof userControllerGetPinnedReviews>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	}
+) => {
+	const { query: queryOptions, request: requestOptions } = options ?? {};
+
+	const queryKey = queryOptions?.queryKey ?? getUserControllerGetPinnedReviewsQueryKey(userId);
+
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof userControllerGetPinnedReviews>>> = ({
+		signal,
+	}) => userControllerGetPinnedReviews(userId, requestOptions, signal);
+
+	return { queryKey, queryFn, enabled: !!userId, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof userControllerGetPinnedReviews>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type UserControllerGetPinnedReviewsQueryResult = NonNullable<
+	Awaited<ReturnType<typeof userControllerGetPinnedReviews>>
+>;
+export type UserControllerGetPinnedReviewsQueryError = void;
+
+export function useUserControllerGetPinnedReviews<
+	TData = Awaited<ReturnType<typeof userControllerGetPinnedReviews>>,
+	TError = void,
+>(
+	userId: string,
+	options: {
+		query: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof userControllerGetPinnedReviews>>, TError, TData>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof userControllerGetPinnedReviews>>,
+					TError,
+					Awaited<ReturnType<typeof userControllerGetPinnedReviews>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useUserControllerGetPinnedReviews<
+	TData = Awaited<ReturnType<typeof userControllerGetPinnedReviews>>,
+	TError = void,
+>(
+	userId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof userControllerGetPinnedReviews>>, TError, TData>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof userControllerGetPinnedReviews>>,
+					TError,
+					Awaited<ReturnType<typeof userControllerGetPinnedReviews>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useUserControllerGetPinnedReviews<
+	TData = Awaited<ReturnType<typeof userControllerGetPinnedReviews>>,
+	TError = void,
+>(
+	userId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof userControllerGetPinnedReviews>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Get pinned reviews for a user
+ */
+
+export function useUserControllerGetPinnedReviews<
+	TData = Awaited<ReturnType<typeof userControllerGetPinnedReviews>>,
+	TError = void,
+>(
+	userId: string,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof userControllerGetPinnedReviews>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+	const queryOptions = getUserControllerGetPinnedReviewsQueryOptions(userId, options);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
+
+	query.queryKey = queryOptions.queryKey;
+
+	return query;
+}
+
+/**
+ * Adds a review to the authenticated user's pinned reviews list. Maximum of 5 reviews can be pinned. Only public reviews can be pinned.
+ * @summary Pin a review to your profile
+ */
+export const userControllerAddPinnedReview = (
+	reviewId: string,
+	userControllerAddPinnedReviewBody?: UserControllerAddPinnedReviewBody,
+	options?: SecondParameter<typeof axiosInstance>,
+	signal?: AbortSignal
+) => {
+	return axiosInstance<User>(
+		{
+			url: `/user/pinned/${reviewId}`,
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			data: userControllerAddPinnedReviewBody,
+			signal,
+		},
+		options
+	);
+};
+
+export const getUserControllerAddPinnedReviewMutationOptions = <
+	TError = void | void | void,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof userControllerAddPinnedReview>>,
+		TError,
+		{ reviewId: string; data: UserControllerAddPinnedReviewBody },
+		TContext
+	>;
+	request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+	Awaited<ReturnType<typeof userControllerAddPinnedReview>>,
+	TError,
+	{ reviewId: string; data: UserControllerAddPinnedReviewBody },
+	TContext
+> => {
+	const mutationKey = ['userControllerAddPinnedReview'];
+	const { mutation: mutationOptions, request: requestOptions } = options
+		? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey }, request: undefined };
+
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof userControllerAddPinnedReview>>,
+		{ reviewId: string; data: UserControllerAddPinnedReviewBody }
+	> = (props) => {
+		const { reviewId, data } = props ?? {};
+
+		return userControllerAddPinnedReview(reviewId, data, requestOptions);
+	};
+
+	return { mutationFn, ...mutationOptions };
+};
+
+export type UserControllerAddPinnedReviewMutationResult = NonNullable<
+	Awaited<ReturnType<typeof userControllerAddPinnedReview>>
+>;
+export type UserControllerAddPinnedReviewMutationBody = UserControllerAddPinnedReviewBody;
+export type UserControllerAddPinnedReviewMutationError = void | void | void;
+
+/**
+ * @summary Pin a review to your profile
+ */
+export const useUserControllerAddPinnedReview = <TError = void | void | void, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof userControllerAddPinnedReview>>,
+			TError,
+			{ reviewId: string; data: UserControllerAddPinnedReviewBody },
+			TContext
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseMutationResult<
+	Awaited<ReturnType<typeof userControllerAddPinnedReview>>,
+	TError,
+	{ reviewId: string; data: UserControllerAddPinnedReviewBody },
+	TContext
+> => {
+	const mutationOptions = getUserControllerAddPinnedReviewMutationOptions(options);
+
+	return useMutation(mutationOptions, queryClient);
+};
+
+/**
+ * Removes a review from the authenticated user's pinned reviews list.
+ * @summary Remove a pinned review from your profile
+ */
+export const userControllerRemovePinnedReview = (
+	reviewId: string,
+	options?: SecondParameter<typeof axiosInstance>
+) => {
+	return axiosInstance<User>({ url: `/user/pinned/${reviewId}`, method: 'DELETE' }, options);
+};
+
+export const getUserControllerRemovePinnedReviewMutationOptions = <
+	TError = void | void,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof userControllerRemovePinnedReview>>,
+		TError,
+		{ reviewId: string },
+		TContext
+	>;
+	request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+	Awaited<ReturnType<typeof userControllerRemovePinnedReview>>,
+	TError,
+	{ reviewId: string },
+	TContext
+> => {
+	const mutationKey = ['userControllerRemovePinnedReview'];
+	const { mutation: mutationOptions, request: requestOptions } = options
+		? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey }, request: undefined };
+
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof userControllerRemovePinnedReview>>,
+		{ reviewId: string }
+	> = (props) => {
+		const { reviewId } = props ?? {};
+
+		return userControllerRemovePinnedReview(reviewId, requestOptions);
+	};
+
+	return { mutationFn, ...mutationOptions };
+};
+
+export type UserControllerRemovePinnedReviewMutationResult = NonNullable<
+	Awaited<ReturnType<typeof userControllerRemovePinnedReview>>
+>;
+
+export type UserControllerRemovePinnedReviewMutationError = void | void;
+
+/**
+ * @summary Remove a pinned review from your profile
+ */
+export const useUserControllerRemovePinnedReview = <TError = void | void, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof userControllerRemovePinnedReview>>,
+			TError,
+			{ reviewId: string },
+			TContext
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseMutationResult<
+	Awaited<ReturnType<typeof userControllerRemovePinnedReview>>,
+	TError,
+	{ reviewId: string },
+	TContext
+> => {
+	const mutationOptions = getUserControllerRemovePinnedReviewMutationOptions(options);
 
 	return useMutation(mutationOptions, queryClient);
 };

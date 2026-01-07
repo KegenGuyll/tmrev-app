@@ -3,6 +3,7 @@ import { DimensionValue, StyleProp, StyleSheet, View, ViewStyle } from 'react-na
 import { useRouter } from 'expo-router';
 import dayjs from 'dayjs';
 import { TmrevReview } from '@/models/tmrev';
+import { ReviewAggregated } from '@/api/tmrev-api-v2';
 import MoviePoster from './MoviePoster';
 import { FromLocation } from '@/models';
 import { feedReviewRoute } from '@/constants/routes';
@@ -17,7 +18,7 @@ type EllipsizeSettings = {
 export type MovieReviewDisplayChip = 'averagedAdvancedScore' | 'budget' | 'reviewDate' | 'runtime';
 
 type MovieReviewCardProps = {
-	review: TmrevReview;
+	review: TmrevReview | ReviewAggregated;
 	from: FromLocation;
 	containerStyle?: StyleProp<ViewStyle>;
 	titleEllipsizeSettings?: EllipsizeSettings;

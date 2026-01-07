@@ -67,6 +67,7 @@ export * from './updateUserDto';
 export * from './updateWatchListDtoClass';
 export * from './updateWatchedDtoClass';
 export * from './user';
+export * from './userControllerAddPinnedReviewBody';
 export * from './userProfile';
 export * from './userProfileWithWatchedCount';
 export * from './usernameAvailableDto';
