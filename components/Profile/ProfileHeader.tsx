@@ -13,8 +13,13 @@ import React, { useState } from 'react';
 import { Link, useRouter } from 'expo-router';
 import useAuth from '@/hooks/useAuth';
 import { numberShortHand } from '@/utils/common';
-import { useFollowUserV2Mutation, useUnfollowUserV2Mutation } from '@/redux/api/tmrev';
 import { FromLocation } from '@/models';
+import {
+	useUserControllerFollowUser,
+	useUserControllerUnfollowUser,
+	GenreInsightItem,
+	UserProfile,
+} from '@/api/tmrev-api-v2';
 import {
 	allListsRoute,
 	allReviewsRoute,
@@ -23,7 +28,6 @@ import {
 	profileFollowingRoute,
 } from '@/constants/routes';
 import { followUserLoginPrompt } from '@/constants/messages';
-import { GenreInsightItem, UserProfile } from '@/api/tmrev-api-v2';
 
 type ProfileHeaderProps = {
 	user: UserProfile;
@@ -44,15 +48,15 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 	const [followerCount, setFollowerCount] = useState(user.followerCount);
 	const [snackbarVisible, setSnackbarVisible] = useState(false);
 	const { currentUser } = useAuth({});
-	const [followUser] = useFollowUserV2Mutation();
-	const [unfollowUser] = useUnfollowUserV2Mutation();
+	const { mutateAsync: followUser } = useUserControllerFollowUser();
+	const { mutateAsync: unfollowUser } = useUserControllerUnfollowUser();
 	const router = useRouter();
 
 	const handleFollowUser = async () => {
 		if (!currentUser) return;
 
 		try {
-			await followUser({ userUid: user.uuid });
+			await followUser({ id: user.uuid, data: {} });
 			setIsFollowing(true);
 			setFollowerCount(followerCount + 1);
 		} catch (error) {
@@ -64,7 +68,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 		if (!currentUser) return;
 
 		try {
-			await unfollowUser({ userUid: user.uuid });
+			await unfollowUser({ id: user.uuid, data: {} });
 			setIsFollowing(false);
 			setFollowerCount(followerCount - 1);
 		} catch (error) {

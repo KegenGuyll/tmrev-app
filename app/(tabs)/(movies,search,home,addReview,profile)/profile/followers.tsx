@@ -5,9 +5,8 @@ import { Text, Button, Searchbar, Divider } from 'react-native-paper';
 import React, { useMemo, useState } from 'react';
 import useAuth from '@/hooks/useAuth';
 import { FromLocation } from '@/models';
-import { useGetFollowersV2Query } from '@/redux/api/tmrev';
-import { BasicUserV2 } from '@/models/tmrev/user';
 import { profileRoute } from '@/constants/routes';
+import { useUserControllerGetFollowers, UserProfile } from '@/api/tmrev-api-v2';
 import useDebounce from '@/hooks/useDebounce';
 
 type FollowerSearchParams = {
@@ -16,7 +15,7 @@ type FollowerSearchParams = {
 };
 
 type FollowerItemProps = {
-	item: BasicUserV2;
+	item: UserProfile;
 	isCurrentUser?: boolean;
 	from?: FromLocation;
 };
@@ -63,21 +62,27 @@ const Followers: React.FC = () => {
 
 	const { currentUser } = useAuth({});
 
-	const { data, isLoading } = useGetFollowersV2Query(
-		{ uid: userId!, query: { search: debouncedSearchTerm } },
-		{ skip: !userId }
+	const { data, isLoading } = useUserControllerGetFollowers(
+		userId!,
+		debouncedSearchTerm ? { search: debouncedSearchTerm } : undefined,
+		{
+			query: {
+				enabled: !!userId,
+				placeholderData: (previousData) => previousData,
+			},
+		}
 	);
 
 	const isCurrentUser = useMemo(() => currentUser?.uid === userId, [currentUser, userId]);
 
-	if (isLoading) {
+	if (isLoading && !data) {
 		return <Text>Loading...</Text>;
 	}
 
 	return (
 		<>
 			<Stack.Screen
-				options={{ title: `${data?.body.length} Followers`, headerRight: () => null }}
+				options={{ title: `${data?.totalCount ?? 0} Followers`, headerRight: () => null }}
 			/>
 			<View style={{ padding: 8, gap: 16 }}>
 				<Searchbar
@@ -89,7 +94,7 @@ const Followers: React.FC = () => {
 				<Divider />
 				<Text variant="titleMedium">All Followers</Text>
 				<FlatList
-					data={data?.body}
+					data={data?.results}
 					renderItem={({ item }) => (
 						<FollowerItem isCurrentUser={isCurrentUser} item={item} from={from} />
 					)}
