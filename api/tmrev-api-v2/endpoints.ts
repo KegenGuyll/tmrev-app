@@ -28,6 +28,8 @@ import type {
 	CreateUserDto,
 	CreateWatchListDtoClass,
 	CreateWatchedDtoClass,
+	FeedControllerGetFeed200,
+	FeedControllerGetFeedParams,
 	GenreInsight,
 	HeatmapInsight,
 	InsightControllerGetHeatmapInsightsParams,
@@ -5260,3 +5262,136 @@ export const useWatchedControllerBatchCreate = <TError = unknown, TContext = unk
 
 	return useMutation(mutationOptions, queryClient);
 };
+
+/**
+ * Returns a paginated feed of public reviews sorted by most recent. Optionally excludes the authenticated user's own reviews.
+ * @summary Get user feed
+ */
+export const feedControllerGetFeed = (
+	params?: FeedControllerGetFeedParams,
+	options?: SecondParameter<typeof axiosInstance>,
+	signal?: AbortSignal
+) => {
+	return axiosInstance<FeedControllerGetFeed200>(
+		{ url: `/feed`, method: 'GET', params, signal },
+		options
+	);
+};
+
+export const getFeedControllerGetFeedQueryKey = (params?: FeedControllerGetFeedParams) => {
+	return [`/feed`, ...(params ? [params] : [])] as const;
+};
+
+export const getFeedControllerGetFeedQueryOptions = <
+	TData = Awaited<ReturnType<typeof feedControllerGetFeed>>,
+	TError = unknown,
+>(
+	params?: FeedControllerGetFeedParams,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof feedControllerGetFeed>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	}
+) => {
+	const { query: queryOptions, request: requestOptions } = options ?? {};
+
+	const queryKey = queryOptions?.queryKey ?? getFeedControllerGetFeedQueryKey(params);
+
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof feedControllerGetFeed>>> = ({ signal }) =>
+		feedControllerGetFeed(params, requestOptions, signal);
+
+	return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+		Awaited<ReturnType<typeof feedControllerGetFeed>>,
+		TError,
+		TData
+	> & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type FeedControllerGetFeedQueryResult = NonNullable<
+	Awaited<ReturnType<typeof feedControllerGetFeed>>
+>;
+export type FeedControllerGetFeedQueryError = unknown;
+
+export function useFeedControllerGetFeed<
+	TData = Awaited<ReturnType<typeof feedControllerGetFeed>>,
+	TError = unknown,
+>(
+	params: undefined | FeedControllerGetFeedParams,
+	options: {
+		query: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof feedControllerGetFeed>>, TError, TData>
+		> &
+			Pick<
+				DefinedInitialDataOptions<
+					Awaited<ReturnType<typeof feedControllerGetFeed>>,
+					TError,
+					Awaited<ReturnType<typeof feedControllerGetFeed>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useFeedControllerGetFeed<
+	TData = Awaited<ReturnType<typeof feedControllerGetFeed>>,
+	TError = unknown,
+>(
+	params?: FeedControllerGetFeedParams,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof feedControllerGetFeed>>, TError, TData>
+		> &
+			Pick<
+				UndefinedInitialDataOptions<
+					Awaited<ReturnType<typeof feedControllerGetFeed>>,
+					TError,
+					Awaited<ReturnType<typeof feedControllerGetFeed>>
+				>,
+				'initialData'
+			>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useFeedControllerGetFeed<
+	TData = Awaited<ReturnType<typeof feedControllerGetFeed>>,
+	TError = unknown,
+>(
+	params?: FeedControllerGetFeedParams,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof feedControllerGetFeed>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Get user feed
+ */
+
+export function useFeedControllerGetFeed<
+	TData = Awaited<ReturnType<typeof feedControllerGetFeed>>,
+	TError = unknown,
+>(
+	params?: FeedControllerGetFeedParams,
+	options?: {
+		query?: Partial<
+			UseQueryOptions<Awaited<ReturnType<typeof feedControllerGetFeed>>, TError, TData>
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+	const queryOptions = getFeedControllerGetFeedQueryOptions(params, options);
+
+	const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+		queryKey: DataTag<QueryKey, TData, TError>;
+	};
+
+	query.queryKey = queryOptions.queryKey;
+
+	return query;
+}

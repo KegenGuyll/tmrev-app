@@ -2,7 +2,11 @@ import React, { useMemo, useState } from 'react';
 import { FlatList, RefreshControl, View } from 'react-native';
 import { ActivityIndicator, Divider, Snackbar, Text } from 'react-native-paper';
 import { useRouter } from 'expo-router';
-import { useGetUserFeedQuery } from '@/redux/api/tmrev';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import {
+	feedControllerGetFeed,
+	getFeedControllerGetFeedQueryKey,
+} from '@/api/tmrev-api-v2/endpoints';
 import FeedCard from '@/features/feed/feedCard';
 import { loginRoute } from '@/constants/routes';
 
@@ -10,46 +14,63 @@ const pageSize = 10;
 
 const HomeScreen = () => {
 	const router = useRouter();
-	const [isRefreshing, setIsRefreshing] = useState(false);
-	const [page, setPage] = useState(0);
-	const { data, isLoading, refetch } = useGetUserFeedQuery({
-		pageNumber: page,
-		pageSize,
-	});
 	const [loginMessage, setLoginMessage] = useState<string | null>(null);
 
-	const hasReachedEnd = useMemo(() => data?.body.totalNumberOfPages === page, [data, page]);
+	const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage, refetch, isRefetching } =
+		useInfiniteQuery({
+			queryKey: getFeedControllerGetFeedQueryKey(),
+			queryFn: ({ pageParam = 1 }) =>
+				feedControllerGetFeed({
+					pageNumber: String(pageParam),
+					pageSize: String(pageSize),
+				}),
+			getNextPageParam: (lastPage) => {
+				const currentPage = lastPage.pageNumber || 1;
+				const totalPages = lastPage.totalNumberOfPages || 1;
+				return currentPage < totalPages ? currentPage + 1 : undefined;
+			},
+			initialPageParam: 1,
+		});
+
+	const feedItems = useMemo(() => {
+		return data?.pages.flatMap((page) => page.results || []) || [];
+	}, [data]);
 
 	const onRefresh = async () => {
-		setIsRefreshing(true);
-		setPage(0);
-		await refetch().unwrap();
-		setIsRefreshing(false);
+		await refetch();
 	};
 
-	const onEndReached = async () => {
-		if (!hasReachedEnd) {
-			setPage(page + 1);
+	const onEndReached = () => {
+		if (hasNextPage && !isFetchingNextPage) {
+			fetchNextPage();
 		}
 	};
 
-	if (!data || isLoading) {
+	if (isLoading) {
 		return (
-			<View>
-				<Text>Loading...</Text>
+			<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+				<ActivityIndicator size="large" />
+			</View>
+		);
+	}
+
+	if (feedItems.length === 0 && !isLoading) {
+		return (
+			<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+				<Text>No reviews found</Text>
 			</View>
 		);
 	}
 
 	return (
 		<>
-			<View>
+			<View style={{ flex: 1 }}>
 				<FlatList
 					onEndReached={onEndReached}
 					refreshControl={
-						<RefreshControl tintColor="white" refreshing={isRefreshing} onRefresh={onRefresh} />
+						<RefreshControl tintColor="white" refreshing={isRefetching} onRefresh={onRefresh} />
 					}
-					data={data.body.feed.reviews}
+					data={feedItems}
 					keyExtractor={(item) => item._id}
 					renderItem={({ item }) => (
 						<View>
@@ -62,9 +83,9 @@ const HomeScreen = () => {
 							/>
 						</View>
 					)}
-					onEndReachedThreshold={0.5}
+					onEndReachedThreshold={0.3}
 					ListFooterComponentStyle={{ paddingTop: 16 }}
-					ListFooterComponent={hasReachedEnd ? null : <ActivityIndicator />}
+					ListFooterComponent={isFetchingNextPage ? <ActivityIndicator /> : null}
 				/>
 			</View>
 			<Snackbar
