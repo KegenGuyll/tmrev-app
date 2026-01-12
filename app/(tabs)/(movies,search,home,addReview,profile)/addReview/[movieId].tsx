@@ -15,6 +15,7 @@ import TextInput from '@/components/Inputs/TextInput';
 import { CreateTmrevReviewQuery } from '@/models/tmrev/review';
 import DatePicker from '@/components/Date/DatePicker';
 import {
+	getFeedControllerGetFeedQueryKey,
 	getReviewControllerFindByTmdbIdQueryKey,
 	getReviewControllerFindOneQueryKey,
 	getWatchListControllerFindOneQueryKey,
@@ -70,10 +71,23 @@ const CreateReview = () => {
 					queryKey: getWatchListControllerFindOneQueryKey(),
 					exact: false,
 				});
+				queryClient.invalidateQueries({
+					queryKey: getFeedControllerGetFeedQueryKey(),
+					exact: false,
+				});
 			},
 		},
 	});
-	const updateReviewMutation = useReviewControllerUpdate();
+	const updateReviewMutation = useReviewControllerUpdate({
+		mutation: {
+			onSuccess: async () => {
+				queryClient.invalidateQueries({
+					queryKey: getFeedControllerGetFeedQueryKey(),
+					exact: false,
+				});
+			},
+		},
+	});
 
 	const { data: movieData } = useGetMovieDetailsQuery({
 		movie_id: Number(movieId) || 0,
