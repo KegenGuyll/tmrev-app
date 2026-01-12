@@ -6,13 +6,9 @@
  * OpenAPI spec version: 2.0.0
  */
 
-export interface Profile {
+export interface CommentAuthorDto {
 	uuid: string;
 	username: string;
-	email: string;
 	displayName: string;
-	bio: string;
-	createdAt: string;
-	updatedAt: string;
 	photoUrl: string;
 }

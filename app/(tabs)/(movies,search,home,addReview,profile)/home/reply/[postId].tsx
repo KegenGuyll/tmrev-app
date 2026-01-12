@@ -4,8 +4,13 @@ import { View, Image, TextInput, KeyboardAvoidingView, ScrollView, Platform } fr
 import { ActivityIndicator, Button, Text, useTheme } from 'react-native-paper';
 import React, { useEffect, useRef, useState } from 'react';
 import useAuth from '@/hooks/useAuth';
-import { useAddCommentMutation, useGetCommentDetailsQuery } from '@/redux/api/tmrev';
-import { useReviewControllerFindOne, useUserControllerFindOne } from '@/api/tmrev-api-v2/endpoints';
+import {
+	useReviewControllerFindOne,
+	useUserControllerFindOne,
+	useCommentControllerFindOne,
+} from '@/api/tmrev-api-v2/endpoints';
+import { CommentPostType } from '@/api/tmrev-api-v2';
+import useCommentMutations from '@/hooks/useCommentMutations';
 import MultiLineInput from '@/components/Inputs/MultiLineInput';
 import { FeedReviewContentTypes, feedReviewRoute } from '@/constants/routes';
 import ReviewCard from '@/features/feed/reviewCard';
@@ -27,14 +32,14 @@ const ReplyPost: React.FC = () => {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 
 	const { currentUser } = useAuth({});
-	const { data: commentData, isLoading: isCommentLoading } = useGetCommentDetailsQuery(postId!, {
-		skip: !postId || contentType !== 'comments',
+	const { data: commentData, isLoading: isCommentLoading } = useCommentControllerFindOne(postId!, {
+		query: { enabled: !!postId && contentType === 'comments' },
 	});
 	const { data: reviewData } = useReviewControllerFindOne(postId!, {
 		query: { enabled: !!postId && contentType === 'reviews' },
 	});
 
-	const [addComment] = useAddCommentMutation();
+	const { createComment, isCreating } = useCommentMutations(postId);
 
 	useEffect(() => {
 		if (inputRef.current) {
@@ -45,11 +50,12 @@ const ReplyPost: React.FC = () => {
 	const handlePost = async () => {
 		if (!contentType) return;
 		setIsLoading(true);
-		await addComment({
+		await createComment({
 			comment: reply,
-			id: postId!,
-			contentType,
-		}).unwrap();
+			postId: postId!,
+			authorId: reviewData ? reviewData.userId : commentData!.author.uuid,
+			postType: contentType as CommentPostType,
+		});
 		setIsLoading(false);
 		router.replace(feedReviewRoute(postId!, contentType, from!));
 	};
@@ -81,12 +87,12 @@ const ReplyPost: React.FC = () => {
 				keyboardVerticalOffset={113}
 			>
 				<ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
-					{isLoading && <ActivityIndicator />}
+					{(isLoading || isCreating) && <ActivityIndicator />}
 					{reviewData && contentType === 'reviews' && (
 						<ReviewCard reviewData={reviewData} displayMetaData={false} from={from!} />
 					)}
 					{commentData && contentType === 'comments' && (
-						<CommentCard comment={commentData.body} displayMetaData={false} from={from!} />
+						<CommentCard comment={commentData} displayMetaData={false} from={from!} />
 					)}
 					<View
 						style={{
@@ -100,12 +106,29 @@ const ReplyPost: React.FC = () => {
 						ref={commentAreaRef}
 						style={{ display: 'flex', flexDirection: 'row', gap: 16, alignItems: 'flex-start' }}
 					>
-						<Image
-							source={{ uri: currentUserData?.photoUrl }}
-							height={50}
-							width={50}
-							style={{ borderRadius: 100 }}
-						/>
+						{currentUserData?.photoUrl ? (
+							<Image
+								source={{ uri: currentUserData.photoUrl }}
+								height={50}
+								width={50}
+								style={{ borderRadius: 100 }}
+							/>
+						) : (
+							<View
+								style={{
+									height: 50,
+									width: 50,
+									borderRadius: 100,
+									backgroundColor: theme.colors.primary,
+									justifyContent: 'center',
+									alignItems: 'center',
+								}}
+							>
+								<Text style={{ color: theme.colors.onPrimary }}>
+									{currentUserData?.username?.charAt(0).toUpperCase()}
+								</Text>
+							</View>
+						)}
 						<View style={{ gap: 16, width: '100%', flex: 1 }}>
 							<View>
 								<Text variant="labelLarge">{currentUserData?.username}</Text>

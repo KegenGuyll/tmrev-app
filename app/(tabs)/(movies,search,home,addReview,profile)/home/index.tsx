@@ -23,6 +23,7 @@ const HomeScreen = () => {
 				feedControllerGetFeed({
 					pageNumber: String(pageParam),
 					pageSize: String(pageSize),
+					excludeSelf: 'false',
 				}),
 			getNextPageParam: (lastPage) => {
 				const currentPage = lastPage.pageNumber || 1;

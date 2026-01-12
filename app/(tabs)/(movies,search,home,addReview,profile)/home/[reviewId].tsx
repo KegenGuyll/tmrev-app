@@ -1,17 +1,13 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import {
-	Keyboard,
-	StyleSheet,
-	TouchableWithoutFeedback,
-	View,
-	ScrollView,
-	RefreshControl,
-} from 'react-native';
+import { Keyboard, StyleSheet, TouchableWithoutFeedback, View, RefreshControl } from 'react-native';
 import { Text, useTheme, MD3Theme, Divider, ActivityIndicator, Snackbar } from 'react-native-paper';
 import React, { useMemo, useState } from 'react';
 import { FlatList } from 'react-native-gesture-handler';
-import { useGetCommentDetailsQuery, useGetCommentsQuery } from '@/redux/api/tmrev';
-import { useReviewControllerFindOne } from '@/api/tmrev-api-v2/endpoints';
+import {
+	useReviewControllerFindOne,
+	useCommentControllerFindOne,
+} from '@/api/tmrev-api-v2/endpoints';
+import useComments from '@/hooks/useComments';
 import CommentCard from '@/features/feed/commentCard';
 import { FeedReviewContentTypes, feedReviewDetailsRoute, loginRoute } from '@/constants/routes';
 import ReviewCard from '@/features/feed/reviewCard';
@@ -44,21 +40,29 @@ const ReviewPage: React.FC = () => {
 	});
 
 	const {
-		data: commentData,
-		isLoading: isCommentLoading,
+		comments,
+		totalCount,
+		isLoading: isCommentsLoading,
 		refetch: refetchComments,
-	} = useGetCommentsQuery(reviewId!, {
-		skip: !reviewId,
+		fetchNextPage,
+		hasNextPage,
+		isFetchingNextPage,
+	} = useComments({
+		postId: reviewId!,
+		enabled: !!reviewId,
 	});
+
 	const {
 		data: commentDetails,
 		isLoading: isCommentDetailsLoading,
 		refetch: refetchCommentDetails,
-	} = useGetCommentDetailsQuery(reviewId!, { skip: !reviewId || contentType !== 'comments' });
+	} = useCommentControllerFindOne(reviewId!, {
+		query: { enabled: !!reviewId && contentType === 'comments' },
+	});
 
 	const isLoading = useMemo(
-		() => isReviewDataLoading || isCommentLoading || isCommentLoading,
-		[isCommentDetailsLoading, isCommentLoading, isReviewDataLoading]
+		() => isReviewDataLoading || isCommentsLoading || isCommentDetailsLoading,
+		[isCommentDetailsLoading, isCommentsLoading, isReviewDataLoading]
 	);
 
 	const handleRefresh = async () => {
@@ -68,14 +72,19 @@ const ReviewPage: React.FC = () => {
 				await refetchReview();
 			}
 			if (contentType === 'comments') {
-				await refetchCommentDetails().unwrap();
+				await refetchCommentDetails();
 			}
 
-			await refetchComments().unwrap();
-
+			await refetchComments();
 			setIsRefreshing(false);
 		} catch (error) {
 			setIsRefreshing(false);
+		}
+	};
+
+	const handleLoadMore = () => {
+		if (hasNextPage && !isFetchingNextPage) {
+			fetchNextPage();
 		}
 	};
 
@@ -102,41 +111,49 @@ const ReviewPage: React.FC = () => {
 				}}
 			/>
 			<TouchableWithoutFeedback onPress={Keyboard.dismiss} style={styles.container}>
-				<ScrollView
-					contentContainerStyle={{ paddingBottom: 100 }}
-					refreshControl={
-						<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor="white" />
-					}
-				>
+				<View style={{ flex: 1 }}>
 					{isLoading && (
-						<ActivityIndicator style={{ position: 'absolute', top: 10, right: 0, left: 0 }} />
-					)}
-					{contentType === 'reviews' && (
-						<ReviewCard
-							setLoginMessage={setLoginMessage}
-							numberOfComments={commentData?.body.length || 0}
-							reviewData={reviewData}
-							from={from!}
+						<ActivityIndicator
+							style={{ position: 'absolute', top: 10, right: 0, left: 0, zIndex: 1 }}
 						/>
-					)}
-					{commentDetails && contentType === 'comments' && (
-						<CommentCard
-							setLoginMessage={setLoginMessage}
-							isSubject
-							comment={commentDetails?.body}
-							from={from!}
-						/>
-					)}
-					{contentType === 'comments' && (
-						<View style={[styles.flexRow, { paddingVertical: 16 }]}>
-							<Text variant="titleMedium">
-								{commentDetails?.body.replies ? '	Replies:' : 'No Replies:'}
-							</Text>
-						</View>
 					)}
 					<FlatList
-						scrollEnabled={false}
-						data={commentData?.body}
+						contentContainerStyle={{ paddingBottom: 100 }}
+						refreshControl={
+							<RefreshControl
+								refreshing={isRefreshing}
+								onRefresh={handleRefresh}
+								tintColor="white"
+							/>
+						}
+						ListHeaderComponent={
+							<>
+								{contentType === 'reviews' && (
+									<ReviewCard
+										setLoginMessage={setLoginMessage}
+										numberOfComments={totalCount}
+										reviewData={reviewData}
+										from={from!}
+									/>
+								)}
+								{commentDetails && contentType === 'comments' && (
+									<CommentCard
+										setLoginMessage={setLoginMessage}
+										isSubject
+										comment={commentDetails}
+										from={from!}
+									/>
+								)}
+								{contentType === 'comments' && (
+									<View style={[styles.flexRow, { paddingVertical: 16 }]}>
+										<Text variant="titleMedium">
+											{totalCount > 0 ? `Replies (${totalCount}):` : 'No Replies'}
+										</Text>
+									</View>
+								)}
+							</>
+						}
+						data={comments}
 						renderItem={({ item }) => (
 							<>
 								<CommentCard setLoginMessage={setLoginMessage} comment={item} from={from!} />
@@ -144,8 +161,11 @@ const ReviewPage: React.FC = () => {
 							</>
 						)}
 						keyExtractor={(item) => item._id}
+						onEndReached={handleLoadMore}
+						onEndReachedThreshold={0.3}
+						ListFooterComponent={isFetchingNextPage ? <ActivityIndicator /> : null}
 					/>
-				</ScrollView>
+				</View>
 			</TouchableWithoutFeedback>
 			<View style={styles.keyboardContainer}>
 				<TouchableWithoutFeedback onPress={() => handleNavigateToComment()}>

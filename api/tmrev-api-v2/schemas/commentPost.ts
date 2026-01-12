@@ -5,10 +5,12 @@
  * Review aggregation and movie database API
  * OpenAPI spec version: 2.0.0
  */
+import type { CommentAuthor } from './commentAuthor';
 import type { CommentPostType } from './commentPostType';
 
 export interface CommentPost {
-	author: string;
+	/** Post author profile details */
+	author: CommentAuthor;
 	id: string;
 	type: CommentPostType;
 }
