@@ -11,8 +11,9 @@ import {
 } from 'react-native-paper';
 import dayjs from 'dayjs';
 import { useRouter } from 'expo-router';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import useAuth from '@/hooks/useAuth';
+import useReviewMutations from '@/hooks/useReviewMutations';
 import { FeedItem } from '@/api/tmrev-api-v2/schemas';
 import MoviePoster from '@/components/MoviePoster';
 import {
@@ -25,7 +26,7 @@ import {
 import { formatDate } from '@/utils/common';
 import { FromLocation } from '@/models';
 import BarChart from '@/components/CustomCharts/BarChart';
-import { commentLoginPrompt } from '@/constants/messages';
+import { commentLoginPrompt, dislikeLoginPrompt, likeLoginPrompt } from '@/constants/messages';
 
 type FeedCardProps = {
 	review: FeedItem;
@@ -41,12 +42,21 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from, setLoginMessage }: Fe
 
 	const { currentUser } = useAuth({});
 
-	const hasLiked = review.hasUpvoted;
-	const hasDisliked = review.hasDownvoted;
+	const [hasLiked, setHasLiked] = useState<boolean>(review.hasUpvoted);
+	const [hasDisliked, setHasDisliked] = useState<boolean>(review.hasDownvoted);
 	const [snackBarMessage, setSnackBarMessage] = useState<string | null>(null);
 	const [showMenu, setShowMenu] = useState<boolean>(false);
 	const [showFullReview, setShowFullReview] = useState<boolean>(false);
 	const theme = useTheme();
+
+	const { voteUp, removeUp, voteDown, removeDown, isVotingUp, isVotingDown } = useReviewMutations();
+
+	useEffect(() => {
+		if (!review || !currentUser) return;
+
+		setHasLiked(review.hasUpvoted);
+		setHasDisliked(review.hasDownvoted);
+	}, [review, currentUser]);
 
 	const fullReviewData = useMemo(() => {
 		if (!review || !review.advancedScore) return [];
@@ -106,12 +116,74 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from, setLoginMessage }: Fe
 		router.navigate(feedReviewDetailsRoute(review._id, 'reviews', from));
 	};
 
-	const handleUpVote = () => {
-		// TODO: Implement V2 API voting
+	const handleUpVote = async () => {
+		if (!review || !currentUser) {
+			if (setLoginMessage) {
+				setLoginMessage(likeLoginPrompt);
+			}
+			return;
+		}
+
+		// Store previous state for rollback
+		const previousLiked = hasLiked;
+		const previousDisliked = hasDisliked;
+
+		try {
+			// If already upvoted, remove the upvote (unvote)
+			if (hasLiked) {
+				// Optimistic update
+				setHasLiked(false);
+				await removeUp({ reviewId: review._id });
+			} else {
+				// If currently downvoted, remove downvote first
+				if (hasDisliked) {
+					setHasDisliked(false);
+					await removeDown({ reviewId: review._id });
+				}
+				// Optimistic update then add upvote
+				setHasLiked(true);
+				await voteUp({ reviewId: review._id });
+			}
+		} catch (error) {
+			// Rollback on error
+			setHasLiked(previousLiked);
+			setHasDisliked(previousDisliked);
+		}
 	};
 
-	const handleDownVote = () => {
-		// TODO: Implement V2 API voting
+	const handleDownVote = async () => {
+		if (!review || !currentUser) {
+			if (setLoginMessage) {
+				setLoginMessage(dislikeLoginPrompt);
+			}
+			return;
+		}
+
+		// Store previous state for rollback
+		const previousLiked = hasLiked;
+		const previousDisliked = hasDisliked;
+
+		try {
+			// If already downvoted, remove the downvote (unvote)
+			if (hasDisliked) {
+				// Optimistic update
+				setHasDisliked(false);
+				await removeDown({ reviewId: review._id });
+			} else {
+				// If currently upvoted, remove upvote first
+				if (hasLiked) {
+					setHasLiked(false);
+					await removeUp({ reviewId: review._id });
+				}
+				// Optimistic update then add downvote
+				setHasDisliked(true);
+				await voteDown({ reviewId: review._id });
+			}
+		} catch (error) {
+			// Rollback on error
+			setHasLiked(previousLiked);
+			setHasDisliked(previousDisliked);
+		}
 	};
 
 	const handleShowFullReview = () => {
@@ -211,6 +283,7 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from, setLoginMessage }: Fe
 							textColor="white"
 							onPress={handleUpVote}
 							icon={hasLiked ? 'thumb-up' : 'thumb-up-outline'}
+							disabled={isVotingUp || isVotingDown}
 						>
 							{review.votes.upVote}
 						</Button>
@@ -218,6 +291,7 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from, setLoginMessage }: Fe
 							textColor="white"
 							onPress={handleDownVote}
 							icon={hasDisliked ? 'thumb-down' : 'thumb-down-outline'}
+							disabled={isVotingUp || isVotingDown}
 						>
 							{review.votes.downVote}
 						</Button>

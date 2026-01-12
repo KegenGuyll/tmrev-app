@@ -1398,6 +1398,316 @@ export const useReviewControllerRemove = <TError = void | void | void, TContext 
 };
 
 /**
+ * @summary Add an upvote to a review
+ */
+export const reviewControllerAddUpVote = (
+	id: string,
+	options?: SecondParameter<typeof axiosInstance>,
+	signal?: AbortSignal
+) => {
+	return axiosInstance<void>({ url: `/review/${id}/upVote`, method: 'POST', signal }, options);
+};
+
+export const getReviewControllerAddUpVoteMutationOptions = <
+	TError = void | void,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof reviewControllerAddUpVote>>,
+		TError,
+		{ id: string },
+		TContext
+	>;
+	request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+	Awaited<ReturnType<typeof reviewControllerAddUpVote>>,
+	TError,
+	{ id: string },
+	TContext
+> => {
+	const mutationKey = ['reviewControllerAddUpVote'];
+	const { mutation: mutationOptions, request: requestOptions } = options
+		? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey }, request: undefined };
+
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof reviewControllerAddUpVote>>,
+		{ id: string }
+	> = (props) => {
+		const { id } = props ?? {};
+
+		return reviewControllerAddUpVote(id, requestOptions);
+	};
+
+	return { mutationFn, ...mutationOptions };
+};
+
+export type ReviewControllerAddUpVoteMutationResult = NonNullable<
+	Awaited<ReturnType<typeof reviewControllerAddUpVote>>
+>;
+
+export type ReviewControllerAddUpVoteMutationError = void | void;
+
+/**
+ * @summary Add an upvote to a review
+ */
+export const useReviewControllerAddUpVote = <TError = void | void, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof reviewControllerAddUpVote>>,
+			TError,
+			{ id: string },
+			TContext
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseMutationResult<
+	Awaited<ReturnType<typeof reviewControllerAddUpVote>>,
+	TError,
+	{ id: string },
+	TContext
+> => {
+	const mutationOptions = getReviewControllerAddUpVoteMutationOptions(options);
+
+	return useMutation(mutationOptions, queryClient);
+};
+
+/**
+ * @summary Remove an upvote from a review
+ */
+export const reviewControllerRemoveUpVote = (
+	id: string,
+	options?: SecondParameter<typeof axiosInstance>
+) => {
+	return axiosInstance<void>({ url: `/review/${id}/upVote`, method: 'DELETE' }, options);
+};
+
+export const getReviewControllerRemoveUpVoteMutationOptions = <
+	TError = void | void,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof reviewControllerRemoveUpVote>>,
+		TError,
+		{ id: string },
+		TContext
+	>;
+	request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+	Awaited<ReturnType<typeof reviewControllerRemoveUpVote>>,
+	TError,
+	{ id: string },
+	TContext
+> => {
+	const mutationKey = ['reviewControllerRemoveUpVote'];
+	const { mutation: mutationOptions, request: requestOptions } = options
+		? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey }, request: undefined };
+
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof reviewControllerRemoveUpVote>>,
+		{ id: string }
+	> = (props) => {
+		const { id } = props ?? {};
+
+		return reviewControllerRemoveUpVote(id, requestOptions);
+	};
+
+	return { mutationFn, ...mutationOptions };
+};
+
+export type ReviewControllerRemoveUpVoteMutationResult = NonNullable<
+	Awaited<ReturnType<typeof reviewControllerRemoveUpVote>>
+>;
+
+export type ReviewControllerRemoveUpVoteMutationError = void | void;
+
+/**
+ * @summary Remove an upvote from a review
+ */
+export const useReviewControllerRemoveUpVote = <TError = void | void, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof reviewControllerRemoveUpVote>>,
+			TError,
+			{ id: string },
+			TContext
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseMutationResult<
+	Awaited<ReturnType<typeof reviewControllerRemoveUpVote>>,
+	TError,
+	{ id: string },
+	TContext
+> => {
+	const mutationOptions = getReviewControllerRemoveUpVoteMutationOptions(options);
+
+	return useMutation(mutationOptions, queryClient);
+};
+
+/**
+ * @summary Add a downvote to a review
+ */
+export const reviewControllerAddDownVote = (
+	id: string,
+	options?: SecondParameter<typeof axiosInstance>,
+	signal?: AbortSignal
+) => {
+	return axiosInstance<void>({ url: `/review/${id}/downVote`, method: 'POST', signal }, options);
+};
+
+export const getReviewControllerAddDownVoteMutationOptions = <
+	TError = void | void,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof reviewControllerAddDownVote>>,
+		TError,
+		{ id: string },
+		TContext
+	>;
+	request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+	Awaited<ReturnType<typeof reviewControllerAddDownVote>>,
+	TError,
+	{ id: string },
+	TContext
+> => {
+	const mutationKey = ['reviewControllerAddDownVote'];
+	const { mutation: mutationOptions, request: requestOptions } = options
+		? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey }, request: undefined };
+
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof reviewControllerAddDownVote>>,
+		{ id: string }
+	> = (props) => {
+		const { id } = props ?? {};
+
+		return reviewControllerAddDownVote(id, requestOptions);
+	};
+
+	return { mutationFn, ...mutationOptions };
+};
+
+export type ReviewControllerAddDownVoteMutationResult = NonNullable<
+	Awaited<ReturnType<typeof reviewControllerAddDownVote>>
+>;
+
+export type ReviewControllerAddDownVoteMutationError = void | void;
+
+/**
+ * @summary Add a downvote to a review
+ */
+export const useReviewControllerAddDownVote = <TError = void | void, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof reviewControllerAddDownVote>>,
+			TError,
+			{ id: string },
+			TContext
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseMutationResult<
+	Awaited<ReturnType<typeof reviewControllerAddDownVote>>,
+	TError,
+	{ id: string },
+	TContext
+> => {
+	const mutationOptions = getReviewControllerAddDownVoteMutationOptions(options);
+
+	return useMutation(mutationOptions, queryClient);
+};
+
+/**
+ * @summary Remove a downvote from a review
+ */
+export const reviewControllerRemoveDownVote = (
+	id: string,
+	options?: SecondParameter<typeof axiosInstance>
+) => {
+	return axiosInstance<void>({ url: `/review/${id}/downVote`, method: 'DELETE' }, options);
+};
+
+export const getReviewControllerRemoveDownVoteMutationOptions = <
+	TError = void | void,
+	TContext = unknown,
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof reviewControllerRemoveDownVote>>,
+		TError,
+		{ id: string },
+		TContext
+	>;
+	request?: SecondParameter<typeof axiosInstance>;
+}): UseMutationOptions<
+	Awaited<ReturnType<typeof reviewControllerRemoveDownVote>>,
+	TError,
+	{ id: string },
+	TContext
+> => {
+	const mutationKey = ['reviewControllerRemoveDownVote'];
+	const { mutation: mutationOptions, request: requestOptions } = options
+		? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+			? options
+			: { ...options, mutation: { ...options.mutation, mutationKey } }
+		: { mutation: { mutationKey }, request: undefined };
+
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof reviewControllerRemoveDownVote>>,
+		{ id: string }
+	> = (props) => {
+		const { id } = props ?? {};
+
+		return reviewControllerRemoveDownVote(id, requestOptions);
+	};
+
+	return { mutationFn, ...mutationOptions };
+};
+
+export type ReviewControllerRemoveDownVoteMutationResult = NonNullable<
+	Awaited<ReturnType<typeof reviewControllerRemoveDownVote>>
+>;
+
+export type ReviewControllerRemoveDownVoteMutationError = void | void;
+
+/**
+ * @summary Remove a downvote from a review
+ */
+export const useReviewControllerRemoveDownVote = <TError = void | void, TContext = unknown>(
+	options?: {
+		mutation?: UseMutationOptions<
+			Awaited<ReturnType<typeof reviewControllerRemoveDownVote>>,
+			TError,
+			{ id: string },
+			TContext
+		>;
+		request?: SecondParameter<typeof axiosInstance>;
+	},
+	queryClient?: QueryClient
+): UseMutationResult<
+	Awaited<ReturnType<typeof reviewControllerRemoveDownVote>>,
+	TError,
+	{ id: string },
+	TContext
+> => {
+	const mutationOptions = getReviewControllerRemoveDownVoteMutationOptions(options);
+
+	return useMutation(mutationOptions, queryClient);
+};
+
+/**
  * @summary Update movie details from TMDB
  */
 export const movieControllerUpdate = (

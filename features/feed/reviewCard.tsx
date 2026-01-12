@@ -14,9 +14,9 @@ import dayjs from 'dayjs';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
 import useAuth from '@/hooks/useAuth';
+import useReviewMutations from '@/hooks/useReviewMutations';
 import MoviePoster from '@/components/MoviePoster';
 import { ReviewAggregated } from '@/api/tmrev-api-v2';
-// import { useVoteTmrevReviewMutation } from '@/redux/api/tmrev';
 import { feedReviewDetailsRoute, profileRoute, reviewFunctionRoute } from '@/constants/routes';
 import { formatDate } from '@/utils/common';
 import { FromLocation } from '@/models';
@@ -94,7 +94,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 		];
 	}, [reviewData]);
 
-	// const [voteReview] = useVoteTmrevReviewMutation();
+	const { voteUp, removeUp, voteDown, removeDown, isVotingUp, isVotingDown } = useReviewMutations();
 
 	const { currentUser } = useAuth({});
 
@@ -106,43 +106,73 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 	}, [reviewData, currentUser]);
 
 	const handleUpVote = async () => {
-		// BLOCKED: V2 API missing vote
-		console.log('Voting blocked in V2 migration');
-		/*
 		if (!reviewData || !currentUser) {
 			if (setLoginMessage) {
 				setLoginMessage(likeLoginPrompt);
 			}
 			return;
 		}
+
+		// Store previous state for rollback
+		const previousLiked = hasLiked;
+		const previousDisliked = hasDisliked;
+
 		try {
-			await voteReview({ reviewId: reviewData._id, vote: true }).unwrap();
-			setHasLiked(true);
-			setHasDisliked(false);
+			// If already upvoted, remove the upvote (unvote)
+			if (hasLiked) {
+				// Optimistic update
+				setHasLiked(false);
+				await removeUp({ reviewId: reviewData._id });
+			} else {
+				// If currently downvoted, remove downvote first
+				if (hasDisliked) {
+					setHasDisliked(false);
+					await removeDown({ reviewId: reviewData._id });
+				}
+				// Optimistic update then add upvote
+				setHasLiked(true);
+				await voteUp({ reviewId: reviewData._id });
+			}
 		} catch (error) {
-			console.error(error);
+			// Rollback on error
+			setHasLiked(previousLiked);
+			setHasDisliked(previousDisliked);
 		}
-		*/
 	};
 
 	const handleDownVote = async () => {
-		// BLOCKED: V2 API missing vote
-		console.log('Voting blocked in V2 migration');
-		/*
 		if (!reviewData || !currentUser) {
 			if (setLoginMessage) {
 				setLoginMessage(dislikeLoginPrompt);
 			}
 			return;
 		}
+
+		// Store previous state for rollback
+		const previousLiked = hasLiked;
+		const previousDisliked = hasDisliked;
+
 		try {
-			await voteReview({ reviewId: reviewData._id, vote: false }).unwrap();
-			setHasDisliked(true);
-			setHasLiked(false);
+			// If already downvoted, remove the downvote (unvote)
+			if (hasDisliked) {
+				// Optimistic update
+				setHasDisliked(false);
+				await removeDown({ reviewId: reviewData._id });
+			} else {
+				// If currently upvoted, remove upvote first
+				if (hasLiked) {
+					setHasLiked(false);
+					await removeUp({ reviewId: reviewData._id });
+				}
+				// Optimistic update then add downvote
+				setHasDisliked(true);
+				await voteDown({ reviewId: reviewData._id });
+			}
 		} catch (error) {
-			console.error(error);
+			// Rollback on error
+			setHasLiked(previousLiked);
+			setHasDisliked(previousDisliked);
 		}
-		*/
 	};
 
 	const handleComment = () => {
@@ -259,6 +289,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 							textColor="white"
 							onPress={handleUpVote}
 							icon={hasLiked ? 'thumb-up' : 'thumb-up-outline'}
+							disabled={isVotingUp || isVotingDown}
 						>
 							{reviewData.votes?.upVote.length || 0}
 						</Button>
@@ -266,6 +297,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
 							textColor="white"
 							onPress={handleDownVote}
 							icon={hasDisliked ? 'thumb-down' : 'thumb-down-outline'}
+							disabled={isVotingUp || isVotingDown}
 						>
 							{reviewData.votes?.downVote.length || 0}
 						</Button>
