@@ -2,11 +2,12 @@ import React from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { Canvas, RoundedRect, useCanvasRef } from '@shopify/react-native-skia';
 import { Text } from 'react-native-paper';
+import { HeatmapInsight } from '@/api/tmrev-api-v2';
 
 interface HeatmapProps {
 	customColor?: string;
 	noValueColor?: string;
-	heatmapData: number[];
+	heatmapData: HeatmapInsight[];
 	chartTitle?: string;
 }
 
@@ -18,9 +19,8 @@ const Heatmap: React.FC<HeatmapProps> = ({
 }) => {
 	const canvasRef = useCanvasRef();
 
-	const maxVal = Math.max(...heatmapData);
-	const minVal = Math.min(...heatmapData);
-
+	const maxVal = Math.max(...heatmapData.map((item) => item.count));
+	const minVal = Math.min(...heatmapData.map((item) => item.count));
 	const getColor = (value: number) => {
 		if (!value) return noValueColor;
 
@@ -52,7 +52,7 @@ const Heatmap: React.FC<HeatmapProps> = ({
 							y={rowIndex * (rectSize + spacing)}
 							width={rectSize}
 							height={rectSize}
-							color={getColor(value)}
+							color={getColor(value.count)}
 							r={4}
 						/>
 					);

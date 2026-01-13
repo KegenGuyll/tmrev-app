@@ -13,9 +13,13 @@ import React, { useState } from 'react';
 import { Link, useRouter } from 'expo-router';
 import useAuth from '@/hooks/useAuth';
 import { numberShortHand } from '@/utils/common';
-import { useFollowUserV2Mutation, useUnfollowUserV2Mutation } from '@/redux/api/tmrev';
-import { UserV2 } from '@/models/tmrev/user';
 import { FromLocation } from '@/models';
+import {
+	useUserControllerFollowUser,
+	useUserControllerUnfollowUser,
+	GenreInsightItem,
+	UserProfile,
+} from '@/api/tmrev-api-v2';
 import {
 	allListsRoute,
 	allReviewsRoute,
@@ -26,9 +30,9 @@ import {
 import { followUserLoginPrompt } from '@/constants/messages';
 
 type ProfileHeaderProps = {
-	user: UserV2;
+	user: UserProfile;
 	from?: FromLocation;
-	favoriteGenres?: string[];
+	favoriteGenres?: GenreInsightItem[];
 	setLoginMessage?: (message: string | null) => void;
 };
 
@@ -44,15 +48,15 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 	const [followerCount, setFollowerCount] = useState(user.followerCount);
 	const [snackbarVisible, setSnackbarVisible] = useState(false);
 	const { currentUser } = useAuth({});
-	const [followUser] = useFollowUserV2Mutation();
-	const [unfollowUser] = useUnfollowUserV2Mutation();
+	const { mutateAsync: followUser } = useUserControllerFollowUser();
+	const { mutateAsync: unfollowUser } = useUserControllerUnfollowUser();
 	const router = useRouter();
 
 	const handleFollowUser = async () => {
 		if (!currentUser) return;
 
 		try {
-			await followUser({ userUid: user.uuid });
+			await followUser({ id: user.uuid, data: {} });
 			setIsFollowing(true);
 			setFollowerCount(followerCount + 1);
 		} catch (error) {
@@ -64,7 +68,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 		if (!currentUser) return;
 
 		try {
-			await unfollowUser({ userUid: user.uuid });
+			await unfollowUser({ id: user.uuid, data: {} });
 			setIsFollowing(false);
 			setFollowerCount(followerCount - 1);
 		} catch (error) {
@@ -111,10 +115,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 							<Text variant="labelLarge">following</Text>
 						</View>
 					</Link>
-					{user.listCount > 0 ? (
+					{user.watchListCount > 0 ? (
 						<Link href={allListsRoute(from || 'profile', user.uuid)}>
 							<View style={styles.statDisplay}>
-								<Text>{numberShortHand(user.listCount)}</Text>
+								<Text>{numberShortHand(user.watchListCount)}</Text>
 								<Text variant="labelLarge">lists</Text>
 							</View>
 						</Link>
@@ -135,7 +139,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 						<Text variant="labelSmall">Favorite Genres:</Text>
 						<View style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
 							{favoriteGenres.map((genre) => (
-								<Chip key={genre}>{genre}</Chip>
+								<Chip key={genre.value}>{genre.label}</Chip>
 							))}
 						</View>
 					</View>

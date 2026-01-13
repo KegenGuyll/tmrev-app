@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 import { View } from 'react-native';
-import { TmrevReview } from '@/models/tmrev';
 import RadarChart from './CustomCharts/RadarChart';
+import { ReviewAggregated } from '@/api/tmrev-api-v2';
 
 type MovieRadarChartProps = {
-	reviews: TmrevReview[];
+	reviews: ReviewAggregated[];
 };
 
 const MovieRadarChart: React.FC<MovieRadarChartProps> = ({ reviews }: MovieRadarChartProps) => {

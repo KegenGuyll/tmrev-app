@@ -4,22 +4,26 @@ import { Button, Divider, Icon, Surface, Switch, Text, useTheme } from 'react-na
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useQueryClient } from '@tanstack/react-query';
 import { capitalize } from '@/utils/common';
 import { useGetMovieDetailsQuery } from '@/redux/api/tmdb/movieApi';
 import RatingSliderList, { Ratings } from '@/components/AddReview/RatingSliderList';
 import MultiLineInput from '@/components/Inputs/MultiLineInput';
 import { MoviePosterImage } from '@/components/MoviePoster';
 import formatDateYear from '@/utils/formatDateYear';
-import {
-	useAddTmrevReviewMutation,
-	useGetSingleReviewQuery,
-	useGetUserMovieReviewsQuery,
-	useUpdateTmrevReviewMutation,
-} from '@/redux/api/tmrev';
 import TextInput from '@/components/Inputs/TextInput';
 import { CreateTmrevReviewQuery } from '@/models/tmrev/review';
 import DatePicker from '@/components/Date/DatePicker';
-import useAuth from '@/hooks/useAuth';
+import {
+	getFeedControllerGetFeedQueryKey,
+	getReviewControllerFindByTmdbIdQueryKey,
+	getReviewControllerFindOneQueryKey,
+	getWatchListControllerFindOneQueryKey,
+	useReviewControllerCreate,
+	useReviewControllerFindByTmdbId,
+	useReviewControllerFindOne,
+	useReviewControllerUpdate,
+} from '@/api/tmrev-api-v2';
 
 type CreateReviewSearchParams = {
 	movieId: string;
@@ -42,6 +46,7 @@ const defaultRatings: Ratings = {
 };
 
 const CreateReview = () => {
+	const queryClient = useQueryClient();
 	const { movieId, content, reviewId } = useLocalSearchParams<CreateReviewSearchParams>();
 	const router = useRouter();
 	const [expanded, setExpanded] = useState(true);
@@ -49,34 +54,62 @@ const CreateReview = () => {
 	const [isPublic, setIsPublic] = useState(true);
 	const [reviewDate, setReviewDate] = useState(dayjs(new Date()).format('YYYY-MM-DD'));
 	const [updateReviewDate, setUpdateReviewDate] = useState(false);
-	const [createReview] = useAddTmrevReviewMutation();
-	const [updateReview] = useUpdateTmrevReviewMutation();
 	const [ratings, setRatings] = useState<Ratings>(defaultRatings);
 	const [note, setNote] = useState('');
 	const theme = useTheme();
-	const { currentUser } = useAuth({});
+
+	const createReviewMutation = useReviewControllerCreate({
+		mutation: {
+			onSuccess: async () => {
+				queryClient.invalidateQueries({
+					queryKey: getReviewControllerFindByTmdbIdQueryKey(Number(movieId) || 0),
+				});
+				queryClient.invalidateQueries({
+					queryKey: getReviewControllerFindOneQueryKey(reviewId),
+				});
+				queryClient.invalidateQueries({
+					queryKey: getWatchListControllerFindOneQueryKey(),
+					exact: false,
+				});
+				queryClient.invalidateQueries({
+					queryKey: getFeedControllerGetFeedQueryKey(),
+					exact: false,
+				});
+			},
+		},
+	});
+	const updateReviewMutation = useReviewControllerUpdate({
+		mutation: {
+			onSuccess: async () => {
+				queryClient.invalidateQueries({
+					queryKey: getFeedControllerGetFeedQueryKey(),
+					exact: false,
+				});
+			},
+		},
+	});
 
 	const { data: movieData } = useGetMovieDetailsQuery({
 		movie_id: Number(movieId) || 0,
 		params: {},
 	});
 
-	const { data: reviewData } = useGetSingleReviewQuery(
-		{ reviewId: reviewId || '' },
-		{ skip: content !== 'edit' || !reviewId }
-	);
-
-	const { data: userPrevReviewData } = useGetUserMovieReviewsQuery(
-		{
-			userId: currentUser?.uid || '',
-			query: {
-				pageNumber: 0,
-				pageSize: 100,
-				textSearch: movieData?.title,
-				sort_by: 'reviewedDate.desc',
-			},
+	const { data: reviewData } = useReviewControllerFindOne(reviewId!, {
+		query: {
+			enabled: content === 'edit' && !!reviewId,
+			queryKey: getReviewControllerFindOneQueryKey(reviewId),
 		},
-		{ skip: !currentUser || content === 'edit' || !movieData?.title }
+	});
+
+	const { data: userPrevReviewData } = useReviewControllerFindByTmdbId(
+		Number(movieId),
+		{},
+		{
+			query: {
+				enabled: !!movieId || content === 'edit',
+				queryKey: getReviewControllerFindByTmdbIdQueryKey(Number(movieId) || 0),
+			},
+		}
 	);
 
 	const selectedMovieData = useMemo(() => movieData, [movieData]);
@@ -85,22 +118,22 @@ const CreateReview = () => {
 		if (!reviewData) return;
 
 		setRatings({
-			plot: reviewData.body?.advancedScore?.plot || 0,
-			theme: reviewData.body?.advancedScore?.theme || 0,
-			climax: reviewData.body?.advancedScore?.climax || 0,
-			ending: reviewData.body?.advancedScore?.ending || 0,
-			acting: reviewData.body?.advancedScore?.acting || 0,
-			characters: reviewData.body?.advancedScore?.characters || 0,
-			music: reviewData.body?.advancedScore?.music || 0,
-			cinematography: reviewData.body?.advancedScore?.cinematography || 0,
-			visuals: reviewData.body?.advancedScore?.visuals || 0,
-			personalScore: reviewData.body?.advancedScore?.personalScore || 0,
+			plot: reviewData.advancedScore?.plot || 0,
+			theme: reviewData.advancedScore?.theme || 0,
+			climax: reviewData.advancedScore?.climax || 0,
+			ending: reviewData.advancedScore?.ending || 0,
+			acting: reviewData.advancedScore?.acting || 0,
+			characters: reviewData.advancedScore?.characters || 0,
+			music: reviewData.advancedScore?.music || 0,
+			cinematography: reviewData.advancedScore?.cinematography || 0,
+			visuals: reviewData.advancedScore?.visuals || 0,
+			personalScore: reviewData.advancedScore?.personalScore || 0,
 		});
 
-		setTitle(reviewData.body?.title || '');
-		setNote(reviewData.body?.notes || '');
-		setIsPublic(reviewData.body?.public || true);
-		setReviewDate(dayjs(reviewData.body?.reviewedDate).format('YYYY-MM-DD'));
+		setTitle(reviewData.title || '');
+		setNote(reviewData.notes || '');
+		setIsPublic(reviewData.public || true);
+		setReviewDate(dayjs(reviewData.reviewedDate).format('YYYY-MM-DD'));
 	}, [reviewData]);
 
 	useEffect(() => {
@@ -139,9 +172,14 @@ const CreateReview = () => {
 				};
 
 				if (content === 'edit') {
-					await updateReview(review).unwrap();
+					await updateReviewMutation.mutateAsync({
+						id: reviewId || '',
+						data: review,
+					});
 				} else {
-					await createReview(review).unwrap();
+					await createReviewMutation.mutateAsync({
+						data: review,
+					});
 				}
 
 				resetAllValues();
@@ -172,7 +210,7 @@ const CreateReview = () => {
 							padding: 16,
 						}}
 					>
-						{userPrevReviewData && userPrevReviewData?.body?.totalCount > 0 && (
+						{userPrevReviewData && (userPrevReviewData?.totalCount || 0) > 0 && (
 							<Surface
 								style={{
 									padding: 8,
@@ -186,7 +224,7 @@ const CreateReview = () => {
 							>
 								<Icon source="chart-timeline-variant-shimmer" size={20} />
 								<Text variant="labelLarge">
-									You&apos;ve reviewed this movie {userPrevReviewData?.body.totalCount} times before
+									You&apos;ve reviewed this movie {userPrevReviewData?.totalCount} times before
 								</Text>
 							</Surface>
 						)}

@@ -2,34 +2,36 @@ import { Stack, useRouter } from 'expo-router';
 import { View, StyleSheet } from 'react-native';
 import { Button, Divider, TextInput, Text } from 'react-native-paper';
 import React, { useEffect, useMemo, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import useAuth from '@/hooks/useAuth';
 import {
-	useGetUserQuery,
-	useIsUsernameAvailableQuery,
-	useUpdateUserMutation,
-} from '@/redux/api/tmrev';
-import useDebounce from '@/hooks/useDebounce';
+	getUserControllerFindOneQueryKey,
+	useUserControllerFindOne,
+	useUserControllerUpdate,
+} from '@/api/tmrev-api-v2/endpoints';
 
 const EditProfile = () => {
 	const { currentUser } = useAuth({});
-	const { data } = useGetUserQuery(
-		{ uid: currentUser?.uid as string },
-		{ skip: !currentUser || !currentUser.uid }
-	);
+	const { data } = useUserControllerFindOne(currentUser?.uid as string, {
+		query: { enabled: !!currentUser?.uid },
+	});
 
 	const router = useRouter();
-	const [updateUser] = useUpdateUserMutation();
+	const queryClient = useQueryClient();
+	const { mutateAsync: updateUser } = useUserControllerUpdate({
+		mutation: {
+			onSuccess: () => {
+				queryClient.invalidateQueries({
+					queryKey: getUserControllerFindOneQueryKey(currentUser?.uid),
+				});
+			},
+		},
+	});
 
 	const [form, setForm] = useState({
 		username: data?.username || '',
 		location: data?.location || '',
 		bio: data?.bio || '',
-	});
-
-	const debouncedUsername = useDebounce(form.username, 200);
-
-	const { data: isUsernameAvailableData } = useIsUsernameAvailableQuery(debouncedUsername, {
-		skip: !debouncedUsername,
 	});
 
 	const doesUsernameMeetRequirements = useMemo(
@@ -38,11 +40,13 @@ const EditProfile = () => {
 	);
 
 	useEffect(() => {
-		setForm({
-			username: data?.username || '',
-			location: data?.location || '',
-			bio: data?.bio || '',
-		});
+		if (data) {
+			setForm({
+				username: data.username || '',
+				location: data.location || '',
+				bio: data.bio || '',
+			});
+		}
 	}, [data]);
 
 	const handleFormChange = (key: string, value: string) => {
@@ -53,13 +57,13 @@ const EditProfile = () => {
 		if (!currentUser || !form.username) return;
 
 		try {
-			const token = await currentUser.getIdToken();
-
 			await updateUser({
-				authToken: token,
-				username: form.username,
-				location: form.location,
-				bio: form.bio,
+				id: currentUser.uid,
+				data: {
+					username: form.username,
+					location: form.location,
+					bio: form.bio,
+				},
 			});
 
 			router.dismiss(2);
@@ -76,15 +80,12 @@ const EditProfile = () => {
 			<View style={styles.container}>
 				<View>
 					<TextInput
-						error={!isUsernameAvailableData?.isAvailable || !doesUsernameMeetRequirements}
+						error={!doesUsernameMeetRequirements}
 						mode="outlined"
 						label="Username"
 						onChange={(e) => handleFormChange('username', e.nativeEvent.text)}
 						value={form.username}
 					/>
-					{isUsernameAvailableData?.success && !isUsernameAvailableData?.isAvailable && (
-						<Text variant="labelMedium">Username is already taken</Text>
-					)}
 					{!doesUsernameMeetRequirements && (
 						<Text variant="labelMedium">Username must be between 5 and 15 characters</Text>
 					)}

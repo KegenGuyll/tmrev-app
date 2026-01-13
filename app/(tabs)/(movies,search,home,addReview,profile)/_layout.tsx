@@ -5,8 +5,8 @@ import { Badge, IconButton } from 'react-native-paper';
 import { View } from 'react-native';
 import { notificationsRoute } from '@/constants/routes';
 import { FromLocation } from '@/models';
-import { useGetNotificationCountQuery } from '@/redux/api/tmrev';
 import useAuth from '@/hooks/useAuth';
+import { useNotificationControllerGetCount } from '@/api/tmrev-api-v2';
 
 type DynamicLayoutProps = {
 	segment: string;
@@ -34,8 +34,10 @@ const DynamicLayout = ({ segment }: DynamicLayoutProps) => {
 
 	const { currentUser } = useAuth({});
 
-	const { data: notificationCountData } = useGetNotificationCountQuery(undefined, {
-		skip: !currentUser,
+	const { data: notificationCountData } = useNotificationControllerGetCount(undefined, {
+		query: {
+			enabled: !!currentUser,
+		},
 	});
 
 	return (
@@ -53,10 +55,10 @@ const DynamicLayout = ({ segment }: DynamicLayoutProps) => {
 								onPress={() => router.navigate(notificationsRoute(segment as FromLocation))}
 								icon="bell-outline"
 							/>
-							{!!notificationCountData?.body && (
+							{!!notificationCountData && (
 								<View style={{ position: 'absolute', top: 0, right: 0 }}>
-									<Badge visible={notificationCountData.body > 0} size={20}>
-										{notificationCountData.body}
+									<Badge visible={(notificationCountData?.count || 0) > 0} size={20}>
+										{notificationCountData.count}
 									</Badge>
 								</View>
 							)}

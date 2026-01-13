@@ -2,11 +2,11 @@ import { Chip, Divider, Text } from 'react-native-paper';
 import { Image, View } from 'react-native';
 import { Link } from 'expo-router';
 import dayjs from 'dayjs';
-import { TmrevReview } from '@/models/tmrev';
+import { ReviewAggregated } from '@/api/tmrev-api-v2';
 import { formatDate } from '@/utils/common';
 
 type MovieReviewProps = {
-	review: TmrevReview;
+	review: ReviewAggregated;
 	from: string;
 };
 

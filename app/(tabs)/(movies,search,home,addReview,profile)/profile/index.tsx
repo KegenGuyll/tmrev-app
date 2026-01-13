@@ -5,16 +5,16 @@ import React, { useEffect, useState } from 'react';
 import auth from '@react-native-firebase/auth';
 import useAuth from '@/hooks/useAuth';
 import ProfileHeader from '@/components/Profile/ProfileHeader';
-import {
-	useGetGenreInsightsQuery,
-	useGetUserMovieActivityInsightsQuery,
-	useGetV2UserQuery,
-} from '@/redux/api/tmrev';
 import ProfileNavigation from '@/components/Profile/ProfileListNavigationt';
 import ProfilePinnedMovies from '@/components/Profile/ProfilePinnedMovies';
 import { loginRoute, profileSettingsRoute, signupRoute } from '@/constants/routes';
 import BarChart from '@/components/CustomCharts/BarChart';
 import Heatmap from '@/components/CustomCharts/Heatmap';
+import {
+	useInsightControllerGetGenreInsights,
+	useInsightControllerGetHeatmapInsights,
+	useUserControllerFindOne,
+} from '@/api/tmrev-api-v2';
 
 const days = 60;
 
@@ -31,20 +31,23 @@ const Profile = () => {
 		isLoading,
 		refetch,
 		error: userError,
-	} = useGetV2UserQuery(
-		{ uid: currentUser?.uid as string },
-		{ skip: !currentUser || !currentUser.uid }
-	);
-	const { data: insightData, refetch: refetchInsights } = useGetGenreInsightsQuery(
+	} = useUserControllerFindOne(currentUser?.uid as string, {
+		query: { enabled: !!currentUser?.uid },
+	});
+
+	const { data: insightData, refetch: refetchInsights } = useInsightControllerGetGenreInsights(
 		currentUser?.uid as string,
 		{
-			skip: !currentUser || !currentUser.uid,
+			query: { enabled: !!currentUser?.uid },
 		}
 	);
 
-	const { data: heatmapData, refetch: refetchHeatMap } = useGetUserMovieActivityInsightsQuery(
-		{ userId: currentUser?.uid as string, days },
-		{ skip: !currentUser || !currentUser.uid }
+	const { data: heatmapData, refetch: refetchHeatMap } = useInsightControllerGetHeatmapInsights(
+		currentUser?.uid as string,
+		{ days },
+		{
+			query: { enabled: !!currentUser?.uid },
+		}
 	);
 
 	useEffect(() => {
@@ -57,9 +60,9 @@ const Profile = () => {
 
 	const handleRefresh = async () => {
 		setRefreshing(true);
-		await refetchInsights().unwrap();
-		await refetchHeatMap().unwrap();
-		await refetch().unwrap();
+		await refetchInsights();
+		await refetchHeatMap();
+		await refetch();
 		setRefreshing(false);
 	};
 
@@ -91,7 +94,7 @@ const Profile = () => {
 		<>
 			<Stack.Screen
 				options={{
-					title: data.body.username,
+					title: data.username,
 					headerRight: () => (
 						<IconButton
 							onPress={() => router.navigate(profileSettingsRoute('profile', currentUser.uid))}
@@ -110,28 +113,28 @@ const Profile = () => {
 					<View style={{ gap: 16 }}>
 						<View>
 							<ProfileHeader
-								favoriteGenres={insightData?.data.favoriteGenres}
+								favoriteGenres={insightData?.mostReviewedGenres || []}
 								from="profile"
-								user={data.body}
+								user={data}
 							/>
 							<ProfileNavigation
 								from="profile"
 								profileId={currentUser.uid}
-								listCount={data.body.listCount}
-								reviewCount={data.body.reviewCount}
-								watchedCount={data.body.watchedCount}
+								listCount={data.watchListCount}
+								reviewCount={data.reviewCount}
+								watchedCount={data.watchedCount}
 							/>
 						</View>
 						<View
 							style={{ paddingHorizontal: 8, display: 'flex', flexDirection: 'column', gap: 16 }}
 						>
-							{insightData && !!insightData.data.mostReviewedGenres.length && (
+							{insightData && !!insightData.mostReviewedGenres.length && (
 								<BarChart
 									chartTitle="Most Reviewed Genres"
 									barLabelColor="black"
 									barColor={theme.colors.primary}
-									data={insightData?.data.mostReviewedGenres}
-									canvasHeight={insightData.data.mostReviewedGenres.length * 38}
+									data={insightData?.mostReviewedGenres}
+									canvasHeight={insightData.mostReviewedGenres.length * 38}
 								/>
 							)}
 							<View style={{ height: 150, width: '100%', paddingTop: 16, paddingBottom: 8 }}>
@@ -139,7 +142,7 @@ const Profile = () => {
 									chartTitle={`Movie Reviews (${days} days)`}
 									customColor={theme.colors.inversePrimary}
 									noValueColor={theme.colors.background}
-									heatmapData={heatmapData?.data || []}
+									heatmapData={heatmapData || []}
 								/>
 							</View>
 							<ProfilePinnedMovies

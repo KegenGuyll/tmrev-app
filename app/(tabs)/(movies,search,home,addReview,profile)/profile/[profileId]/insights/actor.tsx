@@ -4,9 +4,9 @@ import { Text } from 'react-native-paper';
 import { FlatGrid } from 'react-native-super-grid';
 import { useState } from 'react';
 import { FromLocation } from '@/models';
-import { useGetActorInsightsQuery } from '@/redux/api/tmrev';
 import imageUrl from '@/utils/imageUrl';
 import { personDetailsRoute } from '@/constants/routes';
+import { useInsightControllerGetActorInsights } from '@/api/tmrev-api-v2';
 
 type InsightsActorSearchParams = {
 	from: FromLocation;
@@ -17,11 +17,15 @@ const ActorInsights = () => {
 	const { from, profileId } = useLocalSearchParams<InsightsActorSearchParams>();
 	const [refreshing, setRefreshing] = useState(false);
 
-	const { data, isLoading, refetch } = useGetActorInsightsQuery(profileId!, { skip: !profileId });
+	const { data, isLoading, refetch } = useInsightControllerGetActorInsights(profileId!, {
+		query: {
+			enabled: !!profileId,
+		},
+	});
 
 	const handleRefresh = async () => {
 		setRefreshing(true);
-		await refetch().unwrap();
+		await refetch();
 		setRefreshing(false);
 	};
 
@@ -53,7 +57,7 @@ const ActorInsights = () => {
 					}
 					refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
 					spacing={16}
-					data={data.reviewedActorMapSorted}
+					data={data}
 					renderItem={({ item }) => (
 						<View
 							style={{

@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import useAuth from '@/hooks/useAuth';
 import { FromLocation } from '@/models';
-import { useGetPinnedMoviesQuery } from '@/redux/api/tmrev';
+import { useUserControllerGetPinnedReviews } from '@/api/tmrev-api-v2';
 import MovieReviewCard from '../MovieReviewCard';
 import { updatePinnedReviewsRoute } from '@/constants/routes';
 
@@ -22,7 +22,9 @@ const ProfilePinnedMovies: React.FC<ProfilePinnedMoviesProps> = ({
 }: ProfilePinnedMoviesProps) => {
 	const { currentUser } = useAuth({});
 	const router = useRouter();
-	const { data: pinnedData, refetch } = useGetPinnedMoviesQuery(profileId);
+	const { data: pinnedData, refetch } = useUserControllerGetPinnedReviews(profileId, {
+		query: { enabled: !!profileId },
+	});
 
 	useMemo(() => {
 		if (refreshing) {
@@ -53,11 +55,11 @@ const ProfilePinnedMovies: React.FC<ProfilePinnedMoviesProps> = ({
 					</View>
 				)}
 			</View>
-			{pinnedData?.body && !!pinnedData.body.length && (
+			{pinnedData && !!pinnedData.length && (
 				<View>
 					<FlatList
 						style={{ flex: 1 }}
-						data={pinnedData.body}
+						data={pinnedData}
 						showsHorizontalScrollIndicator={false}
 						contentContainerStyle={{ alignItems: 'stretch', alignContent: 'stretch' }}
 						renderItem={({ item }) => (
@@ -89,7 +91,7 @@ const ProfilePinnedMovies: React.FC<ProfilePinnedMoviesProps> = ({
 					/>
 				</View>
 			)}
-			{isCurrentUser && (!pinnedData?.body || !pinnedData.body.length) && (
+			{isCurrentUser && (!pinnedData || !pinnedData.length) && (
 				<TouchableRipple
 					style={styles.pinnedContainer}
 					onPress={() => router.navigate(updatePinnedReviewsRoute(from))}
@@ -97,7 +99,7 @@ const ProfilePinnedMovies: React.FC<ProfilePinnedMoviesProps> = ({
 					<Text variant="labelSmall">Click to pin your favorite reviews</Text>
 				</TouchableRipple>
 			)}
-			{!isCurrentUser && (!pinnedData?.body || !pinnedData.body.length) && (
+			{!isCurrentUser && (!pinnedData || !pinnedData.length) && (
 				<View style={styles.pinnedContainer}>
 					<Text variant="labelSmall">User has no pinned reviews :(</Text>
 				</View>

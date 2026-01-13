@@ -21,6 +21,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useBottomSheetModal } from '@gorhom/bottom-sheet';
+import { useQueryClient } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -36,11 +37,6 @@ import { formatRuntime, numberShortHand, roundWithMaxPrecision } from '@/utils/c
 import ISO3166_1 from '@/models/tmdb/ISO3166-1';
 import ActorPlaceholderImage from '@/components/ActorPlacholderImage';
 import { PosterPath } from '@/models';
-import {
-	useCreateWatchListMutation,
-	useGetAllReviewsQuery,
-	useGetReviewsByMovieIdQuery,
-} from '@/redux/api/tmrev';
 import MovieRadarChart from '@/components/MovieRadarChart';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import {
@@ -62,6 +58,13 @@ import useAuth from '@/hooks/useAuth';
 import MovieHorizontalGrid from '@/components/MovieHorizontalGrid';
 import { MovieCollectionPart } from '@/models/tmdb/movie/movieCollection';
 import WatchProviders from '@/components/MovieDetails/WatchProviders';
+import {
+	getReviewControllerFindByTmdbIdQueryKey,
+	getWatchedControllerGetMovieStatsQueryKey,
+	useReviewControllerFindByTmdbId,
+	useWatchedControllerGetMovieStats,
+	useWatchListControllerCreate,
+} from '@/api/tmrev-api-v2';
 
 type MovieDetailsParams = {
 	movieId: string;
@@ -78,8 +81,10 @@ const MovieDetails = () => {
 	const { movieId, from } = useLocalSearchParams<MovieDetailsParams>();
 	const router = useRouter();
 	const theme = useTheme();
+	const queryClient = useQueryClient();
 	const { dismissAll } = useBottomSheetModal();
-	const { data: movieReviews } = useGetAllReviewsQuery({ movie_id: Number(movieId) });
+	const { data: movieReviews } = useReviewControllerFindByTmdbId(Number(movieId));
+	const { data: watchedStats } = useWatchedControllerGetMovieStats(Number(movieId));
 	const [selectedMovie, setSelectedMovie] = useState<MovieGeneral | null>(null);
 	const [showAddMovieToListModal, setShowAddMovieToListModal] = useState(false);
 	const [snackBarMessage, setSnackBarMessage] = useState<string | null>(null);
@@ -87,7 +92,7 @@ const MovieDetails = () => {
 	const [successfulListClone, setSuccessfulListClone] = useState<string | null>(null);
 	const [isRefreshing, setIsRefreshing] = useState(false);
 
-	const [createWatchList] = useCreateWatchListMutation();
+	const createWatchListMutation = useWatchListControllerCreate();
 
 	const { currentUser } = useAuth({});
 
@@ -114,15 +119,6 @@ const MovieDetails = () => {
 		}
 	);
 
-	const { data: movieReviewsData, refetch: movieReviewsRefetch } = useGetReviewsByMovieIdQuery({
-		movieId: Number(movieId),
-		query: {
-			pageNumber: 0,
-			pageSize: 1,
-			sort_by: 'createdAt.desc',
-		},
-	});
-
 	const { data: movieReleaseDates, refetch: movieReleaseDatesRefetch } =
 		useGetMovieReleaseDatesQuery({
 			movie_id: Number(movieId),
@@ -135,13 +131,22 @@ const MovieDetails = () => {
 
 	const onRefresh = async () => {
 		setIsRefreshing(true);
+
 		await Promise.all([
 			movieDataRefetch(),
-			movieCollectionRefetch(),
-			movieReviewsRefetch(),
 			movieReleaseDatesRefetch(),
 			movieCreditsRefetch(),
+			queryClient.invalidateQueries({
+				queryKey: getReviewControllerFindByTmdbIdQueryKey(Number(movieId)),
+				type: 'active',
+			}),
+			queryClient.invalidateQueries({
+				queryKey: getWatchedControllerGetMovieStatsQueryKey(Number(movieId)),
+				type: 'active',
+			}),
+			movieData?.belongs_to_collection?.id ? movieCollectionRefetch() : Promise.resolve(),
 		]);
+
 		setIsRefreshing(false);
 	};
 
@@ -181,21 +186,23 @@ const MovieDetails = () => {
 
 		if (!movieCollection) return;
 
-		const response = await createWatchList({
-			description: movieCollection.overview || '',
-			title: movieCollection.name || '',
-			public: true,
-			tags: [],
-			movies: movieCollection.parts
-				.filter((m) => m.release_date)
-				.sort(sortByReleaseDate)
-				.map((m, i) => ({
-					order: i,
-					tmdbID: m.id,
-				})),
-		}).unwrap();
+		const response = await createWatchListMutation.mutateAsync({
+			data: {
+				description: movieCollection.overview || '',
+				title: movieCollection.name || '',
+				public: true,
+				tags: [],
+				movies: movieCollection.parts
+					.filter((m) => m.release_date)
+					.sort(sortByReleaseDate)
+					.map((m, i) => ({
+						order: i,
+						tmdbID: m.id,
+					})),
+			},
+		});
 
-		setSuccessfulListClone(response._id);
+		setSuccessfulListClone((response as any)._id);
 	};
 
 	const handleAddToList = () => {
@@ -209,7 +216,7 @@ const MovieDetails = () => {
 		router.push(addToListRoute(from || 'movies', movieId));
 	};
 
-	if (movieDataIsFetching || movieDataIsLoading || !movieData || !movieReviewsData) {
+	if (movieDataIsFetching || movieDataIsLoading || !movieData || !movieReviews) {
 		return (
 			<>
 				<Stack.Screen options={{ headerShown: true }} />
@@ -273,11 +280,11 @@ const MovieDetails = () => {
 							WatchList
 						</Button>
 					</View>
-					{movieReviews && (
+					{watchedStats && (
 						<WatchedMovie
 							movieId={Number(movieId!)}
-							likes={movieReviews?.body.likes}
-							dislikes={movieReviews?.body.dislikes}
+							likes={watchedStats.totalLikes}
+							dislikes={watchedStats.totalDislikes}
 							setLoginMessage={setLoginMessage}
 						/>
 					)}
@@ -292,9 +299,9 @@ const MovieDetails = () => {
 							gap: 8,
 						}}
 					>
-						{movieReviews?.body.avgScore && (
+						{movieReviews?.averagedReviewScore && (
 							<Chip icon="star">
-								<Text>{roundWithMaxPrecision(movieReviews?.body.avgScore?.totalScore, 1)}</Text>
+								<Text>{roundWithMaxPrecision(movieReviews?.averagedReviewScore, 1)}</Text>
 							</Chip>
 						)}
 						{movieData.budget ? (
@@ -345,18 +352,16 @@ const MovieDetails = () => {
 								gap: 4,
 							}}
 						>
-							{movieReviewsData?.body.totalCount > 0 ? (
+							{(movieReviews?.totalCount || 0) > 0 ? (
 								<>
 									<Text variant="labelLarge">Reviews</Text>
-									<Text variant="bodyMedium">
-										{numberShortHand(movieReviewsData?.body.totalCount)}
-									</Text>
+									<Text variant="bodyMedium">{numberShortHand(movieReviews?.totalCount || 0)}</Text>
 								</>
 							) : (
 								<Text variant="labelLarge">Be the first to review!</Text>
 							)}
 						</View>
-						{movieReviewsData?.body.reviews.map((review) => (
+						{(movieReviews?.results || []).map((review) => (
 							<TouchableOpacity
 								key={review._id}
 								onPress={() =>
@@ -422,7 +427,7 @@ const MovieDetails = () => {
 								</View> */}
 							</TouchableOpacity>
 						))}
-						{movieReviewsData?.body.totalCount === 0 && currentUser && (
+						{movieReviews?.totalCount === 0 && currentUser && (
 							<View style={{ display: 'flex', flexDirection: 'row', gap: 8, alignItems: 'center' }}>
 								<Image
 									style={{ width: 50, height: 50, borderRadius: 100 }}
@@ -456,8 +461,8 @@ const MovieDetails = () => {
 							ADD TO LIST
 						</Button>
 					</View> */}
-					{!!movieReviews?.body.reviews.length && (
-						<MovieRadarChart reviews={movieReviews?.body.reviews || []} />
+					{!!movieReviews?.results?.length && (
+						<MovieRadarChart reviews={movieReviews?.results || []} />
 					)}
 					{movieCollection && (
 						<View style={{ flex: 1, gap: 4 }}>

@@ -6,8 +6,8 @@ import { Platform, View } from 'react-native';
 import { useState } from 'react';
 import { loggedInProfileRoute } from '@/constants/routes';
 import useAuth from '@/hooks/useAuth';
-import { useIsUsernameAvailableQuery } from '@/redux/api/tmrev';
 import useDebounce from '@/hooks/useDebounce';
+import { useUserControllerIsUsernameAvailable } from '@/api/tmrev-api-v2';
 
 const Signup: React.FC = () => {
 	const router = useRouter();
@@ -16,12 +16,14 @@ const Signup: React.FC = () => {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
-	const [errorMessage, setErrorMessage] = useState<string | null>('');
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
 	const debouncedUsername = useDebounce(username, 200);
 
-	const { data: isUsernameAvailable } = useIsUsernameAvailableQuery(debouncedUsername, {
-		skip: !debouncedUsername,
+	const { data: isUsernameAvailable } = useUserControllerIsUsernameAvailable(debouncedUsername, {
+		query: {
+			enabled: !!debouncedUsername,
+		},
 	});
 
 	const doesUsernameMeetRequirements = username.length >= 5 && username.length <= 15;
@@ -53,13 +55,13 @@ const Signup: React.FC = () => {
 				<View style={{ gap: 8 }}>
 					<View>
 						<TextInput
-							error={!isUsernameAvailable?.isAvailable || !doesUsernameMeetRequirements}
+							error={!isUsernameAvailable?.available || !doesUsernameMeetRequirements}
 							value={username}
 							onChangeText={setUsername}
 							label="Username"
 							mode="outlined"
 						/>
-						{isUsernameAvailable?.success && !isUsernameAvailable?.isAvailable && (
+						{!isUsernameAvailable?.available && (
 							<Text variant="labelMedium">Username is already taken</Text>
 						)}
 						{!doesUsernameMeetRequirements && (

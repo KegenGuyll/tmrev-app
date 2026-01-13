@@ -8,19 +8,19 @@ import {
 	Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Text, Divider, Button, Snackbar, IconButton, Menu } from 'react-native-paper';
+import { Text, Divider, Button, Snackbar, IconButton, Menu, Avatar } from 'react-native-paper';
 import dayjs from 'dayjs';
 import React, { useEffect, useMemo, useState } from 'react';
 import useAuth from '@/hooks/useAuth';
-import { CommentWithUser } from '@/models/tmrev/comments';
+import { CommentResponseDto } from '@/api/tmrev-api-v2';
 import { feedReviewDetailsRoute, feedReviewRoute, profileRoute } from '@/constants/routes';
 import { numberShortHand } from '@/utils/common';
 import {
-	useDeleteCommentMutation,
-	useGetCommentDetailsQuery,
-	useGetSingleReviewQuery,
-	useVoteCommentMutation,
-} from '@/redux/api/tmrev';
+	useReviewControllerFindOne,
+	useCommentControllerFindOne,
+} from '@/api/tmrev-api-v2/endpoints';
+import useCommentMutations from '@/hooks/useCommentMutations';
+import useComments from '@/hooks/useComments';
 import { FromLocation } from '@/models';
 import ReviewCard from './reviewCard';
 import {
@@ -31,11 +31,12 @@ import {
 } from '@/constants/messages';
 
 type CommentCardProps = {
-	comment: CommentWithUser;
+	comment: CommentResponseDto;
 	displayMetaData?: boolean;
 	from: FromLocation;
 	isSubject?: boolean;
 	setLoginMessage?: (message: string | null) => void;
+	repliesCount?: number;
 };
 
 const CommentCard: React.FC<CommentCardProps> = ({
@@ -44,28 +45,41 @@ const CommentCard: React.FC<CommentCardProps> = ({
 	from,
 	isSubject,
 	setLoginMessage,
+	repliesCount = 0,
 }: CommentCardProps) => {
 	const styles = makeStyles();
 	const router = useRouter();
 	const [openMenu, setOpenMenu] = useState<boolean>(false);
 
-	const [voteComment] = useVoteCommentMutation();
-	const [deleteComment] = useDeleteCommentMutation();
+	const { voteComment, deleteComment } = useCommentMutations(comment.post.id);
 	const { currentUser } = useAuth({});
 
-	const { data: reviewData } = useGetSingleReviewQuery(
-		{ reviewId: comment.post.id },
-		{ skip: !comment.post.id || comment.post.type !== 'reviews' }
-	);
+	const { data: reviewData } = useReviewControllerFindOne(comment.post.id!, {
+		query: { enabled: !!comment.post.id && comment.post.type === 'reviews' },
+	});
 
-	const { data: commentDetails } = useGetCommentDetailsQuery(comment.post.id!, {
-		skip: !comment.post.id || comment.post.type !== 'comments',
+	const { data: parentCommentDetails } = useCommentControllerFindOne(comment.post.id!, {
+		query: { enabled: !!comment.post.id && comment.post.type === 'comments' },
+	});
+
+	const { totalCount: repliesTotal } = useComments({
+		postId: comment._id,
+		pageSize: 1,
+		enabled: displayMetaData,
 	});
 
 	const isCurrentUsersComment = useMemo(
-		() => currentUser?.uid === comment.user.uuid,
+		() => currentUser?.uid === comment.author.uuid,
 		[currentUser, comment]
 	);
+
+	const authorInitials = useMemo(() => {
+		const name = comment.author?.username || '';
+		const parts = name.trim().split(/\s+/).filter(Boolean);
+		if (!parts.length) return '?';
+		if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+		return (parts[0][0] + parts[1][0]).toUpperCase();
+	}, [comment.author?.username]);
 
 	const [hasLiked, setHasLiked] = useState<boolean>(false);
 	const [hasDisliked, setHasDisliked] = useState<boolean>(false);
@@ -74,8 +88,8 @@ const CommentCard: React.FC<CommentCardProps> = ({
 	useEffect(() => {
 		if (!currentUser || !comment.votes) return;
 
-		setHasLiked(comment.votes!.upVote.includes(currentUser.uid));
-		setHasDisliked(comment.votes!.downVote.includes(currentUser.uid));
+		setHasLiked(comment.hasUpvoted);
+		setHasDisliked(comment.hasDownvoted);
 	}, [comment, currentUser]);
 
 	const handleComment = () => {
@@ -97,7 +111,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
 			return;
 		}
 		try {
-			await voteComment({ commentId: comment._id, vote: true }).unwrap();
+			await voteComment({ commentId: comment._id, voteType: 'up' });
 			setHasLiked(true);
 			setHasDisliked(false);
 		} catch (error) {
@@ -113,7 +127,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
 			return;
 		}
 		try {
-			await voteComment({ commentId: comment._id, vote: false }).unwrap();
+			await voteComment({ commentId: comment._id, voteType: 'down' });
 			setHasDisliked(true);
 			setHasLiked(false);
 		} catch (error) {
@@ -133,7 +147,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
 					style: 'destructive',
 					text: 'Delete',
 					onPress: async () => {
-						await deleteComment(comment._id).unwrap();
+						await deleteComment({ commentId: comment._id });
 					},
 				},
 			]);
@@ -157,10 +171,10 @@ const CommentCard: React.FC<CommentCardProps> = ({
 					/>
 				</View>
 			)}
-			{isSubject && commentDetails && (
+			{isSubject && parentCommentDetails && (
 				<View>
 					<CommentCard
-						comment={commentDetails.body}
+						comment={parentCommentDetails}
 						displayMetaData={false}
 						from={from}
 						isSubject
@@ -183,20 +197,24 @@ const CommentCard: React.FC<CommentCardProps> = ({
 						<View style={{ flex: 1, gap: 16 }}>
 							<View style={[styles.flexRow, { gap: 8, alignItems: 'center' }]}>
 								<TouchableWithoutFeedback
-									onPress={() => router.navigate(profileRoute('home', comment.user.uuid))}
+									onPress={() => router.navigate(profileRoute('home', comment.author.uuid))}
 								>
-									<Image
-										source={{ uri: comment.user.photoUrl }}
-										height={50}
-										width={50}
-										style={{ borderRadius: 100 }}
-									/>
+									{comment.author?.photoUrl ? (
+										<Image
+											source={{ uri: comment.author.photoUrl }}
+											height={50}
+											width={50}
+											style={{ borderRadius: 100 }}
+										/>
+									) : (
+										<Avatar.Text size={50} label={authorInitials} />
+									)}
 								</TouchableWithoutFeedback>
 								<View
 									style={[styles.flexRow, { alignItems: 'flex-start', flex: 1, width: '100%' }]}
 								>
 									<View style={[styles.flexColumn, { flexGrow: 1 }]}>
-										<Text variant="labelLarge">{comment.user.username}</Text>
+										<Text variant="labelLarge">{comment.author.username}</Text>
 										<Text variant="labelSmall">
 											{dayjs(comment.createdAt).format('hh:mm A · MMM DD, YYYY')}
 										</Text>
@@ -241,14 +259,14 @@ const CommentCard: React.FC<CommentCardProps> = ({
 									textColor="white"
 									icon={hasLiked ? 'thumb-up' : 'thumb-up-outline'}
 								>
-									{comment.votes.upVote.length}
+									{comment.votes.upVote}
 								</Button>
 								<Button
 									onPress={handleDownVote}
 									textColor="white"
 									icon={hasDisliked ? 'thumb-down' : 'thumb-down-outline'}
 								>
-									{comment.votes.downVote.length}
+									{comment.votes.downVote}
 								</Button>
 								<Button
 									onPress={handleComment}
@@ -256,7 +274,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
 									icon="comment-outline"
 									style={[styles.flexRow, { alignItems: 'center' }]}
 								>
-									{numberShortHand(comment.replies)}
+									{numberShortHand(repliesTotal || repliesCount)}
 								</Button>
 
 								<Button disabled textColor="white" icon="share-outline">

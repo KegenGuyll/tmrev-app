@@ -6,7 +6,7 @@ import auth from '@react-native-firebase/auth';
 import React from 'react';
 import useAuth from '@/hooks/useAuth';
 import { homeRoute, profileSettingsNotificationsRoute } from '@/constants/routes';
-import { useDeleteUserMutation } from '@/redux/api/tmrev';
+import { useUserControllerRemove } from '@/api/tmrev-api-v2/endpoints';
 
 type ProfileSettingsParams = {
 	profileId: string;
@@ -16,7 +16,7 @@ const ProfileSettings = () => {
 	const { profileId } = useLocalSearchParams<ProfileSettingsParams>();
 	const router = useRouter();
 	const theme = useTheme();
-	const [deleteUser] = useDeleteUserMutation();
+	const { mutateAsync: deleteUser } = useUserControllerRemove();
 
 	const handleDeleteAlert = () => {
 		Alert.alert('Delete Account', 'Are you sure you want to delete your account?', [
@@ -55,7 +55,9 @@ const ProfileSettings = () => {
 			}
 		}
 
-		await deleteUser();
+		if (currentUser?.uid) {
+			await deleteUser({ id: currentUser.uid });
+		}
 
 		await auth().signOut();
 

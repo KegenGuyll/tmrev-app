@@ -13,7 +13,8 @@ import dayjs from 'dayjs';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import useAuth from '@/hooks/useAuth';
-import { FeedReviews } from '@/models/tmrev/feed';
+import useReviewMutations from '@/hooks/useReviewMutations';
+import { FeedItem } from '@/api/tmrev-api-v2/schemas';
 import MoviePoster from '@/components/MoviePoster';
 import {
 	FeedReviewContentTypes,
@@ -22,19 +23,13 @@ import {
 	profileRoute,
 	reviewFunctionRoute,
 } from '@/constants/routes';
-import { useVoteTmrevReviewMutation } from '@/redux/api/tmrev';
 import { formatDate } from '@/utils/common';
 import { FromLocation } from '@/models';
 import BarChart from '@/components/CustomCharts/BarChart';
-import {
-	commentLoginPrompt,
-	dislikeLoginPrompt,
-	errorPrompt,
-	likeLoginPrompt,
-} from '@/constants/messages';
+import { commentLoginPrompt, dislikeLoginPrompt, likeLoginPrompt } from '@/constants/messages';
 
 type FeedCardProps = {
-	review: FeedReviews;
+	review: FeedItem;
 	// eslint-disable-next-line react/no-unused-prop-types
 	contentType: FeedReviewContentTypes;
 	from: FromLocation;
@@ -47,12 +42,21 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from, setLoginMessage }: Fe
 
 	const { currentUser } = useAuth({});
 
-	const [hasLiked, setHasLiked] = useState<boolean>(false);
-	const [hasDisliked, setHasDisliked] = useState<boolean>(false);
+	const [hasLiked, setHasLiked] = useState<boolean>(review.hasUpvoted);
+	const [hasDisliked, setHasDisliked] = useState<boolean>(review.hasDownvoted);
 	const [snackBarMessage, setSnackBarMessage] = useState<string | null>(null);
 	const [showMenu, setShowMenu] = useState<boolean>(false);
 	const [showFullReview, setShowFullReview] = useState<boolean>(false);
 	const theme = useTheme();
+
+	const { voteUp, removeUp, voteDown, removeDown, isVotingUp, isVotingDown } = useReviewMutations();
+
+	useEffect(() => {
+		if (!review || !currentUser) return;
+
+		setHasLiked(review.hasUpvoted);
+		setHasDisliked(review.hasDownvoted);
+	}, [review, currentUser]);
 
 	const fullReviewData = useMemo(() => {
 		if (!review || !review.advancedScore) return [];
@@ -101,15 +105,6 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from, setLoginMessage }: Fe
 		];
 	}, [review]);
 
-	useEffect(() => {
-		if (!currentUser || !review.votes) return;
-
-		setHasLiked(review.votes.upVote.includes(currentUser.uid));
-		setHasDisliked(review.votes.downVote.includes(currentUser.uid));
-	}, [review.votes, currentUser]);
-
-	const [voteReview] = useVoteTmrevReviewMutation();
-
 	const handleComment = () => {
 		if (!currentUser) {
 			if (setLoginMessage) {
@@ -122,34 +117,72 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from, setLoginMessage }: Fe
 	};
 
 	const handleUpVote = async () => {
-		if (!currentUser) {
+		if (!review || !currentUser) {
 			if (setLoginMessage) {
 				setLoginMessage(likeLoginPrompt);
 			}
 			return;
 		}
+
+		// Store previous state for rollback
+		const previousLiked = hasLiked;
+		const previousDisliked = hasDisliked;
+
 		try {
-			await voteReview({ reviewId: review._id, vote: true }).unwrap();
-			setHasLiked(true);
-			setHasDisliked(false);
+			// If already upvoted, remove the upvote (unvote)
+			if (hasLiked) {
+				// Optimistic update
+				setHasLiked(false);
+				await removeUp({ reviewId: review._id });
+			} else {
+				// If currently downvoted, remove downvote first
+				if (hasDisliked) {
+					setHasDisliked(false);
+					await removeDown({ reviewId: review._id });
+				}
+				// Optimistic update then add upvote
+				setHasLiked(true);
+				await voteUp({ reviewId: review._id });
+			}
 		} catch (error) {
-			setSnackBarMessage(errorPrompt);
+			// Rollback on error
+			setHasLiked(previousLiked);
+			setHasDisliked(previousDisliked);
 		}
 	};
 
 	const handleDownVote = async () => {
-		if (!currentUser) {
+		if (!review || !currentUser) {
 			if (setLoginMessage) {
 				setLoginMessage(dislikeLoginPrompt);
 			}
 			return;
 		}
+
+		// Store previous state for rollback
+		const previousLiked = hasLiked;
+		const previousDisliked = hasDisliked;
+
 		try {
-			await voteReview({ reviewId: review._id, vote: false }).unwrap();
-			setHasDisliked(true);
-			setHasLiked(false);
+			// If already downvoted, remove the downvote (unvote)
+			if (hasDisliked) {
+				// Optimistic update
+				setHasDisliked(false);
+				await removeDown({ reviewId: review._id });
+			} else {
+				// If currently upvoted, remove upvote first
+				if (hasLiked) {
+					setHasLiked(false);
+					await removeUp({ reviewId: review._id });
+				}
+				// Optimistic update then add downvote
+				setHasDisliked(true);
+				await voteDown({ reviewId: review._id });
+			}
 		} catch (error) {
-			setSnackBarMessage(errorPrompt);
+			// Rollback on error
+			setHasLiked(previousLiked);
+			setHasDisliked(previousDisliked);
 		}
 	};
 
@@ -172,16 +205,27 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from, setLoginMessage }: Fe
 				<>
 					<View style={[styles.flexRow, { gap: 8, alignItems: 'center' }]}>
 						<TouchableHighlight
-							onPress={() => router.navigate(profileRoute('home', review.userDetails.uuid))}
+							onPress={() => router.navigate(profileRoute('home', review.profile.uuid))}
 							style={[styles.flexRow, { gap: 8, alignItems: 'center' }]}
 						>
-							<Image
-								source={{ uri: review.userDetails.photoUrl }}
-								style={{ width: 50, height: 50, borderRadius: 100 }}
-							/>
+							{review.profile.photoUrl ? (
+								<Image
+									source={{ uri: review.profile.photoUrl }}
+									style={{ width: 50, height: 50, borderRadius: 100 }}
+								/>
+							) : (
+								<View
+									style={{
+										width: 50,
+										height: 50,
+										borderRadius: 100,
+										backgroundColor: theme.colors.surfaceVariant,
+									}}
+								/>
+							)}
 						</TouchableHighlight>
 						<View style={styles.flexColumn}>
-							<Text variant="labelLarge">{review.userDetails.username}</Text>
+							<Text variant="labelLarge">{review.profile.username}</Text>
 							<Text variant="labelSmall">
 								{dayjs(formatDate(review.createdAt)).format('hh:mm A · MMM DD, YYYY')}
 							</Text>
@@ -239,25 +283,22 @@ const FeedCard: React.FC<FeedCardProps> = ({ review, from, setLoginMessage }: Fe
 							textColor="white"
 							onPress={handleUpVote}
 							icon={hasLiked ? 'thumb-up' : 'thumb-up-outline'}
+							disabled={isVotingUp || isVotingDown}
 						>
-							{review.votes!.upVote.length}
+							{review.votes.upVote}
 						</Button>
 						<Button
 							textColor="white"
 							onPress={handleDownVote}
 							icon={hasDisliked ? 'thumb-down' : 'thumb-down-outline'}
+							disabled={isVotingUp || isVotingDown}
 						>
-							{review.votes!.downVote.length}
+							{review.votes.downVote}
 						</Button>
 						<Button textColor="white" onPress={handleComment} icon="comment-outline">
-							{review.replies}
+							{review.commentCount}
 						</Button>
-						<Button
-							disabled
-							textColor="white"
-							onPress={() => console.log('share')}
-							icon="share-outline"
-						>
+						<Button disabled textColor="white" onPress={() => {}} icon="share-outline">
 							Share
 						</Button>
 					</View>

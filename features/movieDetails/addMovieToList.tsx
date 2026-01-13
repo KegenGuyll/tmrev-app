@@ -1,16 +1,26 @@
 /* eslint-disable react-native/no-color-literals */
-import { BottomSheetModal, BottomSheetVirtualizedList } from '@gorhom/bottom-sheet';
+import {
+	BottomSheetHandleProps,
+	BottomSheetModal,
+	BottomSheetVirtualizedList,
+} from '@gorhom/bottom-sheet';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Searchbar } from 'react-native-paper';
 import { RefreshControl, View } from 'react-native';
+import { useQueryClient } from '@tanstack/react-query';
 import useAuth from '@/hooks/useAuth';
-import { useAddMovieToWatchListMutation, useGetUserWatchListsQuery } from '@/redux/api/tmrev';
+import {
+	getWatchListControllerFindOneQueryKey,
+	getWatchListControllerGetUserWatchListsQueryKey,
+	useWatchListControllerGetUserWatchLists,
+	useWatchListControllerUpdate,
+} from '@/api/tmrev-api-v2/endpoints';
+import { WatchListControllerGetUserWatchListsParams } from '@/api/tmrev-api-v2/schemas/watchListControllerGetUserWatchListsParams';
 import { MovieGeneral } from '@/models/tmdb/movie/tmdbMovie';
 import CustomBackground from '@/components/CustomBottomSheetBackground';
 import MovieListItem from '@/components/MovieList/MovieListItem';
 import TitledHandledComponent from '@/components/BottomSheetModal/TitledHandledComponent';
 import CreateWatchListModal from '@/components/CreateWatchListModal';
-import { GetUserWatchListPayload } from '@/models/tmrev/watchList';
 import useDebounce from '@/hooks/useDebounce';
 
 type AddMovieToListProps = {
@@ -34,35 +44,42 @@ const AddMovieToList: React.FC<AddMovieToListProps> = ({
 	const [searchValue, setSearchValue] = useState('');
 	const [openCreateModal, setOpenCreateModal] = useState(false);
 	const bottomSheetModalAddMoviesRef = useRef<BottomSheetModal>(null);
-	const [page, setPage] = useState(0);
+	const [page, setPage] = useState(1);
 	const [refreshing, setRefreshing] = useState(false);
+	const queryClient = useQueryClient();
 
 	const { currentUser } = useAuth({});
 
 	const debouncedSearchTerm = useDebounce(searchValue, 500);
 
-	const query: GetUserWatchListPayload = useMemo(() => {
-		if (!currentUser) return { pageNumber: page, pageSize, sort_by: 'updatedAt.desc' };
+	const query = useMemo(() => {
+		if (!currentUser) return undefined;
+
+		const params: WatchListControllerGetUserWatchListsParams = {
+			pageNumber: page,
+			pageSize,
+			sortBy: 'updatedAt.desc',
+		};
 
 		if (debouncedSearchTerm) {
-			setPage(0);
-			return {
-				pageNumber: 0,
-				userId: currentUser?.uid,
-				pageSize,
-				textSearch: debouncedSearchTerm,
-				sort_by: 'updatedAt.desc',
-			};
+			params.textSearch = debouncedSearchTerm;
+			params.pageNumber = 1;
 		}
 
-		return { pageNumber: page, userId: currentUser?.uid, pageSize, sort_by: 'updatedAt.desc' };
+		return params;
 	}, [page, currentUser, debouncedSearchTerm]);
 
-	const { data, isLoading, isFetching } = useGetUserWatchListsQuery(query, {
-		skip: !currentUser,
-	});
+	const { data, isLoading, isFetching, refetch } = useWatchListControllerGetUserWatchLists(
+		currentUser?.uid || '',
+		query,
+		{
+			query: {
+				enabled: !!currentUser,
+			},
+		}
+	);
 
-	const [addMovie] = useAddMovieToWatchListMutation();
+	const { mutateAsync: updateWatchList } = useWatchListControllerUpdate();
 
 	useEffect(() => {
 		if (visible) {
@@ -73,18 +90,19 @@ const AddMovieToList: React.FC<AddMovieToListProps> = ({
 	}, [visible]);
 
 	const incrementPage = useCallback(() => {
-		if (page === data?.body.totalNumberOfPages) {
+		if (data?.totalNumberOfPages && page >= data.totalNumberOfPages) {
 			return;
 		}
 
-		if (isLoading) return;
+		if (isLoading || isFetching) return;
 
-		setPage(page + 1);
-	}, [data, page]);
+		setPage((prev) => prev + 1);
+	}, [data, page, isLoading, isFetching]);
 
 	const handleRefresh = async () => {
 		setRefreshing(true);
-		setPage(0);
+		setPage(1);
+		await refetch();
 		setRefreshing(false);
 	};
 
@@ -93,41 +111,82 @@ const AddMovieToList: React.FC<AddMovieToListProps> = ({
 			try {
 				if (!selectedMovie) return;
 
-				await addMovie({
-					data: {
-						id: selectedMovie.id,
+				const listToUpdate = data?.results?.find((l) => l._id === watchListId);
+
+				if (!listToUpdate) {
+					throw new Error('List not found');
+				}
+
+				const currentMovies = listToUpdate.movies || [];
+				if (
+					currentMovies.some((m: any) => {
+						const id = Number(m.tmdbID || m.id);
+						return id === selectedMovie.id;
+					})
+				) {
+					if (onError) onError('Movie already in list');
+					return;
+				}
+
+				const newMovies = [
+					...currentMovies.map((m: any, index: number) => ({
+						tmdbID: Number(m.tmdbID || m.id),
+						order: index,
+					})),
+					{
+						tmdbID: Number(selectedMovie.id),
+						order: currentMovies.length,
 					},
-					listId: watchListId,
-				}).unwrap();
+				];
+
+				await updateWatchList({
+					id: watchListId,
+					data: {
+						movies: newMovies,
+					},
+				});
+
+				// Invalidate the specific list detail query
+				queryClient.invalidateQueries({
+					queryKey: getWatchListControllerFindOneQueryKey(watchListId),
+				});
+				if (currentUser) {
+					queryClient.invalidateQueries({
+						queryKey: getWatchListControllerGetUserWatchListsQueryKey(currentUser.uid),
+					});
+				}
 
 				if (onSuccess) {
 					onSuccess();
 				}
 			} catch (error: any) {
 				if (onError) {
-					onError(
-						(error.data && error.data.error) || 'An error occurred while adding movie to list'
-					);
+					onError(error.response?.data?.error || 'An error occurred while adding movie to list');
 				}
 			} finally {
 				onDismiss();
 			}
 		},
-		[selectedMovie]
+		[selectedMovie, data, updateWatchList, queryClient, currentUser, onError, onSuccess, onDismiss]
+	);
+
+	const renderHandleComponent = useCallback(
+		(props: BottomSheetHandleProps) => (
+			<TitledHandledComponent
+				cancelButton={{ title: 'Cancel', onPress: onDismiss }}
+				submitButton={{ title: 'Create List', onPress: () => setOpenCreateModal(true) }}
+				title="Add to List"
+				{...props}
+			/>
+		),
+		[onDismiss]
 	);
 
 	return (
 		<>
 			<BottomSheetModal
 				stackBehavior="push"
-				handleComponent={({ ...props }) => (
-					<TitledHandledComponent
-						cancelButton={{ title: 'Cancel', onPress: onDismiss }}
-						submitButton={{ title: 'Create List', onPress: () => setOpenCreateModal(true) }}
-						title="Add to List"
-						{...props}
-					/>
-				)}
+				handleComponent={renderHandleComponent}
 				handleIndicatorStyle={{ backgroundColor: 'white' }}
 				backgroundComponent={CustomBackground}
 				ref={bottomSheetModalAddMoviesRef}
@@ -138,21 +197,24 @@ const AddMovieToList: React.FC<AddMovieToListProps> = ({
 					}
 				}}
 			>
-				{data && data.success && data.body && (
+				{data && (
 					<BottomSheetVirtualizedList
 						ListHeaderComponent={
 							<Searchbar
-								onChangeText={(text) => setSearchValue(text)}
+								onChangeText={(text) => {
+									setSearchValue(text);
+									setPage(1);
+								}}
 								value={searchValue}
 								placeholder="Search for list..."
 							/>
 						}
 						getItem={(d, index) => d[index]}
-						getItemCount={() => data.body.watchlists.length + data.body.emptyWatchlists.length}
+						getItemCount={() => data.results?.length || 0}
 						refreshControl={
 							<RefreshControl tintColor="white" refreshing={refreshing} onRefresh={handleRefresh} />
 						}
-						data={[...data.body.emptyWatchlists, ...data.body.watchlists]}
+						data={data.results || []}
 						contentContainerStyle={{ padding: 8 }}
 						renderItem={({ item }) => (
 							<MovieListItem
@@ -163,17 +225,7 @@ const AddMovieToList: React.FC<AddMovieToListProps> = ({
 						)}
 						keyExtractor={(item) => item._id}
 						onEndReached={incrementPage}
-						ListFooterComponent={() => {
-							if (isLoading || isFetching) {
-								return (
-									<View>
-										<ActivityIndicator />
-									</View>
-								);
-							}
-
-							return null;
-						}}
+						ListFooterComponent={<ListFooter isLoading={isLoading || isFetching} />}
 					/>
 				)}
 			</BottomSheetModal>
@@ -186,6 +238,18 @@ const AddMovieToList: React.FC<AddMovieToListProps> = ({
 			/>
 		</>
 	);
+};
+
+const ListFooter = ({ isLoading }: { isLoading: boolean }) => {
+	if (isLoading) {
+		return (
+			<View>
+				<ActivityIndicator />
+			</View>
+		);
+	}
+
+	return null;
 };
 
 export default AddMovieToList;

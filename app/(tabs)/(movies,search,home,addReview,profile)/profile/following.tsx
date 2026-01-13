@@ -6,13 +6,13 @@ import React, { useMemo, useState } from 'react';
 import { FlatList } from 'react-native-gesture-handler';
 import useAuth from '@/hooks/useAuth';
 import { FromLocation } from '@/models';
-import {
-	useFollowUserV2Mutation,
-	useGetFollowingV2Query,
-	useUnfollowUserV2Mutation,
-} from '@/redux/api/tmrev';
-import { BasicUserV2 } from '@/models/tmrev/user';
 import { profileRoute } from '@/constants/routes';
+import {
+	useUserControllerGetFollowing,
+	useUserControllerFollowUser,
+	useUserControllerUnfollowUser,
+	UserProfile,
+} from '@/api/tmrev-api-v2';
 import useDebounce from '@/hooks/useDebounce';
 
 type FollowerSearchParams = {
@@ -21,7 +21,7 @@ type FollowerSearchParams = {
 };
 
 type FollowerItemProps = {
-	item: BasicUserV2;
+	item: UserProfile;
 	isCurrentUser?: boolean;
 	from?: FromLocation;
 };
@@ -32,14 +32,14 @@ const FollowingItem: React.FC<FollowerItemProps> = ({
 	isCurrentUser,
 }: FollowerItemProps) => {
 	const [isFollowing, setIsFollowing] = useState<boolean>(true);
-	const [followUser] = useFollowUserV2Mutation();
-	const [unFollowUser] = useUnfollowUserV2Mutation();
+	const { mutateAsync: followUser } = useUserControllerFollowUser();
+	const { mutateAsync: unFollowUser } = useUserControllerUnfollowUser();
 
-	const handleFollowButton = () => {
+	const handleFollowButton = async () => {
 		if (isFollowing) {
-			unFollowUser({ userUid: item.uuid });
+			await unFollowUser({ id: item.uuid, data: {} });
 		} else {
-			followUser({ userUid: item.uuid });
+			await followUser({ id: item.uuid, data: {} });
 		}
 
 		setIsFollowing(!isFollowing);
@@ -83,21 +83,27 @@ const Following: React.FC = () => {
 
 	const debouncedSearchTerm = useDebounce(search, 500);
 
-	const { data, isLoading } = useGetFollowingV2Query(
-		{ uid: userId!, query: { search: debouncedSearchTerm } },
-		{ skip: !userId }
+	const { data, isLoading, isFetching } = useUserControllerGetFollowing(
+		userId!,
+		debouncedSearchTerm ? { search: debouncedSearchTerm } : undefined,
+		{
+			query: {
+				enabled: !!userId,
+				placeholderData: (previousData) => previousData,
+			},
+		}
 	);
 
 	const isCurrentUser = useMemo(() => currentUser?.uid === userId, [currentUser, userId]);
 
-	if (isLoading) {
+	if (isLoading && !data) {
 		return <Text>Loading...</Text>;
 	}
 
 	return (
 		<>
 			<Stack.Screen
-				options={{ title: `${data?.body.length} Following`, headerRight: () => null }}
+				options={{ title: `${data?.totalCount ?? 0} Following`, headerRight: () => null }}
 			/>
 			<View style={{ padding: 8, gap: 16 }}>
 				<Searchbar
@@ -109,7 +115,7 @@ const Following: React.FC = () => {
 				<Divider />
 				<Text variant="titleMedium">All Following</Text>
 				<FlatList
-					data={data?.body}
+					data={data?.results}
 					renderItem={({ item }) => (
 						<FollowingItem item={item} from={from} isCurrentUser={isCurrentUser} />
 					)}

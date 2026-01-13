@@ -1,26 +1,26 @@
 /* eslint-disable react/no-unstable-nested-components */
 import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { View, Alert, RefreshControl, StyleSheet } from 'react-native';
+import type { NavigationAction } from '@react-navigation/native';
 import { Button, Divider, IconButton, Menu, Snackbar, Text } from 'react-native-paper';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatGrid } from 'react-native-super-grid';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
-import dayjs from 'dayjs';
+import { useQueryClient } from '@tanstack/react-query';
 import useAuth from '@/hooks/useAuth';
 import { FromLocation } from '@/models';
 import {
-	useCreateWatchListMutation,
-	useDeleteWatchListMutation,
-	useGetWatchListInsightsQuery,
-	useUpdateWatchListMutation,
-} from '@/redux/api/tmrev';
+	getWatchListControllerFindOneQueryKey,
+	getWatchListControllerGetUserWatchListsQueryKey,
+	useWatchListControllerCreate,
+	useWatchListControllerFindOne,
+	useWatchListControllerRemove,
+	useWatchListControllerUpdate,
+} from '@/api/tmrev-api-v2/endpoints';
 import { MovieDetails } from '@/models/tmrev/review';
 import EditRankPosition from '@/features/listDetails/EditRankPosition';
-import useDebounce from '@/hooks/useDebounce';
 import { createListRoute, listDetailsRoute } from '@/constants/routes';
-import { GetWatchListInsightsBody, GetWatchListMovie } from '@/models/tmrev/watchList';
 import { useAppDispatch } from '@/hooks/reduxHooks';
 import { showSnackbar } from '@/redux/slice/globalSnackbar';
 import ListHeaderComponent from '@/components/ListDetails/HeadComponent';
@@ -28,6 +28,7 @@ import ListGridItem from '@/components/ListDetails/GridItem';
 import ListDetailItem from '@/components/ListDetails/ListItem';
 import { MovieBuy } from '@/models/tmdb/movie/movieWatchProviders';
 import WatchProviderItem from '@/components/ListDetails/WatchProviderItem';
+import { WatchlistMovieAggregated } from '@/api/tmrev-api-v2';
 
 type ListDetailsPageSearchParams = {
 	listId: string;
@@ -35,41 +36,36 @@ type ListDetailsPageSearchParams = {
 	from: FromLocation;
 };
 
-type CachedData = {
-	data: GetWatchListInsightsBody;
-	date: Date;
-};
-
 type ListDisplays = 'grid' | 'list' | 'watchProvider';
 
 const ListDetailsPage: React.FC = () => {
 	const { listId, profileId, from } = useLocalSearchParams<ListDetailsPageSearchParams>();
 	const [display, setDisplay] = useState<ListDisplays>('grid');
-	const [rankedList, setRankedList] = useState<GetWatchListMovie[]>([]);
+	const [rankedList, setRankedList] = useState<WatchlistMovieAggregated[]>([]);
 	const bottomSheetEditRankRef = useRef<BottomSheetModal>(null);
 	const [selectedMovie, setSelectedMovie] = useState<{
 		position: number;
-		details: GetWatchListMovie | null;
+		details: WatchlistMovieAggregated | null;
 	} | null>(null);
 	const [title, setTitle] = useState('');
 	const [description, setDescription] = useState('');
 	const navigation = useNavigation();
-	const [hasSaved, setHasSaved] = useState(false);
 	const [menuVisible, setMenuVisible] = useState(false);
 	const [snackBarMessage, setSnackBarMessage] = useState('');
 	const [isRefreshing, setIsRefreshing] = useState(false);
 	const router = useRouter();
 	const dispatch = useAppDispatch();
 
-	const debounceRankedList = useDebounce(JSON.stringify(rankedList), 1500);
-
 	const { currentUser, tmrevUser } = useAuth({});
 
 	const isCurrentUser = useMemo(() => currentUser?.uid === profileId, [currentUser, profileId]);
 
-	const { data, isLoading, refetch } = useGetWatchListInsightsQuery(
-		{ listId: listId!, region: tmrevUser?.countryCode },
-		{ skip: !listId }
+	const { data, isLoading, refetch } = useWatchListControllerFindOne(
+		listId!,
+		{ countryCode: 'US' },
+		{
+			query: { enabled: !!listId },
+		}
 	);
 
 	const availableFlatrates = useMemo(() => {
@@ -94,7 +90,7 @@ const ListDetailsPage: React.FC = () => {
 	}, [rankedList]);
 
 	const moviesByStreamingPlatform = useMemo(() => {
-		const platformMap: { [key: string]: GetWatchListMovie[] } = {};
+		const platformMap: { [key: string]: WatchlistMovieAggregated[] } = {};
 
 		rankedList.forEach((movie) => {
 			if (!movie.watchProviders?.flatrate) {
@@ -133,79 +129,33 @@ const ListDetailsPage: React.FC = () => {
 
 	const handleRefresh = async () => {
 		setIsRefreshing(true);
-		await refetch().unwrap();
+		await refetch();
 		setIsRefreshing(false);
 	};
 
-	const [updateWatchList] = useUpdateWatchListMutation();
-	const [createWatchList] = useCreateWatchListMutation();
-	const [deleteWatchList] = useDeleteWatchListMutation();
+	const queryClient = useQueryClient();
 
-	// check if there is any unsaved data in storage
-	const checkStorage = useCallback(async () => {
-		if (!data) return;
-		try {
-			const storedData = await AsyncStorage.getItem(data!.body._id);
-
-			if (!storedData) return;
-
-			const parsedData: CachedData = JSON.parse(storedData);
-
-			Alert.alert(
-				'Unsaved Changes found!',
-				`Would you like to load your last known data? ${dayjs(parsedData.date).format('MM/DD/YYYY hh:mm a')}`,
-				[
-					{
-						text: 'Cancel',
-						onPress: async () => {
-							await AsyncStorage.removeItem(data!.body._id);
-						},
-						style: 'cancel',
-					},
-					{
-						text: 'OK',
-						onPress: async () => {
-							handleLoadStoredData(parsedData.data);
-							await AsyncStorage.removeItem(data!.body._id);
-						},
-					},
-				]
-			);
-		} catch (error) {
-			console.error(error);
-		}
-	}, [data]);
-
-	const handleLoadStoredData = (cachedData: GetWatchListInsightsBody) => {
-		if (cachedData) {
-			setTitle(cachedData.title);
-			setDescription(cachedData.description);
-			setRankedList([...cachedData.movies]);
-		}
-	};
-
-	// check for unsaved changes on unmount
-	useEffect(() => {
-		checkStorage();
-	}, [data]);
+	const { mutateAsync: updateWatchList } = useWatchListControllerUpdate();
+	const { mutateAsync: createWatchList } = useWatchListControllerCreate();
+	const { mutateAsync: deleteWatchList } = useWatchListControllerRemove();
 
 	// check if there are unsaved changes
 	const hasUnsavedChanges = useMemo(() => {
 		if (!listId) return false;
 
 		// Check if the title or description has changed
-		if (title !== data?.body.title || description !== data?.body.description) {
+		if (title !== data?.title || description !== data?.description) {
 			return true;
 		}
 
 		// Check if the order of the movies has changed
-		if (rankedList.length !== data?.body.movies.length) {
+		if (rankedList.length !== data?.movies.length) {
 			return true;
 		}
 
 		// eslint-disable-next-line no-plusplus
 		for (let i = 0; i < rankedList.length; i++) {
-			if (rankedList[i].id !== data?.body.movies[i].id) {
+			if (rankedList[i].id !== data?.movies[i].id) {
 				return true;
 			}
 		}
@@ -213,32 +163,10 @@ const ListDetailsPage: React.FC = () => {
 		return false;
 	}, [rankedList, title, description]);
 
-	// handle unsaved changes
-	useEffect(
-		() =>
-			navigation.addListener('beforeRemove', async () => {
-				if (hasUnsavedChanges && data && !hasSaved) {
-					await AsyncStorage.setItem(
-						data.body._id,
-						JSON.stringify({
-							data: {
-								...data.body,
-								title,
-								description,
-								movies: rankedList,
-							},
-							date: new Date(),
-						})
-					);
-				}
-			}),
-		[navigation, hasUnsavedChanges, rankedList, data, hasSaved, title, description]
-	);
-
 	// update ranked list if data is fetched
 	useEffect(() => {
-		if (data && data.success) {
-			setRankedList([...data.body.movies]);
+		if (data) {
+			setRankedList([...data.movies]);
 		}
 	}, [data]);
 
@@ -251,12 +179,12 @@ const ListDetailsPage: React.FC = () => {
 
 	// update title and description if they are empty
 	useEffect(() => {
-		if (data && data.success) {
+		if (data) {
 			if (title === '') {
-				setTitle(data.body.title);
+				setTitle(data.title);
 			}
 			if (description === '') {
-				setDescription(data.body.description);
+				setDescription(data.description);
 			}
 		}
 	}, [data]);
@@ -328,21 +256,79 @@ const ListDetailsPage: React.FC = () => {
 				return rankedList.map((movie, index) => ({ order: index, tmdbID: movie.id }));
 			};
 
-			await updateWatchList({
-				watchListId: listId!,
-				title: title || data!.body.title,
-				description: description || data!.body.description,
-				public: data!.body.public,
-				tags: data!.body.tags,
-				movies: formattedMovies(),
-			}).unwrap();
+			try {
+				await updateWatchList({
+					id: listId!,
+					data: {
+						title: title || data!.title,
+						description: description || data!.description,
+						public: data!.public,
+						tags: data!.tags,
+						movies: formattedMovies(),
+					},
+				});
 
-			setHasSaved(true);
+				await queryClient.invalidateQueries({
+					queryKey: getWatchListControllerFindOneQueryKey(listId),
+				});
+				if (currentUser) {
+					await queryClient.invalidateQueries({
+						queryKey: getWatchListControllerGetUserWatchListsQueryKey(currentUser.uid),
+					});
+				}
 
-			setSnackBarMessage(`Saved ${title || data!.body.title}`);
+				setSnackBarMessage(`Saved ${title || data!.title}`);
+			} catch (error) {
+				console.error(error);
+				setSnackBarMessage('Error saving watchlist');
+			}
 		},
 		[data, description, listId, rankedList, title, updateWatchList]
 	);
+
+	// prompt to save changes when navigating away (after save handler exists)
+	useEffect(() => {
+		const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+			if (!hasUnsavedChanges || !isCurrentUser) {
+				return;
+			}
+
+			e.preventDefault();
+
+			Alert.alert(
+				'Unsaved changes',
+				'You have unsaved changes. Would you like to save before leaving?',
+				[
+					{ text: 'Cancel', style: 'cancel' },
+					{
+						text: 'Discard',
+						style: 'destructive',
+						onPress: () => {
+							const {
+								data: { action },
+							} = e as { data: { action: NavigationAction } };
+							navigation.dispatch(action);
+						},
+					},
+					{
+						text: 'Save',
+						onPress: async () => {
+							try {
+								await handleUpdateWatchList();
+							} finally {
+								const {
+									data: { action },
+								} = e as { data: { action: NavigationAction } };
+								navigation.dispatch(action);
+							}
+						},
+					},
+				]
+			);
+		});
+
+		return unsubscribe;
+	}, [navigation, hasUnsavedChanges, isCurrentUser, handleUpdateWatchList]);
 
 	// clone watchlist
 	const handleCloneWatchList = async () => {
@@ -350,47 +336,52 @@ const ListDetailsPage: React.FC = () => {
 
 		try {
 			const response = await createWatchList({
-				title: title || data!.body.title,
-				description: description || data!.body.description,
-				public: data!.body.public,
-				tags: data!.body.tags,
-				movies: rankedList.map((movie, index) => ({ order: index, tmdbID: movie.id })),
-			}).unwrap();
+				data: {
+					title: title || data!.title,
+					description: description || data!.description,
+					public: data!.public,
+					tags: data!.tags,
+					movies: rankedList.map((movie, index) => ({ order: index, tmdbID: movie.id })),
+				},
+			});
+
+			await queryClient.invalidateQueries({
+				queryKey: getWatchListControllerGetUserWatchListsQueryKey(currentUser?.uid),
+			});
 
 			setMenuVisible(false);
 
 			dispatch(
 				showSnackbar({
-					message: `Successfully Cloned ${title || data!.body.title}`,
+					message: `Successfully Cloned ${title || data!.title}`,
 					type: 'success',
 				})
 			);
 
-			router.push(listDetailsRoute(from || 'profile', response._id, currentUser?.uid || ''));
-		} catch (error) {
-			dispatch(
-				showSnackbar({ message: `Error Cloning ${title || data!.body.title}`, type: 'error' })
+			router.push(
+				listDetailsRoute(from || 'profile', (response as any)._id, currentUser?.uid || '')
 			);
+		} catch (error) {
+			dispatch(showSnackbar({ message: `Error Cloning ${title || data!.title}`, type: 'error' }));
 		}
 	};
 
 	const handleDeleteWatchList = async () => {
 		if (!data) return;
 
-		setMenuVisible(false);
-		await deleteWatchList(data.body._id).unwrap();
-		navigation.goBack();
-	};
+		try {
+			setMenuVisible(false);
+			await deleteWatchList({ id: data._id });
 
-	// update watchlist if there are any position changes
-	useEffect(() => {
-		if (debounceRankedList) {
-			const parsedData: MovieDetails[] = JSON.parse(debounceRankedList);
-			if (parsedData.length && hasUnsavedChanges) {
-				handleUpdateWatchList(parsedData);
-			}
+			await queryClient.invalidateQueries({
+				queryKey: getWatchListControllerGetUserWatchListsQueryKey(currentUser?.uid),
+			});
+
+			navigation.goBack();
+		} catch (error) {
+			console.error(error);
 		}
-	}, [debounceRankedList]);
+	};
 
 	const handleOpenEditModal = () => {
 		setMenuVisible(false);
@@ -402,7 +393,7 @@ const ListDetailsPage: React.FC = () => {
 		router.push(createListRoute(from || 'profile', '', listId));
 	};
 
-	const handleLongPress = (item: GetWatchListMovie) => {
+	const handleLongPress = (item: WatchlistMovieAggregated) => {
 		if (!isCurrentUser) return;
 
 		setSelectedMovie({ position: rankedList.indexOf(item), details: item });
@@ -417,14 +408,10 @@ const ListDetailsPage: React.FC = () => {
 		return <Text>Loading...</Text>;
 	}
 
-	if (!data.success) {
-		return <Text>{(data as any).error as string}</Text>;
-	}
-
-	if (!data.body.movies.length) {
+	if (!data.movies.length) {
 		return (
 			<>
-				<Stack.Screen options={{ title: title || data.body.title, headerRight: () => null }} />
+				<Stack.Screen options={{ title: title || data.title, headerRight: () => null }} />
 				<View style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 12 }}>
 					<Text variant="headlineLarge">This list is currently empty</Text>
 					<Button mode="contained" onPress={handleOpenAddMovies}>
@@ -439,7 +426,7 @@ const ListDetailsPage: React.FC = () => {
 		<>
 			<Stack.Screen
 				options={{
-					title: title || data.body.title,
+					title: title || data.title,
 					headerRight: () => (
 						<View
 							style={{
@@ -521,13 +508,13 @@ const ListDetailsPage: React.FC = () => {
 				ListHeaderComponentStyle={styles.backgroundImageContainer}
 				ListHeaderComponent={
 					<ListHeaderComponent
-						title={title || data.body.title}
-						backdropPath={data.body.movies[0].backdrop_path}
-						averageAdvancedScore={data.body.averageAdvancedScore}
-						completionPercentage={data.body.completionPercentage}
+						title={title || data.title}
+						backdropPath={data.movies[0].backdrop_path}
+						averageAdvancedScore={data.averageAdvancedScore}
+						completionPercentage={data.completionPercentage}
 						description={description}
-						totalBudget={data.body.totalBudget}
-						totalRuntime={data.body.totalRuntime}
+						totalBudget={data.totalBudget}
+						totalRuntime={data.totalRuntime}
 						username={tmrevUser?.username || ''}
 					/>
 				}
