@@ -57,8 +57,8 @@ const DynamicLayout = ({ segment }: DynamicLayoutProps) => {
 							/>
 							{!!notificationCountData && (
 								<View style={{ position: 'absolute', top: 0, right: 0 }}>
-									<Badge visible={notificationCountData > 0} size={20}>
-										{notificationCountData}
+									<Badge visible={(notificationCountData?.count || 0) > 0} size={20}>
+										{notificationCountData.count}
 									</Badge>
 								</View>
 							)}
