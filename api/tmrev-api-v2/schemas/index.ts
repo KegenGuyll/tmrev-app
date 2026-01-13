@@ -70,6 +70,7 @@ export * from './notificationContent';
 export * from './notificationContentType';
 export * from './notificationControllerFindAll200';
 export * from './notificationControllerFindAllParams';
+export * from './notificationControllerGetCount200';
 export * from './notificationControllerGetCountParams';
 export * from './notificationNotificationType';
 export * from './notificationSender';
