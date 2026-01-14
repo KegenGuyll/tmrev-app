@@ -95,7 +95,7 @@ yarn web
 - `npm run ios` - Run the app on iOS simulator/device
 - `npm run android` - Run the app on Android emulator/device
 - `npm run web` - Run the app in a web browser
-- `npm run generate-queries` - Generate API queries using Orval
+- `npm run generate-queries` - Generate API client code using Orval (runs `npx orval`)
 
 ## 📁 Project Structure
 
