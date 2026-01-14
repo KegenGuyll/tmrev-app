@@ -10,7 +10,7 @@ import {
 import FeedCard from '@/features/feed/feedCard';
 import { loginRoute } from '@/constants/routes';
 
-const pageSize = 10;
+const pageSize = 20;
 
 const HomeScreen = () => {
 	const router = useRouter();

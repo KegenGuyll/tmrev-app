@@ -28,7 +28,7 @@ import ListGridItem from '@/components/ListDetails/GridItem';
 import ListDetailItem from '@/components/ListDetails/ListItem';
 import { MovieBuy } from '@/models/tmdb/movie/movieWatchProviders';
 import WatchProviderItem from '@/components/ListDetails/WatchProviderItem';
-import { WatchlistMovieAggregated } from '@/api/tmrev-api-v2';
+import { WatchlistMovieAggregatedDetail } from '@/api/tmrev-api-v2';
 
 type ListDetailsPageSearchParams = {
 	listId: string;
@@ -41,11 +41,11 @@ type ListDisplays = 'grid' | 'list' | 'watchProvider';
 const ListDetailsPage: React.FC = () => {
 	const { listId, profileId, from } = useLocalSearchParams<ListDetailsPageSearchParams>();
 	const [display, setDisplay] = useState<ListDisplays>('grid');
-	const [rankedList, setRankedList] = useState<WatchlistMovieAggregated[]>([]);
+	const [rankedList, setRankedList] = useState<WatchlistMovieAggregatedDetail[]>([]);
 	const bottomSheetEditRankRef = useRef<BottomSheetModal>(null);
 	const [selectedMovie, setSelectedMovie] = useState<{
 		position: number;
-		details: WatchlistMovieAggregated | null;
+		details: WatchlistMovieAggregatedDetail | null;
 	} | null>(null);
 	const [title, setTitle] = useState('');
 	const [description, setDescription] = useState('');
@@ -90,7 +90,7 @@ const ListDetailsPage: React.FC = () => {
 	}, [rankedList]);
 
 	const moviesByStreamingPlatform = useMemo(() => {
-		const platformMap: { [key: string]: WatchlistMovieAggregated[] } = {};
+		const platformMap: { [key: string]: WatchlistMovieAggregatedDetail[] } = {};
 
 		rankedList.forEach((movie) => {
 			if (!movie.watchProviders?.flatrate) {
@@ -393,7 +393,7 @@ const ListDetailsPage: React.FC = () => {
 		router.push(createListRoute(from || 'profile', '', listId));
 	};
 
-	const handleLongPress = (item: WatchlistMovieAggregated) => {
+	const handleLongPress = (item: WatchlistMovieAggregatedDetail) => {
 		if (!isCurrentUser) return;
 
 		setSelectedMovie({ position: rankedList.indexOf(item), details: item });
