@@ -528,6 +528,7 @@ const MovieDetails = () => {
 												numberOfLines={1}
 												style={{ width: 150 }}
 												ellipsizeMode="tail"
+												variant="labelLarge"
 											>{`${item.character || item.known_for_department}`}</Text>
 										</View>
 									</TouchableRipple>

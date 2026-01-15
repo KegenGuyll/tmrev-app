@@ -6,7 +6,6 @@ import {
 	Canvas,
 	Path,
 	Skia,
-	useComputedValue,
 	RoundedRect,
 	Text,
 	useFont,
@@ -77,7 +76,7 @@ const RadarChart: React.FC<RadarChartProps> = ({ data }: RadarChartProps) => {
 		});
 	}, [data, center, radius, angleStep, height, font]);
 
-	const path = useComputedValue(() => {
+	const path = useMemo(() => {
 		const skPath = Skia.Path.Make();
 		if (points.length > 0) {
 			skPath.moveTo(points[0].x, points[0].y);
