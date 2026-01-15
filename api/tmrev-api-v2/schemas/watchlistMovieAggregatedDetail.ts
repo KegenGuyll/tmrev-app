@@ -18,5 +18,7 @@ export interface WatchlistMovieAggregatedDetail {
 	overview: string;
 	/** Number of reviews the user has for this movie */
 	reviewCount: number;
+	/** Whether the user has marked this movie as watched */
+	watched: boolean;
 	watchProviders?: MovieWatchProviders;
 }

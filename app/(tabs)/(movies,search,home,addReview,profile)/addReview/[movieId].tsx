@@ -24,6 +24,7 @@ import {
 	useReviewControllerFindOne,
 	useReviewControllerUpdate,
 } from '@/api/tmrev-api-v2';
+import invalidateWatchListDetails from '@/lib/query-utils/invalidateWatchListDetails';
 
 type CreateReviewSearchParams = {
 	movieId: string;
@@ -75,6 +76,7 @@ const CreateReview = () => {
 					queryKey: getFeedControllerGetFeedQueryKey(),
 					exact: false,
 				});
+				invalidateWatchListDetails(queryClient, Number(movieId));
 			},
 		},
 	});

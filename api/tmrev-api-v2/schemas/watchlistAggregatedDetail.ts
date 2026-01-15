@@ -20,7 +20,7 @@ export interface WatchlistAggregatedDetail {
 	userId: string;
 	/** Average advanced score across all reviewed movies */
 	averageAdvancedScore: number;
-	/** Percentage of movies in the list that have been reviewed */
+	/** Percentage of movies in the list that have been reviewed or marked as watched */
 	completionPercentage: number;
 	/** Total budget of all movies in the list */
 	totalBudget: number;

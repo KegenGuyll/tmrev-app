@@ -12,6 +12,7 @@ import {
 	useWatchedControllerUpdate,
 } from '@/api/tmrev-api-v2';
 import { likeMovieLoginPrompt } from '@/constants/messages';
+import invalidateWatchListDetails from '@/lib/query-utils/invalidateWatchListDetails';
 
 type WatchedMovieProps = {
 	likes: number;
@@ -28,7 +29,7 @@ const WatchedMovie: React.FC<WatchedMovieProps> = ({
 }: WatchedMovieProps) => {
 	const { currentUser } = useAuth({});
 	const [hasWatched, setHasWatched] = useState(false);
-	const [hasLiked, setHasLiked] = useState(false);
+	const [hasLiked, setHasLiked] = useState<boolean | null>(null);
 
 	const queryClient = useQueryClient();
 
@@ -44,6 +45,7 @@ const WatchedMovie: React.FC<WatchedMovieProps> = ({
 				queryKey: getWatchedControllerFindByUserIdQueryKey(currentUser?.uid || ''),
 				exact: false,
 			}),
+			invalidateWatchListDetails(queryClient, movieId),
 		]);
 	};
 
@@ -68,10 +70,8 @@ const WatchedMovie: React.FC<WatchedMovieProps> = ({
 
 	useEffect(() => {
 		if (watchedStatus) {
-			setHasWatched(true);
-			if (watchedStatus.liked) {
-				setHasLiked(true);
-			}
+			setHasWatched(watchedStatus.watched);
+			setHasLiked(watchedStatus.liked);
 		}
 	}, [watchedStatus]);
 	const handleOnPress = async (liked: boolean) => {
@@ -111,14 +111,14 @@ const WatchedMovie: React.FC<WatchedMovieProps> = ({
 			<View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 8 }}>
 				<IconButton
 					onPress={() => handleOnPress(true)}
-					icon={hasWatched && hasLiked ? 'thumb-up' : 'thumb-up-outline'}
+					icon={hasWatched && hasLiked === true ? 'thumb-up' : 'thumb-up-outline'}
 				/>
 				<Text>{likes}</Text>
 			</View>
 			<View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 8 }}>
 				<IconButton
 					onPress={() => handleOnPress(false)}
-					icon={hasWatched && !hasLiked ? 'thumb-down' : 'thumb-down-outline'}
+					icon={hasWatched && hasLiked === false ? 'thumb-down' : 'thumb-down-outline'}
 				/>
 				<Text>{dislikes}</Text>
 			</View>

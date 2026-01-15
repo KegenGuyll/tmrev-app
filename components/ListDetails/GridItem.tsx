@@ -3,18 +3,18 @@ import { Icon } from 'react-native-paper';
 import React from 'react';
 import MoviePoster from '../MoviePoster';
 import { FromLocation } from '@/models';
-import { WatchlistMovieAggregated } from '@/api/tmrev-api-v2/schemas/watchlistMovieAggregated';
+import { WatchlistMovieAggregatedDetail } from '@/api/tmrev-api-v2/schemas/watchlistMovieAggregatedDetail';
 
 type ListGridItemProps = {
-	item: WatchlistMovieAggregated;
+	item: WatchlistMovieAggregatedDetail;
 	from: FromLocation;
 	index: number;
 	selectedMovie: {
 		position: number;
-		details: WatchlistMovieAggregated | null;
+		details: WatchlistMovieAggregatedDetail | null;
 	} | null;
-	setSelectedMovie: (movie: { position: number; details: WatchlistMovieAggregated }) => void;
-	handleLongPress: (movie: WatchlistMovieAggregated) => void;
+	setSelectedMovie: (movie: { position: number; details: WatchlistMovieAggregatedDetail }) => void;
+	handleLongPress: (movie: WatchlistMovieAggregatedDetail) => void;
 };
 
 const ListGridItem: React.FC<ListGridItemProps> = ({
@@ -33,7 +33,7 @@ const ListGridItem: React.FC<ListGridItemProps> = ({
 			moviePoster={item.poster_path}
 			rankedPosition={index + 1}
 			overlayComponent={
-				item.reviewCount > 0 && (
+				(item.reviewCount > 0 || item.watched) && (
 					<View
 						style={{
 							display: 'flex',
