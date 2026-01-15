@@ -86,8 +86,6 @@ const TabLayout = () => {
 				}}
 			/>
 			<Tabs.Screen name="notifications/index" options={{ href: null }} />
-			<Tabs.Screen name="person/[personId]" options={{ href: null }} />
-			<Tabs.Screen name="reviews/[movieId]" options={{ href: null }} />
 			<Tabs.Screen name="[movieId]" options={{ href: null }} />
 		</Tabs>
 	);
