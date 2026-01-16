@@ -205,6 +205,7 @@ const useAuth = ({ onSuccessfulSignIn, onError }: UseGoogleAuthInitialValues) =>
 		emailSignUp,
 		currentUser: user,
 		tmrevUser: tmrevUser as UserProfile | undefined,
+		initializing,
 	};
 };
 

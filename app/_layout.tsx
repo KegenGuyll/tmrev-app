@@ -113,13 +113,13 @@ const RootLayoutNav = () => {
 	const dispatch = useAppDispatch();
 
 	return (
-		<GestureHandlerRootView style={{ flex: 1 }}>
-			<StatusBar barStyle="light-content" />
+		<GestureHandlerRootView style={{ flex: 1, backgroundColor: '#242424' }}>
+			<StatusBar barStyle="light-content" backgroundColor="#242424" translucent={false} />
 			<PaperProvider theme={MD3DarkTheme}>
 				<QueryClientProvider>
 					<BottomSheetModalProvider>
 						<ThemeProvider value={DarkTheme}>
-							<View style={{ height: '100%', width: '100%' }}>
+							<View style={{ height: '100%', width: '100%', backgroundColor: '#242424' }}>
 								<Stack
 									screenOptions={{
 										headerTintColor: 'white',

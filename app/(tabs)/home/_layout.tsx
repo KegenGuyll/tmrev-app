@@ -3,6 +3,7 @@ import React from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { Badge, IconButton } from 'react-native-paper';
 import { View } from 'react-native';
+import { Header } from '@react-navigation/elements';
 import { notificationsRoute } from '@/constants/routes';
 import { FromLocation } from '@/models';
 import useAuth from '@/hooks/useAuth';
@@ -43,6 +44,7 @@ const SharedTabLayout = () => {
 			screenOptions={{
 				headerShown: true,
 				headerTintColor: 'white',
+				header: ({ options }) => <Header {...(options as any)} />,
 				title: segmentToTitle(selectedSegment),
 				headerRight: () => {
 					if (!currentUser) return null;

@@ -24,6 +24,7 @@ module.exports = function (api) {
           verbose: false,
         },
       ],
+      'react-native-paper/babel',
       'react-native-reanimated/plugin'
     ],
     env: {

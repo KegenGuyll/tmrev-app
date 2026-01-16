@@ -63,9 +63,10 @@ const AddReviewPage = () => {
 
 	return (
 		<>
-			<View>
+			<View style={{ flex: 1 }}>
 				<FlatGrid
 					itemDimension={75}
+					style={{ flex: 1 }}
 					ListHeaderComponentStyle={{ paddingVertical: 12 }}
 					ListHeaderComponent={
 						<Searchbar

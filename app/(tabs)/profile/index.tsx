@@ -19,7 +19,7 @@ import {
 const days = 60;
 
 const Profile = () => {
-	const { currentUser } = useAuth({});
+	const { currentUser, initializing } = useAuth({});
 	const router = useRouter();
 	const [refreshing, setRefreshing] = useState(false);
 	const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -66,7 +66,7 @@ const Profile = () => {
 		setRefreshing(false);
 	};
 
-	if (isLoading || (!data && currentUser)) {
+	if (initializing || isLoading || (!data && currentUser)) {
 		return <Text>Loading...</Text>;
 	}
 

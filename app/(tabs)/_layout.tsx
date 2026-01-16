@@ -45,19 +45,19 @@ const TabLayout = () => {
 				}}
 			/>
 			<Tabs.Screen
-				name="addReview"
-				options={{
-					headerShown: false,
-					title: 'Add Review',
-					tabBarIcon: ({ color }) => <Icon name="add" color={color} size={iconSize} />,
-				}}
-			/>
-			<Tabs.Screen
 				name="movies"
 				options={{
 					title: 'Movies',
 					headerShown: false,
 					tabBarIcon: ({ color }) => <Icon name="movie" color={color} size={iconSize} />,
+				}}
+			/>
+			<Tabs.Screen
+				name="addReview"
+				options={{
+					headerShown: false,
+					title: 'Add Review',
+					tabBarIcon: ({ color }) => <Icon name="add" color={color} size={iconSize} />,
 				}}
 			/>
 			<Tabs.Screen

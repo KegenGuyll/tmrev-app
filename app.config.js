@@ -8,9 +8,19 @@ module.exports = {
 		icon: './assets/images/icon.png',
 		scheme: 'myapp',
 		userInterfaceStyle: 'automatic',
+		newArchEnabled: true,
 		splash: {
 			image: './assets/images/splash.png',
 			resizeMode: 'contain',
+			backgroundColor: '#242424',
+		},
+		androidStatusBar: {
+			barStyle: 'light-content',
+			backgroundColor: '#242424',
+			translucent: false,
+		},
+		androidNavigationBar: {
+			barStyle: 'light-content',
 			backgroundColor: '#242424',
 		},
 		assetBundlePatterns: ['**/*'],
@@ -32,6 +42,7 @@ module.exports = {
 				foregroundImage: './assets/images/adaptive-icon.png',
 				backgroundColor: '#242424',
 			},
+			edgeToEdgeEnabled: true,
 			primaryColor: '#ffc000',
 			googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
 			package: 'com.tmrev',
@@ -48,6 +59,7 @@ module.exports = {
 			'@react-native-firebase/auth',
 			'@react-native-firebase/crashlytics',
 			'expo-font',
+			'expo-web-browser',
 			[
 				'expo-build-properties',
 				{
