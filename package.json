@@ -10,9 +10,9 @@
     "generate-queries": "npx orval"
   },
   "resolutions": {
-    "metro": "^0.81.0",
-    "metro-resolver": "^0.81.0",
-    "metro-config": "^0.81.0",
+    "metro": "^0.82.0",
+    "metro-resolver": "^0.82.0",
+    "metro-config": "^0.82.0",
     "expo-file-system": "~18.0.12"
   },
   "dependencies": {
@@ -26,7 +26,7 @@
     "@react-native-firebase/crashlytics": "20.1.0",
     "@react-native-firebase/messaging": "^20.1.0",
     "@react-native-google-signin/google-signin": "^11.0.1",
-    "@react-navigation/native": "^7.0.14",
+    "@react-navigation/elements": "^2.9.4",
     "@reduxjs/toolkit": "^2.2.3",
     "@sentry/react-native": "~6.14.0",
     "@shopify/react-native-skia": "2.0.0-next.4",
