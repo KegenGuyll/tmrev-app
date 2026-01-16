@@ -20,7 +20,7 @@ const TabLayout = () => {
 
 	return (
 		<Tabs
-			initialRouteName="(home)"
+			initialRouteName="home"
 			screenOptions={{
 				tabBarActiveTintColor: 'white',
 				tabBarHideOnKeyboard: true,
@@ -28,7 +28,7 @@ const TabLayout = () => {
 			}}
 		>
 			<Tabs.Screen
-				name="(home)"
+				name="home"
 				options={{
 					headerShown: false,
 					title: 'Home',
@@ -37,7 +37,7 @@ const TabLayout = () => {
 				}}
 			/>
 			<Tabs.Screen
-				name="(search)"
+				name="search"
 				options={{
 					title: 'Search',
 					tabBarIcon: ({ color }) => <Icon name="search" color={color} size={iconSize} />,
@@ -45,7 +45,7 @@ const TabLayout = () => {
 				}}
 			/>
 			<Tabs.Screen
-				name="(addReview)"
+				name="addReview"
 				options={{
 					headerShown: false,
 					title: 'Add Review',
@@ -53,7 +53,7 @@ const TabLayout = () => {
 				}}
 			/>
 			<Tabs.Screen
-				name="(movies)"
+				name="movies"
 				options={{
 					title: 'Movies',
 					headerShown: false,
@@ -61,7 +61,7 @@ const TabLayout = () => {
 				}}
 			/>
 			<Tabs.Screen
-				name="(profile)"
+				name="profile"
 				options={{
 					headerShown: false,
 					title: 'Profile',
@@ -85,6 +85,9 @@ const TabLayout = () => {
 					},
 				}}
 			/>
+			<Tabs.Screen name="notifications/index" options={{ href: null }} />
+			<Tabs.Screen name="person/[personId]" options={{ href: null }} />
+			<Tabs.Screen name="[movieId]" options={{ href: null }} />
 		</Tabs>
 	);
 };

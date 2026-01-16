@@ -10,7 +10,7 @@ import * as Notifications from 'expo-notifications';
 import { MD3DarkTheme, PaperProvider, Snackbar } from 'react-native-paper';
 import { Provider } from 'react-redux';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { StatusBar, View } from 'react-native';
+import { StatusBar, View, LogBox } from 'react-native';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import * as Sentry from '@sentry/react-native';
 import { store } from '@/redux/store';
@@ -32,11 +32,16 @@ export {
 
 export const unstableSettings = {
 	// Ensure that reloading on `/modal` keeps a back button present.
-	initialRouteName: '(tabs)/(home)',
+	initialRouteName: '(tabs)/home',
 };
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+// TODO: upgrade to react-native-super-grid
+LogBox.ignoreLogs([
+	'FlatGrid: Support for defaultProps will be removed from memo components in a future major release.',
+]);
 
 const RootLayout = () => {
 	const [loaded, error] = useFonts({

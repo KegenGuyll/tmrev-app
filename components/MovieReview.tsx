@@ -26,7 +26,7 @@ const MovieReview: React.FC<MovieReviewProps> = ({ review, from }: MovieReviewPr
 				>
 					<Link
 						style={{ flexGrow: 1 }}
-						href={`/(tabs)/(${from})/profile/${review.profile.uuid}?from=${from}`}
+						href={`/(tabs)/profile/${review.profile.uuid}?from=${from}`}
 					>
 						<View
 							style={{

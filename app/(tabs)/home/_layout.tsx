@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unstable-nested-components */
 import React from 'react';
-import { Stack, useRouter } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { Badge, IconButton } from 'react-native-paper';
 import { View } from 'react-native';
 import { notificationsRoute } from '@/constants/routes';
@@ -8,29 +8,27 @@ import { FromLocation } from '@/models';
 import useAuth from '@/hooks/useAuth';
 import { useNotificationControllerGetCount } from '@/api/tmrev-api-v2';
 
-type DynamicLayoutProps = {
-	segment: string;
-};
-
 const segmentToTitle = (segment: string) => {
 	switch (segment) {
-		case '(movies)':
+		case 'movies':
 			return 'Movies';
-		case '(search)':
+		case 'search':
 			return 'Search';
-		case '(home)':
+		case 'home':
 			return 'Home';
-		case '(addReview)':
+		case 'addReview':
 			return 'Add Review';
-		case '(profile)':
+		case 'profile':
 			return 'Profile';
 		default:
-			return 'Movies';
+			return 'Home';
 	}
 };
 
-const DynamicLayout = ({ segment }: DynamicLayoutProps) => {
+const SharedTabLayout = () => {
 	const router = useRouter();
+	const segments = useSegments();
+	const selectedSegment = (segments?.[1] ?? 'home').replace(/[()]/g, '');
 
 	const { currentUser } = useAuth({});
 
@@ -45,14 +43,14 @@ const DynamicLayout = ({ segment }: DynamicLayoutProps) => {
 			screenOptions={{
 				headerShown: true,
 				headerTintColor: 'white',
-				title: segmentToTitle(segment),
+				title: segmentToTitle(selectedSegment),
 				headerRight: () => {
 					if (!currentUser) return null;
 
 					return (
 						<View style={{ position: 'relative' }}>
 							<IconButton
-								onPress={() => router.navigate(notificationsRoute(segment as FromLocation))}
+								onPress={() => router.navigate(notificationsRoute(selectedSegment as FromLocation))}
 								icon="bell-outline"
 							/>
 							{!!notificationCountData && (
@@ -70,4 +68,4 @@ const DynamicLayout = ({ segment }: DynamicLayoutProps) => {
 	);
 };
 
-export default DynamicLayout;
+export default SharedTabLayout;

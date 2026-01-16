@@ -141,12 +141,12 @@ const PersonDetails: React.FC = () => {
 						{personData.biography}
 					</Text>
 				</Surface>
-				{currentUser && reviewData && reviewData?.results && (
+				{currentUser && reviewData?.results && reviewData.results.length > 0 && (
 					<View style={{ gap: 8 }}>
 						<Text variant="headlineMedium">Reviewed Movies</Text>
 						<MovieHorizontalGrid
 							data={
-								reviewData.results?.map((m) => ({
+								reviewData.results.map((m) => ({
 									uniqueId: m._id,
 									movieId: m.tmdbID,
 									moviePoster: m.movieDetails.poster_path,

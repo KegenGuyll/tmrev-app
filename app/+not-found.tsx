@@ -5,7 +5,7 @@ const NotFoundScreen = () => {
 	return (
 		<>
 			<Stack.Screen options={{ title: 'Oops!', headerShown: false }} />
-			<Redirect href="/(tabs)/(home)/home" />
+			<Redirect href="/(tabs)/home" />
 		</>
 	);
 };

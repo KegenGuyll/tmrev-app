@@ -139,7 +139,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 						<Text variant="labelSmall">Favorite Genres:</Text>
 						<View style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
 							{favoriteGenres.map((genre) => (
-								<Chip key={genre.value}>{genre.label}</Chip>
+								<Chip key={`${genre.value}-${genre.label}`}>{genre.label}</Chip>
 							))}
 						</View>
 					</View>

@@ -27,7 +27,6 @@ const WatchProviderItems: React.FC<WatchProviderItemsProps> = ({
 	return (
 		<View style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
 			<Image
-				key={provider.provider_id}
 				style={{ width: 40, height: 40, borderRadius: 4 }}
 				source={{
 					uri: imageUrl(provider.logo_path),
@@ -73,7 +72,9 @@ const WatchProviderList: React.FC<WatchProviderListProps> = ({
 					<Text variant="labelLarge">Stream</Text>
 					<TouchableRipple style={{ borderRadius: 4 }} onPress={handleStreamingClick}>
 						<View style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-							{providers?.flatrate?.map((provider) => <WatchProviderItems provider={provider} />)}
+							{providers?.flatrate?.map((provider) => (
+								<WatchProviderItems key={provider.provider_id} provider={provider} />
+							))}
 						</View>
 					</TouchableRipple>
 				</View>
@@ -98,7 +99,9 @@ const WatchProviderList: React.FC<WatchProviderListProps> = ({
 								<View style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
 									<Text variant="labelLarge">Rent</Text>
 									<View style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-										{providers.rent?.map((provider) => <WatchProviderItems provider={provider} />)}
+										{providers.rent?.map((provider) => (
+											<WatchProviderItems key={provider.provider_id} provider={provider} />
+										))}
 									</View>
 								</View>
 							}
@@ -111,7 +114,9 @@ const WatchProviderList: React.FC<WatchProviderListProps> = ({
 								<View style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
 									<Text variant="labelLarge">Buy</Text>
 									<View style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-										{providers.buy?.map((provider) => <WatchProviderItems provider={provider} />)}
+										{providers.buy?.map((provider) => (
+											<WatchProviderItems key={provider.provider_id} provider={provider} />
+										))}
 									</View>
 								</View>
 							}
