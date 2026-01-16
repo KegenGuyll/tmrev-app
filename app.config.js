@@ -14,6 +14,15 @@ module.exports = {
 			resizeMode: 'contain',
 			backgroundColor: '#242424',
 		},
+		androidStatusBar: {
+			barStyle: 'light-content',
+			backgroundColor: '#242424',
+			translucent: false,
+		},
+		androidNavigationBar: {
+			barStyle: 'light-content',
+			backgroundColor: '#242424',
+		},
 		assetBundlePatterns: ['**/*'],
 		ios: {
 			supportsTablet: true,
