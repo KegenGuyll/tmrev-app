@@ -52,41 +52,39 @@ const TabLayout = () => {
 					tabBarIcon: ({ color }) => <Icon name="movie" color={color} size={iconSize} />,
 				}}
 			/>
-			<Tabs.Protected guard={!!currentUser}>
-				<Tabs.Screen
-					name="addReview"
-					options={{
-						headerShown: false,
-						title: 'Add Review',
-						tabBarIcon: ({ color }) => <Icon name="add" color={color} size={iconSize} />,
-					}}
-				/>
-				<Tabs.Screen
-					name="profile"
-					options={{
-						headerShown: false,
-						title: 'Profile',
-						tabBarIcon: ({ color }) => {
-							if (currentUser?.photoURL) {
-								return (
-									<Image
-										source={{ uri: currentUser.photoURL }}
-										style={{
-											width: iconSize,
-											height: iconSize,
-											borderRadius: iconSize / 2,
-											borderColor: color,
-											borderWidth: 1,
-										}}
-									/>
-								);
-							}
+			<Tabs.Screen
+				name="addReview"
+				options={{
+					headerShown: false,
+					title: 'Add Review',
+					tabBarIcon: ({ color }) => <Icon name="add" color={color} size={iconSize} />,
+				}}
+			/>
+			<Tabs.Screen
+				name="profile"
+				options={{
+					headerShown: false,
+					title: 'Profile',
+					tabBarIcon: ({ color }) => {
+						if (currentUser?.photoURL) {
+							return (
+								<Image
+									source={{ uri: currentUser.photoURL }}
+									style={{
+										width: iconSize,
+										height: iconSize,
+										borderRadius: iconSize / 2,
+										borderColor: color,
+										borderWidth: 1,
+									}}
+								/>
+							);
+						}
 
-							return <Icon name="account-circle" color={color} size={iconSize} />;
-						},
-					}}
-				/>
-			</Tabs.Protected>
+						return <Icon name="account-circle" color={color} size={iconSize} />;
+					},
+				}}
+			/>
 			<Tabs.Screen name="notifications/index" options={{ href: null }} />
 			<Tabs.Screen name="person/[personId]" options={{ href: null }} />
 			<Tabs.Screen name="[movieId]" options={{ href: null }} />
