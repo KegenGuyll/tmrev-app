@@ -101,6 +101,7 @@ Create a `.env` file in the root directory with the following variables:
 
 ```env
 # TMREV API v2 Backend URL
+# Replace with your actual backend API URL
 TMREV_V2_API_URL=https://your-api-url.com
 
 # Add other required environment variables
@@ -127,7 +128,7 @@ If you need to regenerate the API client from the OpenAPI spec:
 yarn generate-queries
 ```
 
-**Note**: This requires updating the `input` path in `orval.config.js` to point to your Swagger/OpenAPI specification file.
+**Note**: This requires updating the `input` path in `orval.config.js` to point to your Swagger/OpenAPI specification file. The config file currently points to a local path - update it to your API spec location (e.g., a URL or local file path).
 
 ## 🏃 Running the App
 
@@ -351,8 +352,8 @@ The project uses:
 
 ### Environment-Specific Notes
 
-- **iOS**: Requires CocoaPods installation after `yarn install`. Run `cd ios && pod install` if needed.
-- **Android**: Uses Gradle for builds. First build may take longer.
+- **iOS**: If using development builds with native modules, you may need to install CocoaPods dependencies. Run `cd ios && pod install` if needed after `yarn install`.
+- **Android**: Uses Gradle for builds. First build may take longer to download dependencies.
 - **Web**: Limited functionality compared to native platforms (some native modules not available)
 
 ## 🤝 Contributing
